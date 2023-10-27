@@ -1,2 +1,47 @@
 {
+    "units": {
+        "warrior": {
+            "maxHealth": 3,
+            "damage": 1,
+            "range": 1,
+            "cost": {
+                "gold": 10,
+                "food": 10
+            }
+        },
+        "slingshotter": {
+            "maxHealth": 2,
+            "damage": 1,
+            "range": 4,
+            "cost": {
+                "gold": 10,
+                "food": 5,
+                "wood": 5
+            }
+        }
+    },
+
+    "buildings": {
+        "townhall": {
+            "produce": {
+                "gold": 2
+            }
+        },
+        "field": {
+            "produce": {
+                "food": 2
+            },
+            "cost": {
+                "gold": 30
+            }
+        },
+        "lumberyard": {
+            "produce": {
+                "wood": 10
+            },
+            "cost": {
+                "gold": 50
+            }
+        }
+    }
 }
