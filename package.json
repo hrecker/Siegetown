@@ -1,0 +1,20 @@
+{
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrecker/Prototype.git"
+  },
+  "author": "Henry Recker",
+  "license": "MIT",
+  "scripts": {
+    "start": "del dist\\*index.html && del dist\\*index.*.js* && set BROWSERSLIST_IGNORE_OLD_DATA=1&& parcel webroot/desktop-index.html",
+    "build": "del dist\\*index.html && del dist\\*index.*.js* && parcel build webroot/index.html && del R:\\ItchioBuilds\\Prototype\\dist\\*index.*.js* && robocopy dist R:\\ItchioBuilds\\Prototype\\dist /s /e || powershell -Command \"(Get-Content R:\\ItchioBuilds\\Prototype\\dist\\index.html) -replace 'src=\\\"/', 'src=\\\"./' | Out-File -encoding ASCII R:\\ItchioBuilds\\Prototype\\dist\\index.html\""
+  },
+  "devDependencies": {
+    "cssnano": "^5.1.13",
+    "parcel": "^2.7.0",
+    "phaser": "^3.60.0",
+    "postcss": "^8.4.16",
+    "process": "^0.11.10",
+    "typescript": "^4.6.3"
+  }
+}

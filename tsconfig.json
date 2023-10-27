@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "lib": ["ES2016", "DOM"],
+      "target": "es5",
+      "moduleResolution": "node"
+    },
+    "include": [
+      "webroot/**/*.ts"
+    ]
+  }
