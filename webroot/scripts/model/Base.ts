@@ -1,4 +1,5 @@
 export enum Building {
+    Empty,
     Townhall,
     Field,
     Lumberyard
