@@ -1,8 +1,8 @@
 export enum Building {
-    Empty,
-    Townhall,
-    Field,
-    Lumberyard
+    Empty = "empty",
+    Townhall = "townhall",
+    Field = "field",
+    Lumberyard = "lumberyard"
 }
 
 export type Base = {

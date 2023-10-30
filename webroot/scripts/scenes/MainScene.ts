@@ -1,4 +1,4 @@
-import { ActiveGame, createGame } from "../game/Game";
+import { ActiveGame, createGame, updateGame } from "../game/Game";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 
@@ -12,6 +12,10 @@ export class MainScene extends Phaser.Scene {
         super({
             key: "MainScene"
         });
+    }
+
+    init(data) {
+        this.activeGame = data.activeGame;
     }
 
     /** Adjust any UI elements that need to change position based on the canvas size */
@@ -29,8 +33,6 @@ export class MainScene extends Phaser.Scene {
         }
 
         this.reset();
-
-        this.activeGame = createGame();
 
         // Draw the board
         let topLeftX = (this.game.renderer.width / 2) - (boardWidth / 2);
@@ -77,6 +79,6 @@ export class MainScene extends Phaser.Scene {
 
 
     update(time, delta) {
-        //TODO
+        updateGame(this.activeGame, time);
     }
 }

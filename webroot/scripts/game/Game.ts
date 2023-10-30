@@ -1,3 +1,4 @@
+import { resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
 
@@ -27,4 +28,24 @@ export function createGame(): ActiveGame {
         wood: 0,
         food: 0
     };
+}
+
+let lastUpdate = -1;
+
+export function updateGame(game: ActiveGame, time: number) {
+    if (lastUpdate == -1 || time - lastUpdate >= 1000) {
+        lastUpdate = time;
+        
+        for (let i = 0; i < game.base.grid.length; i++) {
+            for (let j = 0; j < game.base.grid[i].length; j++) {
+                let building = game.base.grid[i][j];
+                game.gold += config()["buildings"][building]["produce"]["gold"];
+                game.food += config()["buildings"][building]["produce"]["food"];
+                game.wood += config()["buildings"][building]["produce"]["wood"];
+            }
+        }
+        
+        // Should always be at least some change in resources due to the default townhall
+        resourceUpdateEvent();
+    }
 }

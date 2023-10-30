@@ -3,22 +3,22 @@ type EmptyCallback = {
     callback: (scene: Phaser.Scene) => void;
     scene: Phaser.Scene;
 }
-type NumberCallback = {
+/*type NumberCallback = {
     callback: (value: number, scene: Phaser.Scene) => void;
     scene: Phaser.Scene;
-}
+}*/
 
 // Callback lists
-//let gameResetCallbacks: EmptyCallback[] = [];
+let resourceUpdateCallbacks: EmptyCallback[] = [];
 
-/*export function addGameResetListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
-    gameResetCallbacks.push({ 
+export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
+    resourceUpdateCallbacks.push({ 
         callback: callback,
         scene: scene
     });
 }
 
-export function gameResetEvent() {
-    gameResetCallbacks.forEach(callback =>
+export function resourceUpdateEvent() {
+    resourceUpdateCallbacks.forEach(callback =>
         callback.callback(callback.scene));
-}*/
+}
