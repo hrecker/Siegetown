@@ -1,11 +1,13 @@
 import { addResourceUpdateListener } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
+import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 
 /** UI displayed over MainScene */
 export class MainUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
+    uiState: UIState;
 
     goldText: Phaser.GameObjects.Text;
     woodText: Phaser.GameObjects.Text;
@@ -13,8 +15,6 @@ export class MainUIScene extends Phaser.Scene {
 
     fieldBuildButtonOutline: Phaser.GameObjects.Rectangle;
     lumberyardBuildButtonOutline: Phaser.GameObjects.Rectangle;
-
-    selectedBuild: Building;
 
     constructor() {
         super({
@@ -24,6 +24,7 @@ export class MainUIScene extends Phaser.Scene {
 
     init(data) {
         this.activeGame = data.activeGame;
+        this.uiState = data.uiState;
     }
 
     /** Adjust any UI elements that need to change position based on the canvas size */
@@ -41,7 +42,7 @@ export class MainUIScene extends Phaser.Scene {
         this.woodText = this.add.text(10, 30, "Wood: 0");
         this.foodText = this.add.text(10, 50, "Food: 0");
 
-        this.selectedBuild = Building.Empty;
+        this.uiState.selectedBuilding = Building.Empty;
 
         //TODO handle building that don't just cost gold
         let fieldBuildButton = this.add.text(this.game.renderer.width - 10, 10, "Build Field: " + config()["buildings"][Building.Field]["cost"]["gold"]).setOrigin(1, 0);
@@ -71,13 +72,13 @@ export class MainUIScene extends Phaser.Scene {
     }
 
     selectBuild(selection: Building) {
-        if (this.selectedBuild == selection) {
-            this.selectedBuild = Building.Empty;
+        if (this.uiState.selectedBuilding == selection) {
+            this.uiState.selectedBuilding = Building.Empty;
         } else {
-            this.selectedBuild = selection;
+            this.uiState.selectedBuilding = selection;
         }
-        this.fieldBuildButtonOutline.setVisible(this.selectedBuild == Building.Field);
-        this.lumberyardBuildButtonOutline.setVisible(this.selectedBuild == Building.Lumberyard);
+        this.fieldBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Field);
+        this.lumberyardBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Lumberyard);
     }
 
     resourceUpdateListener(scene: MainUIScene) {

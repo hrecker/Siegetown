@@ -1,4 +1,5 @@
 import { createGame } from "../game/Game";
+import { createUIState } from "../game/UIState";
 import { loadConfig } from "../model/Config";
 
 
@@ -43,8 +44,9 @@ export class LoadingScene extends Phaser.Scene {
             // Start the main menu scene
             loadConfig(this.cache.json.get("config"));
             let activeGame = createGame();
-            this.scene.start("MainScene", { activeGame: activeGame })
-                      .start("MainUIScene", { activeGame: activeGame })
+            let uiState = createUIState();
+            this.scene.start("MainScene", { activeGame: activeGame, uiState: uiState })
+                      .start("MainUIScene", { activeGame: activeGame, uiState: uiState })
                       .stop();
         })
     }
