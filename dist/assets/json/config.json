@@ -1,6 +1,8 @@
 {
     "baseWidth": 3,
 
+    "numLanes": 3,
+
     "units": {
         "warrior": {
             "maxHealth": 3,

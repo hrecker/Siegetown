@@ -3,18 +3,24 @@ import { ActiveGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
+import { UnitType } from "../model/Unit";
 
 /** UI displayed over MainScene */
 export class MainUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
 
+    // Building UI
     goldText: Phaser.GameObjects.Text;
     woodText: Phaser.GameObjects.Text;
     foodText: Phaser.GameObjects.Text;
 
     fieldBuildButtonOutline: Phaser.GameObjects.Rectangle;
     lumberyardBuildButtonOutline: Phaser.GameObjects.Rectangle;
+
+    // Unit UI
+    warriorBuildButtonOutline: Phaser.GameObjects.Rectangle;
+    slingshotterBuildButtonOutline: Phaser.GameObjects.Rectangle;
 
     constructor() {
         super({
@@ -56,14 +62,35 @@ export class MainUIScene extends Phaser.Scene {
         this.lumberyardBuildButtonOutline.isStroked = true;
         this.lumberyardBuildButtonOutline.setVisible(false);
 
+        //TODO handle units that don't just cost gold
+        let warriorBuildButton = this.add.text(this.game.renderer.width - 10, 110, "Build Warrior: " + config()["units"][UnitType.Warrior]["cost"]["gold"]).setOrigin(1, 0);
+        let slingshotterBuildButton = this.add.text(this.game.renderer.width - 10, 130, "Build Slingshotter: " + config()["units"][UnitType.Slingshotter]["cost"]["gold"]).setOrigin(1, 0);
+        this.warriorBuildButtonOutline = this.add.rectangle(warriorBuildButton.getTopLeft().x - 1, warriorBuildButton.getTopLeft().y - 1,
+            warriorBuildButton.width + 1, warriorBuildButton.height + 1).setOrigin(0, 0);
+        this.warriorBuildButtonOutline.isStroked = true;
+        this.warriorBuildButtonOutline.setVisible(false);
+        this.slingshotterBuildButtonOutline = this.add.rectangle(slingshotterBuildButton.getTopLeft().x - 1, slingshotterBuildButton.getTopLeft().y - 1,
+            slingshotterBuildButton.width + 1, slingshotterBuildButton.height + 1).setOrigin(0, 0);
+        this.slingshotterBuildButtonOutline.isStroked = true;
+        this.slingshotterBuildButtonOutline.setVisible(false);
+
         fieldBuildButton.setInteractive();
         lumberyardBuildButton.setInteractive();
+        warriorBuildButton.setInteractive();
+        slingshotterBuildButton.setInteractive();
         
         fieldBuildButton.on('pointerdown', () => {
             this.selectBuild(Building.Field);
         });
         lumberyardBuildButton.on('pointerdown', () => {
             this.selectBuild(Building.Lumberyard);
+        });
+        
+        warriorBuildButton.on('pointerdown', () => {
+            this.selectUnitBuild(UnitType.Warrior);
+        });
+        slingshotterBuildButton.on('pointerdown', () => {
+            this.selectUnitBuild(UnitType.Slingshotter);
         });
 
         addResourceUpdateListener(this.resourceUpdateListener, this);
@@ -79,6 +106,16 @@ export class MainUIScene extends Phaser.Scene {
         }
         this.fieldBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Field);
         this.lumberyardBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Lumberyard);
+    }
+
+    selectUnitBuild(unit: UnitType) {
+        if (this.uiState.selectedUnit == unit) {
+            this.uiState.selectedUnit = UnitType.None;
+        } else {
+            this.uiState.selectedUnit = unit;
+        }
+        this.warriorBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Warrior);
+        this.slingshotterBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Slingshotter);
     }
 
     resourceUpdateListener(scene: MainUIScene) {

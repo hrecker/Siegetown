@@ -1,13 +1,19 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
+import { Unit } from "../model/Unit";
+
+export type Lane = {
+    playerUnits: Unit[];
+    enemyUnits: Unit[];
+}
 
 export type ActiveGame = {
     base: Base;
     gold: number;
     wood: number;
     food: number;
-    //TODO units
+    lanes: Lane[];
 }
 
 export function createGame(): ActiveGame {
@@ -20,13 +26,22 @@ export function createGame(): ActiveGame {
     }
     let center = (config()["baseWidth"] - 1) / 2;
     grid[center][center] = Building.Townhall;
+
+    let lanes: Lane[] = [];
+    for (let i = 0; i < config()["numLanes"]; i++) {
+        lanes.push({
+            playerUnits: [],
+            enemyUnits: []
+        });
+    }
     return {
         base: {
             grid: grid
         },
         gold: 0,
         wood: 0,
-        food: 0
+        food: 0,
+        lanes: lanes
     };
 }
 
