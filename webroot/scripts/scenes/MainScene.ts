@@ -1,3 +1,4 @@
+import { resourceUpdateEvent } from "../events/EventMessenger";
 import { ActiveGame, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -113,6 +114,7 @@ export class MainScene extends Phaser.Scene {
         this.activeGame.base.grid[gridX][gridY] = this.uiState.selectedBuilding;
         this.gridTexts[gridX][gridY].text = this.getBuildingText(this.uiState.selectedBuilding);
         this.activeGame.gold -= cost;
+        resourceUpdateEvent();
     }
 
     handleLaneClick() {
@@ -136,6 +138,7 @@ export class MainScene extends Phaser.Scene {
         let unit = this.add.circle(0, this.laneTopY + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 2, 0xffffff);
         this.activeGame.lanes[lane].playerUnits.push(createUnit(this.uiState.selectedUnit, unit));
         this.activeGame.gold -= cost;
+        resourceUpdateEvent();
     }
 
     getBuildingText(building: Building): string {
@@ -156,6 +159,6 @@ export class MainScene extends Phaser.Scene {
 
 
     update(time, delta) {
-        updateGame(this.activeGame, time);
+        updateGame(this.activeGame, time, this.game.renderer.width);
     }
 }

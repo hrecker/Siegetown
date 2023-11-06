@@ -47,7 +47,7 @@ export function createGame(): ActiveGame {
 
 let lastUpdate = -1;
 
-export function updateGame(game: ActiveGame, time: number) {
+export function updateGame(game: ActiveGame, time: number, gameWidth: number) {
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
         
@@ -63,4 +63,67 @@ export function updateGame(game: ActiveGame, time: number) {
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();
     }
+
+    // Always move units
+    game.lanes.forEach(lane => {
+        // Move player units
+        let playerUnitsToRemove = [];
+        let xLimit = -1;
+        for (let i = 0; i < lane.playerUnits.length; i++) {
+            let player = lane.playerUnits[i];
+            player.gameObject.x += config()["units"][player.type]["speed"];
+            //TODO stop when seeing an enemy in range
+            // Don't pass other units that are in front
+            if (xLimit != -1) {
+                let topRightX = player.gameObject.getTopRight().x;
+                let overlap = topRightX - xLimit;
+                if (overlap > 0) {
+                    player.gameObject.x -= overlap;
+                }
+            }
+            let topLeftX = player.gameObject.getTopLeft().x;
+            if (topLeftX > gameWidth) {
+                //TODO damaging enemy base
+                player.gameObject.destroy();
+                playerUnitsToRemove.push(i);
+                xLimit = -1;
+            } else {
+                xLimit = topLeftX;
+            }
+        }
+        // Move enemy units
+        let enemyUnitsToRemove = [];
+        xLimit = -1;
+        for (let i = 0; i < lane.enemyUnits.length; i++) {
+            let enemy = lane.enemyUnits[i];
+            enemy.gameObject.x -= config()["units"][enemy.type]["speed"];
+            //TODO stop when seeing an enemy in range
+            // Don't pass other units
+            if (xLimit != -1) {
+                let topLeftX = enemy.gameObject.getTopLeft().x;
+                let overlap = xLimit - topLeftX;
+                if (overlap > 0) {
+                    enemy.gameObject.x += overlap;
+                }
+            }
+            let topRightX = enemy.gameObject.getTopRight().x;
+            if (topRightX < 0) {
+                //TODO damaging player base
+                enemy.gameObject.destroy();
+                enemyUnitsToRemove.push(i);
+                xLimit = -1;
+            } else {
+                xLimit = topRightX;
+            }
+        }
+
+        // Remove units that should be removed
+        for (let i = playerUnitsToRemove.length - 1; i >= 0; i--) {
+            console.log("removed");
+            lane.playerUnits.splice(playerUnitsToRemove[i], 1);
+        }
+        for (let i = enemyUnitsToRemove.length - 1; i >= 0; i--) {
+            lane.enemyUnits.splice(enemyUnitsToRemove[i], 1);
+        }
+    })
 }
