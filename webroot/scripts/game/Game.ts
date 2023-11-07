@@ -1,7 +1,8 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
-import { Unit } from "../model/Unit";
+import { createUnit, Unit, UnitType } from "../model/Unit";
+import { MainScene } from "../scenes/MainScene";
 
 export type Lane = {
     playerUnits: Unit[];
@@ -46,8 +47,9 @@ export function createGame(): ActiveGame {
 }
 
 let lastUpdate = -1;
+let lastEnemySpawn = -1;
 
-export function updateGame(game: ActiveGame, time: number, gameWidth: number) {
+export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
         
@@ -62,6 +64,18 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number) {
         
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();
+    }
+
+    // Spawn enemy units
+    if (lastEnemySpawn == -1 || time - lastEnemySpawn >= config()["enemySpawnRate"]) {
+        lastEnemySpawn = time;
+        let lane = Math.floor(Math.random() * config()["numLanes"]);
+        let unitType = UnitType.Warrior;
+        // Just use a 50/50 chance of each unit type for now
+        if (Math.random() > 0.5) {
+            unitType = UnitType.Slingshotter;
+        }
+        game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
     }
 
     // Always move units

@@ -3,10 +3,11 @@ import { ActiveGame, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
-import { createUnit, UnitType } from "../model/Unit";
+import { createUnit, Unit, UnitType } from "../model/Unit";
 
 const boardWidth = 300;
 const boardMargin = 10;
+const enemyColor = 0x911c04;
 
 export class MainScene extends Phaser.Scene {
     sceneCreated: boolean;
@@ -135,10 +136,16 @@ export class MainScene extends Phaser.Scene {
         }
 
         // Build the unit
-        let unit = this.add.circle(0, this.laneTopY + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 2, 0xffffff);
-        this.activeGame.lanes[lane].playerUnits.push(createUnit(this.uiState.selectedUnit, unit));
+        this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
         this.activeGame.gold -= cost;
         resourceUpdateEvent();
+    }
+
+    createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {
+        let unit = this.add.circle(isEnemy ? this.game.renderer.width : 0,
+            this.laneTopY + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
+            isEnemy ? enemyColor : 0xffffff);
+        return createUnit(type, unit);
     }
 
     getBuildingText(building: Building): string {
@@ -157,8 +164,7 @@ export class MainScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(0x00303B);
     }
 
-
     update(time, delta) {
-        updateGame(this.activeGame, time, this.game.renderer.width);
+        updateGame(this.activeGame, time, this.game.renderer.width, this);
     }
 }

@@ -3,6 +3,8 @@
 
     "numLanes": 3,
 
+    "enemySpawnRate": 12000,
+
     "units": {
         "warrior": {
             "maxHealth": 3,
