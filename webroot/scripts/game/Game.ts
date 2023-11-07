@@ -83,10 +83,25 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         // Move player units
         let playerUnitsToRemove = [];
         let xLimit = -1;
+        let firstEnemyX = -1;
+        let firstPlayerX = -1;
+        if (lane.enemyUnits.length > 0) {
+            firstEnemyX = lane.enemyUnits[0].gameObject.x;
+        }
+        if (lane.playerUnits.length > 0) {
+            firstPlayerX = lane.playerUnits[0].gameObject.x;
+        }
         for (let i = 0; i < lane.playerUnits.length; i++) {
             let player = lane.playerUnits[i];
+
+            // Stop when in range of the first enemy
+            if (firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
+                console.log("player stopped");
+                continue;
+            }
+
             player.gameObject.x += config()["units"][player.type]["speed"];
-            //TODO stop when seeing an enemy in range
+
             // Don't pass other units that are in front
             if (xLimit != -1) {
                 let topRightX = player.gameObject.getTopRight().x;
@@ -110,8 +125,15 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         xLimit = -1;
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
+
+            // Stop when in range of the first player unit
+            if (firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"]) {
+                console.log("enemy stopped");
+                continue;
+            }
+
             enemy.gameObject.x -= config()["units"][enemy.type]["speed"];
-            //TODO stop when seeing an enemy in range
+            
             // Don't pass other units
             if (xLimit != -1) {
                 let topLeftX = enemy.gameObject.getTopLeft().x;

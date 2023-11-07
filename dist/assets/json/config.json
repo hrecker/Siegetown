@@ -9,7 +9,7 @@
         "warrior": {
             "maxHealth": 3,
             "damage": 1,
-            "range": 1,
+            "range": 70,
             "speed": 1,
             "cost": {
                 "gold": 10,
@@ -19,7 +19,7 @@
         "slingshotter": {
             "maxHealth": 2,
             "damage": 1,
-            "range": 4,
+            "range": 210,
             "speed": 0.5,
             "cost": {
                 "gold": 10,
