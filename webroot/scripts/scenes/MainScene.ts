@@ -9,6 +9,11 @@ const boardWidth = 300;
 const boardMargin = 10;
 const enemyColor = 0x911c04;
 
+const healthBarWidth = 64;
+const healthBarHeight = 6;
+export const healthBarYPos = 36;
+const healthBarFillColor = 0x32a852;
+
 export class MainScene extends Phaser.Scene {
     sceneCreated: boolean;
     activeGame: ActiveGame;
@@ -145,7 +150,12 @@ export class MainScene extends Phaser.Scene {
         let unit = this.add.circle(isEnemy ? this.game.renderer.width : 0,
             this.laneTopY + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
             isEnemy ? enemyColor : 0xffffff);
-        return createUnit(type, unit);
+        // Create the Unit's health bar
+        let healthBarBackground = this.add.rectangle(unit.x, unit.y,
+            healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
+        let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
+            healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
+        return createUnit(type, unit, healthBarBackground, healthBar);
     }
 
     getBuildingText(building: Building): string {
@@ -166,5 +176,17 @@ export class MainScene extends Phaser.Scene {
 
     update(time, delta) {
         updateGame(this.activeGame, time, this.game.renderer.width, this);
+
+        // Keep unit health bars in sync with the units
+        this.activeGame.lanes.forEach(lane => {
+            for (let i = 0; i < lane.playerUnits.length; i++) {
+                lane.playerUnits[i].healthBar.x = lane.playerUnits[i].gameObject.x - (healthBarWidth / 2);
+                lane.playerUnits[i].healthBarBackground.x = lane.playerUnits[i].gameObject.x;
+            }
+            for (let i = 0; i < lane.enemyUnits.length; i++) {
+                lane.enemyUnits[i].healthBar.x = lane.enemyUnits[i].gameObject.x - (healthBarWidth / 2);
+                lane.enemyUnits[i].healthBarBackground.x = lane.enemyUnits[i].gameObject.x;
+            }
+        });
     }
 }

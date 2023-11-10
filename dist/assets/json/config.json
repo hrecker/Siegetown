@@ -5,6 +5,8 @@
 
     "enemySpawnRate": 12000,
 
+    "unitAttackRate": 1000,
+
     "units": {
         "warrior": {
             "maxHealth": 3,

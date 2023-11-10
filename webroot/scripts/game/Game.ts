@@ -1,7 +1,7 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
-import { createUnit, Unit, UnitType } from "../model/Unit";
+import { createUnit, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { MainScene } from "../scenes/MainScene";
 
 export type Lane = {
@@ -81,7 +81,8 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
     // Always move units
     game.lanes.forEach(lane => {
         // Move player units
-        let playerUnitsToRemove = [];
+        let playerUnitsToRemove = new Set();
+        let enemyUnitsToRemove = new Set();
         let xLimit = -1;
         let firstEnemyX = -1;
         let firstPlayerX = -1;
@@ -96,7 +97,13 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
 
             // Stop when in range of the first enemy
             if (firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
-                console.log("player stopped");
+                // Attack the enemy
+                if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
+                    player.lastAttackTime = time;
+                    if (updateHealth(lane.enemyUnits[0], -config()["units"][player.type]["damage"]) <= 0) {
+                        enemyUnitsToRemove.add(0);
+                    }
+                }
                 continue;
             }
 
@@ -113,22 +120,26 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             let topLeftX = player.gameObject.getTopLeft().x;
             if (topLeftX > gameWidth) {
                 //TODO damaging enemy base
-                player.gameObject.destroy();
-                playerUnitsToRemove.push(i);
+                playerUnitsToRemove.add(i);
                 xLimit = -1;
             } else {
                 xLimit = topLeftX;
             }
         }
         // Move enemy units
-        let enemyUnitsToRemove = [];
         xLimit = -1;
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
 
             // Stop when in range of the first player unit
             if (firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"]) {
-                console.log("enemy stopped");
+                // Attack the player unit
+                if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= config()["unitAttackRate"]) {
+                    enemy.lastAttackTime = time;
+                    if (updateHealth(lane.playerUnits[0], -config()["units"][enemy.type]["damage"]) <= 0) {
+                        playerUnitsToRemove.add(0);
+                    }
+                }
                 continue;
             }
 
@@ -145,8 +156,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             let topRightX = enemy.gameObject.getTopRight().x;
             if (topRightX < 0) {
                 //TODO damaging player base
-                enemy.gameObject.destroy();
-                enemyUnitsToRemove.push(i);
+                enemyUnitsToRemove.add(i);
                 xLimit = -1;
             } else {
                 xLimit = topRightX;
@@ -154,12 +164,13 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         }
 
         // Remove units that should be removed
-        for (let i = playerUnitsToRemove.length - 1; i >= 0; i--) {
-            console.log("removed");
-            lane.playerUnits.splice(playerUnitsToRemove[i], 1);
+        for (const i of playerUnitsToRemove) {
+            destroyUnit(lane.playerUnits[i]);
+            lane.playerUnits.splice(i, 1);
         }
-        for (let i = enemyUnitsToRemove.length - 1; i >= 0; i--) {
-            lane.enemyUnits.splice(enemyUnitsToRemove[i], 1);
+        for (const i of enemyUnitsToRemove) {
+            destroyUnit(lane.enemyUnits[i]);
+            lane.enemyUnits.splice(i, 1);
         }
     })
 }
