@@ -72,7 +72,7 @@ export class MainScene extends Phaser.Scene {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 let x = this.boardTopLeftX + (boardWidth * i / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
                 let y = this.boardTopLeftY + (boardWidth * j / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
-                this.gridTexts[i][j] = this.add.text(x, y, this.getBuildingText(this.activeGame.base.grid[i][j])).setOrigin(0.5, 0.5).setFontSize(128);
+                this.gridTexts[i][j] = this.add.text(x, y, this.getBuildingText(this.activeGame.base.grid[i][j])).setOrigin(0.5, 0.5).setFontSize(64);
             }
         }
 

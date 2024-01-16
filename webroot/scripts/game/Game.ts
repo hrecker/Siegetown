@@ -27,7 +27,7 @@ export function createGame(): ActiveGame {
             grid[i][j] = Building.Empty;
         }
     }
-    let center = (config()["baseWidth"] - 1) / 2;
+    let center = Math.floor((config()["baseWidth"] - 1) / 2);
     grid[center][center] = Building.Townhall;
 
     let lanes: Lane[] = [];
