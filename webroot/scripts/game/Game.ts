@@ -53,6 +53,14 @@ export function createGame(): ActiveGame {
 let lastUpdate = -1;
 let lastEnemySpawn = -1;
 
+function playerPastLine(playerX: number, gameWidth: number) {
+    return playerX >= gameWidth;
+}
+
+function enemyPastLine(enemyX: number) {
+    return enemyX <= 0;
+}
+
 export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
@@ -90,17 +98,27 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         let xLimit = -1;
         let firstEnemyX = -1;
         let firstPlayerX = -1;
-        if (lane.enemyUnits.length > 0) {
-            firstEnemyX = lane.enemyUnits[0].gameObject.x;
+        // Find the first enemy that can be interacted with; once an enemy is halfway across the line it can't be fought
+        for (let i = 0; i < lane.enemyUnits.length; i++) {
+            if (! enemyPastLine(lane.enemyUnits[0].gameObject.x)) {
+                firstEnemyX = lane.enemyUnits[0].gameObject.x;
+                break;
+            }
         }
-        if (lane.playerUnits.length > 0) {
-            firstPlayerX = lane.playerUnits[0].gameObject.x;
+        // Find the first player that can be interacted with; once a player is halfway across the line it can't be fought
+        for (let i = 0; i < lane.playerUnits.length; i++) {
+            if (! playerPastLine(lane.playerUnits[0].gameObject.x, gameWidth)) {
+                firstPlayerX = lane.playerUnits[0].gameObject.x;
+                break;
+            }
         }
         for (let i = 0; i < lane.playerUnits.length; i++) {
             let player = lane.playerUnits[i];
+            let topLeftX = player.gameObject.getTopLeft().x;
 
             // Stop when in range of the first enemy
-            if (firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
+            if (! playerPastLine(player.gameObject.x, gameWidth) &&
+                firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
                 // Attack the enemy
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
                     player.lastAttackTime = time;
@@ -108,6 +126,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                         enemyUnitsToRemove.add(0);
                     }
                 }
+                xLimit = topLeftX;
                 continue;
             }
 
@@ -121,9 +140,8 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                     player.gameObject.x -= overlap;
                 }
             }
-            let topLeftX = player.gameObject.getTopLeft().x;
             if (topLeftX > gameWidth) {
-                game.enemyBaseHealth -= 1;
+                game.enemyBaseHealth = Math.max(0, game.enemyBaseHealth - 1);
                 enemyBaseDamagedEvent(game.enemyBaseHealth);
                 playerUnitsToRemove.add(i);
                 xLimit = -1;
@@ -137,7 +155,8 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             let enemy = lane.enemyUnits[i];
 
             // Stop when in range of the first player unit
-            if (firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"]) {
+            if (! enemyPastLine(enemy.gameObject.x) &&
+                firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"]) {
                 // Attack the player unit
                 if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= config()["unitAttackRate"]) {
                     enemy.lastAttackTime = time;
@@ -160,7 +179,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             }
             let topRightX = enemy.gameObject.getTopRight().x;
             if (topRightX < 0) {
-                game.baseHealth -= 1;
+                game.baseHealth = Math.max(0, game.baseHealth - 1);
                 baseDamagedEvent(game.baseHealth);
                 enemyUnitsToRemove.add(i);
                 xLimit = -1;
