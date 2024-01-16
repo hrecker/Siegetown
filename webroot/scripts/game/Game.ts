@@ -1,7 +1,7 @@
-import { resourceUpdateEvent } from "../events/EventMessenger";
+import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
-import { createUnit, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
+import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { MainScene } from "../scenes/MainScene";
 
 export type Lane = {
@@ -11,6 +11,8 @@ export type Lane = {
 
 export type ActiveGame = {
     base: Base;
+    baseHealth: number;
+    enemyBaseHealth: number;
     gold: number;
     wood: number;
     food: number;
@@ -39,6 +41,8 @@ export function createGame(): ActiveGame {
         base: {
             grid: grid
         },
+        baseHealth: config()["baseMaxHealth"],
+        enemyBaseHealth: config()["enemyBaseMaxHealth"],
         gold: 0,
         wood: 0,
         food: 0,
@@ -119,7 +123,8 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             }
             let topLeftX = player.gameObject.getTopLeft().x;
             if (topLeftX > gameWidth) {
-                //TODO damaging enemy base
+                game.enemyBaseHealth -= 1;
+                enemyBaseDamagedEvent(game.enemyBaseHealth);
                 playerUnitsToRemove.add(i);
                 xLimit = -1;
             } else {
@@ -155,7 +160,8 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             }
             let topRightX = enemy.gameObject.getTopRight().x;
             if (topRightX < 0) {
-                //TODO damaging player base
+                game.baseHealth -= 1;
+                baseDamagedEvent(game.baseHealth);
                 enemyUnitsToRemove.add(i);
                 xLimit = -1;
             } else {

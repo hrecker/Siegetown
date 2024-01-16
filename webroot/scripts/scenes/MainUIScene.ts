@@ -1,4 +1,4 @@
-import { addResourceUpdateListener } from "../events/EventMessenger";
+import { addBaseDamagedListener, addEnemyBaseDamagedListener, addResourceUpdateListener } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -14,6 +14,8 @@ export class MainUIScene extends Phaser.Scene {
     goldText: Phaser.GameObjects.Text;
     woodText: Phaser.GameObjects.Text;
     foodText: Phaser.GameObjects.Text;
+    baseHealthText: Phaser.GameObjects.Text;
+    enemyBaseHealthText: Phaser.GameObjects.Text;
 
     fieldBuildButtonOutline: Phaser.GameObjects.Rectangle;
     lumberyardBuildButtonOutline: Phaser.GameObjects.Rectangle;
@@ -47,6 +49,10 @@ export class MainUIScene extends Phaser.Scene {
         this.goldText = this.add.text(10, 10, "Gold: 0");
         this.woodText = this.add.text(10, 30, "Wood: 0");
         this.foodText = this.add.text(10, 50, "Food: 0");
+        this.baseHealthText = this.add.text(10, 70, "");
+        this.baseDamagedListener(this, this.activeGame.baseHealth);
+        this.enemyBaseHealthText = this.add.text(10, 140, "");
+        this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
 
         this.uiState.selectedBuilding = Building.Empty;
 
@@ -94,6 +100,8 @@ export class MainUIScene extends Phaser.Scene {
         });
 
         addResourceUpdateListener(this.resourceUpdateListener, this);
+        addBaseDamagedListener(this.baseDamagedListener, this);
+        addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
 
         this.scale.on("resize", this.resize, this);
     }
@@ -122,5 +130,13 @@ export class MainUIScene extends Phaser.Scene {
         scene.goldText.text = "Gold: " + scene.activeGame.gold;
         scene.woodText.text = "Wood: " + scene.activeGame.wood;
         scene.foodText.text = "Food: " + scene.activeGame.food;
+    }
+
+    baseDamagedListener(scene: MainUIScene, health: number) {
+        scene.baseHealthText.text = "Base Health: " + health + " / " + config()["baseMaxHealth"];
+    }
+
+    enemyBaseDamagedListener(scene: MainUIScene, health: number) {
+        scene.enemyBaseHealthText.text = "Enemy Base\nHealth: " + health + " / " + config()["enemyBaseMaxHealth"];
     }
 }

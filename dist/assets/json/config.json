@@ -3,6 +3,9 @@
 
     "numLanes": 3,
 
+    "baseMaxHealth": 10,
+    "enemyBaseMaxHealth": 20,
+
     "enemySpawnRate": 12000,
 
     "unitAttackRate": 1000,
