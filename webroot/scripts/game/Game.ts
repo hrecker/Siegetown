@@ -1,6 +1,7 @@
 import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
+import { Costs } from "../model/Cost";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { MainScene } from "../scenes/MainScene";
 
@@ -59,6 +60,12 @@ function playerPastLine(playerX: number, gameWidth: number) {
 
 function enemyPastLine(enemyX: number) {
     return enemyX <= 0;
+}
+
+export function chargeCosts(game: ActiveGame, costs: Costs) {
+    game.gold -= costs.gold;
+    game.food -= costs.food;
+    game.wood -= costs.wood;
 }
 
 export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {

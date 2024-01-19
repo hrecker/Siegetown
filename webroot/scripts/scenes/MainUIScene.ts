@@ -3,6 +3,7 @@ import { ActiveGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
+import { buildingCosts, unitCosts } from "../model/Cost";
 import { UnitType } from "../model/Unit";
 
 /** UI displayed over MainScene */
@@ -43,6 +44,31 @@ export class MainUIScene extends Phaser.Scene {
         //TODO
     }
 
+    createBuildBuildingButtonText(buildingType: Building, y: number): Phaser.GameObjects.Text {
+        let text = "Build " + buildingType + ":\n";
+        // Assume that everything at least costs gold
+        let costs = buildingCosts(buildingType);
+        text += "Gold: " + costs.gold;
+        if (costs.wood > 0) {
+            text += "\nWood: " + costs.wood;
+        }
+        return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
+    }
+
+    createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
+        let text = "Build " + unitType + ":\n";
+        // Assume that everything at least costs gold
+        let costs = unitCosts(unitType);
+        text += "Gold: " + costs.gold;
+        if (costs.food > 0) {
+            text += "\nFood: " + costs.food;
+        }
+        if (costs.wood) {
+            text += "\nWood: " + costs.wood;
+        }
+        return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
+    }
+
     create() {
         this.resize(true);
 
@@ -57,8 +83,8 @@ export class MainUIScene extends Phaser.Scene {
         this.uiState.selectedBuilding = Building.Empty;
 
         //TODO handle building that don't just cost gold
-        let fieldBuildButton = this.add.text(this.game.renderer.width - 10, 10, "Build Field: " + config()["buildings"][Building.Field]["cost"]["gold"]).setOrigin(1, 0);
-        let lumberyardBuildButton = this.add.text(this.game.renderer.width - 10, 30, "Build Lumberyard: " + config()["buildings"][Building.Lumberyard]["cost"]["gold"]).setOrigin(1, 0);
+        let fieldBuildButton = this.createBuildBuildingButtonText(Building.Field, 10);
+        let lumberyardBuildButton = this.createBuildBuildingButtonText(Building.Lumberyard, 60);
         this.fieldBuildButtonOutline = this.add.rectangle(fieldBuildButton.getTopLeft().x - 1, fieldBuildButton.getTopLeft().y - 1,
             fieldBuildButton.width + 1, fieldBuildButton.height + 1).setOrigin(0, 0);
         this.fieldBuildButtonOutline.isStroked = true;
@@ -69,8 +95,8 @@ export class MainUIScene extends Phaser.Scene {
         this.lumberyardBuildButtonOutline.setVisible(false);
 
         //TODO handle units that don't just cost gold
-        let warriorBuildButton = this.add.text(this.game.renderer.width - 10, 110, "Build Warrior: " + config()["units"][UnitType.Warrior]["cost"]["gold"]).setOrigin(1, 0);
-        let slingshotterBuildButton = this.add.text(this.game.renderer.width - 10, 130, "Build Slingshotter: " + config()["units"][UnitType.Slingshotter]["cost"]["gold"]).setOrigin(1, 0);
+        let warriorBuildButton = this.createBuildUnitButtonText(UnitType.Warrior, 130);
+        let slingshotterBuildButton = this.createBuildUnitButtonText(UnitType.Slingshotter, 180);
         this.warriorBuildButtonOutline = this.add.rectangle(warriorBuildButton.getTopLeft().x - 1, warriorBuildButton.getTopLeft().y - 1,
             warriorBuildButton.width + 1, warriorBuildButton.height + 1).setOrigin(0, 0);
         this.warriorBuildButtonOutline.isStroked = true;

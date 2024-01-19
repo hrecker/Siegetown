@@ -1,8 +1,9 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, updateGame } from "../game/Game";
+import { ActiveGame, chargeCosts, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
+import { buildingCosts, unitCosts } from "../model/Cost";
 import { createUnit, Unit, UnitType } from "../model/Unit";
 
 const boardWidth = 300;
@@ -110,16 +111,15 @@ export class MainScene extends Phaser.Scene {
             return;
         }
 
-        //TODO costs besides gold
-        let cost = config()["buildings"][this.uiState.selectedBuilding]["cost"]["gold"];
-        if (this.activeGame.gold < cost) {
+        let costs = buildingCosts(this.uiState.selectedBuilding);
+        if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
             return;
         }
 
         // Build the building
         this.activeGame.base.grid[gridX][gridY] = this.uiState.selectedBuilding;
         this.gridTexts[gridX][gridY].text = this.getBuildingText(this.uiState.selectedBuilding);
-        this.activeGame.gold -= cost;
+        chargeCosts(this.activeGame, costs);
         resourceUpdateEvent();
     }
 
@@ -134,15 +134,14 @@ export class MainScene extends Phaser.Scene {
             return;
         }
 
-        //TODO costs besides gold
-        let cost = config()["units"][this.uiState.selectedUnit]["cost"]["gold"];
-        if (this.activeGame.gold < cost) {
+        let costs = unitCosts(this.uiState.selectedUnit);
+        if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
             return;
         }
 
         // Build the unit
         this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
-        this.activeGame.gold -= cost;
+        chargeCosts(this.activeGame, costs);
         resourceUpdateEvent();
     }
 
