@@ -1,7 +1,7 @@
 import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { config } from "../model/Config";
-import { Costs } from "../model/Cost";
+import { Resources } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { MainScene } from "../scenes/MainScene";
 
@@ -62,24 +62,37 @@ function enemyPastLine(enemyX: number) {
     return enemyX <= 0;
 }
 
-export function chargeCosts(game: ActiveGame, costs: Costs) {
+export function chargeCosts(game: ActiveGame, costs: Resources) {
     game.gold -= costs.gold;
     game.food -= costs.food;
     game.wood -= costs.wood;
+}
+
+export function getGrowth(game: ActiveGame): Resources {
+    let result = {
+        gold: 0,
+        food: 0,
+        wood: 0,
+    }
+    for (let i = 0; i < game.base.grid.length; i++) {
+        for (let j = 0; j < game.base.grid[i].length; j++) {
+            let building = game.base.grid[i][j];
+            result.gold += config()["buildings"][building]["produce"]["gold"];
+            result.food += config()["buildings"][building]["produce"]["food"];
+            result.wood += config()["buildings"][building]["produce"]["wood"];
+        }
+    }
+    return result;
 }
 
 export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
         
-        for (let i = 0; i < game.base.grid.length; i++) {
-            for (let j = 0; j < game.base.grid[i].length; j++) {
-                let building = game.base.grid[i][j];
-                game.gold += config()["buildings"][building]["produce"]["gold"];
-                game.food += config()["buildings"][building]["produce"]["food"];
-                game.wood += config()["buildings"][building]["produce"]["wood"];
-            }
-        }
+        let growth = getGrowth(game);
+        game.gold += growth.gold;
+        game.food += growth.food;
+        game.wood += growth.wood;
         
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();

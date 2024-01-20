@@ -1,9 +1,9 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, addResourceUpdateListener } from "../events/EventMessenger";
-import { ActiveGame } from "../game/Game";
+import { ActiveGame, getGrowth } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
-import { buildingCosts, unitCosts } from "../model/Cost";
+import { buildingCosts, unitCosts } from "../model/Resources";
 import { UnitType } from "../model/Unit";
 
 /** UI displayed over MainScene */
@@ -75,6 +75,7 @@ export class MainUIScene extends Phaser.Scene {
         this.goldText = this.add.text(10, 10, "Gold: 0");
         this.woodText = this.add.text(10, 30, "Wood: 0");
         this.foodText = this.add.text(10, 50, "Food: 0");
+        this.updateResourceText();
         this.baseHealthText = this.add.text(10, 70, "");
         this.baseDamagedListener(this, this.activeGame.baseHealth);
         this.enemyBaseHealthText = this.add.text(10, 140, "");
@@ -152,10 +153,15 @@ export class MainUIScene extends Phaser.Scene {
         this.slingshotterBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Slingshotter);
     }
 
+    updateResourceText() {
+        let growth = getGrowth(this.activeGame);
+        this.goldText.text = "Gold (+" + growth.gold + "): " + this.activeGame.gold;
+        this.foodText.text = "Food (+" + growth.food + "): " + this.activeGame.food;
+        this.woodText.text = "Wood (+" + growth.wood + "): " + this.activeGame.wood;
+    }
+
     resourceUpdateListener(scene: MainUIScene) {
-        scene.goldText.text = "Gold: " + scene.activeGame.gold;
-        scene.woodText.text = "Wood: " + scene.activeGame.wood;
-        scene.foodText.text = "Food: " + scene.activeGame.food;
+        scene.updateResourceText();
     }
 
     baseDamagedListener(scene: MainUIScene, health: number) {
