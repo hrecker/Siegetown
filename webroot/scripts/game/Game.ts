@@ -20,7 +20,7 @@ export type ActiveGame = {
     lanes: Lane[];
 }
 
-export function createGame(): ActiveGame {
+function startingGrid(): Building[][] {
     let grid: Building[][] = [];
     for (let i = 0; i < config()["baseWidth"]; i++) {
         grid[i] = [];
@@ -30,7 +30,10 @@ export function createGame(): ActiveGame {
     }
     let center = Math.floor((config()["baseWidth"] - 1) / 2);
     grid[center][center] = Building.Townhall;
+    return grid;
+}
 
+function startingLanes(): Lane[] {
     let lanes: Lane[] = [];
     for (let i = 0; i < config()["numLanes"]; i++) {
         lanes.push({
@@ -38,17 +41,43 @@ export function createGame(): ActiveGame {
             enemyUnits: []
         });
     }
+    return lanes;
+}
+
+export function createGame(): ActiveGame {
     return {
         base: {
-            grid: grid
+            grid: startingGrid()
         },
         baseHealth: config()["baseMaxHealth"],
         enemyBaseHealth: config()["enemyBaseMaxHealth"],
         gold: 0,
         wood: 0,
         food: 0,
-        lanes: lanes
+        lanes: startingLanes()
     };
+}
+
+export function resetGame(game: ActiveGame) {
+    for (const lane of game.lanes) {
+        for (const playerUnit of lane.playerUnits) {
+            destroyUnit(playerUnit);
+        }
+        for (const enemyUnit of lane.enemyUnits) {
+            destroyUnit(enemyUnit);
+        }
+    }
+    lastUpdate = -1;
+    lastEnemySpawn = -1;
+    game.base = {
+        grid: startingGrid()
+    };
+    game.baseHealth = config()["baseMaxHealth"];
+    game.enemyBaseHealth = config()["enemyBaseMaxHealth"];
+    game.gold = 0;
+    game.wood = 0;
+    game.food = 0;
+    game.lanes = startingLanes();
 }
 
 let lastUpdate = -1;
@@ -86,6 +115,10 @@ export function getGrowth(game: ActiveGame): Resources {
 }
 
 export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {
+    if (game.baseHealth <= 0 || game.enemyBaseHealth <= 0) {
+        return;
+    }
+
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
         

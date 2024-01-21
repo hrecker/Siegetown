@@ -1,4 +1,4 @@
-import { addBaseDamagedListener, addEnemyBaseDamagedListener, addResourceUpdateListener } from "../events/EventMessenger";
+import { addBaseDamagedListener, addEnemyBaseDamagedListener, addResourceUpdateListener, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame, getGrowth } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -24,6 +24,12 @@ export class MainUIScene extends Phaser.Scene {
     // Unit UI
     warriorBuildButtonOutline: Phaser.GameObjects.Rectangle;
     slingshotterBuildButtonOutline: Phaser.GameObjects.Rectangle;
+
+    // Game result UI
+    resultBackground: Phaser.GameObjects.Rectangle;
+    gameResultText: Phaser.GameObjects.Text;
+    restartButton: Phaser.GameObjects.Text;
+    restartButtonOutline: Phaser.GameObjects.Rectangle;
 
     constructor() {
         super({
@@ -69,6 +75,13 @@ export class MainUIScene extends Phaser.Scene {
         return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
     }
 
+    setGameEndVisible(visible: boolean) {
+        this.resultBackground.visible = visible;
+        this.gameResultText.visible = visible;
+        this.restartButton.visible = visible;
+        this.restartButtonOutline.visible = visible;
+    }
+
     create() {
         this.resize(true);
 
@@ -83,7 +96,6 @@ export class MainUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = Building.Empty;
 
-        //TODO handle building that don't just cost gold
         let fieldBuildButton = this.createBuildBuildingButtonText(Building.Field, 10);
         let lumberyardBuildButton = this.createBuildBuildingButtonText(Building.Lumberyard, 60);
         this.fieldBuildButtonOutline = this.add.rectangle(fieldBuildButton.getTopLeft().x - 1, fieldBuildButton.getTopLeft().y - 1,
@@ -95,7 +107,6 @@ export class MainUIScene extends Phaser.Scene {
         this.lumberyardBuildButtonOutline.isStroked = true;
         this.lumberyardBuildButtonOutline.setVisible(false);
 
-        //TODO handle units that don't just cost gold
         let warriorBuildButton = this.createBuildUnitButtonText(UnitType.Warrior, 130);
         let slingshotterBuildButton = this.createBuildUnitButtonText(UnitType.Slingshotter, 180);
         this.warriorBuildButtonOutline = this.add.rectangle(warriorBuildButton.getTopLeft().x - 1, warriorBuildButton.getTopLeft().y - 1,
@@ -107,10 +118,19 @@ export class MainUIScene extends Phaser.Scene {
         this.slingshotterBuildButtonOutline.isStroked = true;
         this.slingshotterBuildButtonOutline.setVisible(false);
 
+        this.resultBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
+        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!").setFontSize(64).setOrigin(0.5, 0.5);
+        this.restartButton = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart").setFontSize(48).setOrigin(0.5, 0.5);
+        this.restartButtonOutline = this.add.rectangle(this.restartButton.getTopLeft().x - 1, this.restartButton.getTopLeft().y - 1,
+            this.restartButton.width + 1, this.restartButton.height + 1).setOrigin(0, 0);
+        this.restartButtonOutline.isStroked = true;
+        this.setGameEndVisible(false);
+
         fieldBuildButton.setInteractive();
         lumberyardBuildButton.setInteractive();
         warriorBuildButton.setInteractive();
         slingshotterBuildButton.setInteractive();
+        this.restartButton.setInteractive();
         
         fieldBuildButton.on('pointerdown', () => {
             this.selectBuild(Building.Field);
@@ -124,6 +144,16 @@ export class MainUIScene extends Phaser.Scene {
         });
         slingshotterBuildButton.on('pointerdown', () => {
             this.selectUnitBuild(UnitType.Slingshotter);
+        });
+
+        this.restartButton.on('pointerdown', () => {
+            gameRestartedEvent();
+            this.setGameEndVisible(false);
+            this.updateResourceText();
+            this.baseDamagedListener(this, this.activeGame.baseHealth);
+            this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
+            this.selectBuild(Building.Empty);
+            this.selectUnitBuild(UnitType.None);
         });
 
         addResourceUpdateListener(this.resourceUpdateListener, this);
@@ -166,9 +196,17 @@ export class MainUIScene extends Phaser.Scene {
 
     baseDamagedListener(scene: MainUIScene, health: number) {
         scene.baseHealthText.text = "Base Health: " + health + " / " + config()["baseMaxHealth"];
+        if (health <= 0) {
+            scene.gameResultText.text = "Defeat!";
+            scene.setGameEndVisible(true);
+        }
     }
 
     enemyBaseDamagedListener(scene: MainUIScene, health: number) {
         scene.enemyBaseHealthText.text = "Enemy Base\nHealth: " + health + " / " + config()["enemyBaseMaxHealth"];
+        if (health <= 0) {
+            scene.gameResultText.text = "Victory!";
+            scene.setGameEndVisible(true);
+        }
     }
 }

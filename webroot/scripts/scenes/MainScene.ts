@@ -1,5 +1,5 @@
-import { resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, updateGame } from "../game/Game";
+import { addGameRestartedListener, resourceUpdateEvent } from "../events/EventMessenger";
+import { ActiveGame, chargeCosts, resetGame, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
@@ -57,8 +57,6 @@ export class MainScene extends Phaser.Scene {
             this.sceneCreated = true;
         }
 
-        this.reset();
-
         // Draw the board
         this.boardTopLeftX = (this.game.renderer.width / 2) - (boardWidth / 2);
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
@@ -103,6 +101,8 @@ export class MainScene extends Phaser.Scene {
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
+
+        addGameRestartedListener(this.gameRestartedListener, this);
     }
 
     handleGridClick() {
@@ -194,9 +194,16 @@ export class MainScene extends Phaser.Scene {
         }
         return result;
     }
-
-    reset() {
-        this.cameras.main.setBackgroundColor(0x00303B);
+    
+    gameRestartedListener(scene: MainScene) {
+        resetGame(scene.activeGame);
+        // redraw the buildings
+        for (let i = 0; i < config()["baseWidth"]; i++) {
+            for (let j = 0; j < config()["baseWidth"]; j++) {
+                scene.gridTexts[i][j].mainText.text = scene.getBuildingText(scene.activeGame.base.grid[i][j]);
+                scene.gridTexts[i][j].growthText.text = scene.getGrowthText(scene.activeGame.base.grid[i][j]);
+            }
+        }
     }
 
     update(time, delta) {

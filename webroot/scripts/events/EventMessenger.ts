@@ -12,6 +12,7 @@ type NumberCallback = {
 let resourceUpdateCallbacks: EmptyCallback[] = [];
 let baseDamagedCallbacks: NumberCallback[] = [];
 let enemyBaseDamagedCallbacks: NumberCallback[] = [];
+let gameRestartedCallbacks: EmptyCallback[] = [];
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
@@ -47,4 +48,16 @@ export function addEnemyBaseDamagedListener(callback: (scene: Phaser.Scene, heal
 export function enemyBaseDamagedEvent(healthRemaining: number) {
     enemyBaseDamagedCallbacks.forEach(callback =>
         callback.callback(callback.scene, healthRemaining));
+}
+
+export function addGameRestartedListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
+    gameRestartedCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function gameRestartedEvent() {
+    gameRestartedCallbacks.forEach(callback =>
+        callback.callback(callback.scene));
 }
