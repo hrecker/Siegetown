@@ -1,4 +1,4 @@
-import { addGameRestartedListener, resourceUpdateEvent } from "../events/EventMessenger";
+import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
 import { ActiveGame, chargeCosts, resetGame, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -132,6 +132,7 @@ export class MainScene extends Phaser.Scene {
         this.gridTexts[gridX][gridY].growthText.text = this.getGrowthText(this.uiState.selectedBuilding);
         chargeCosts(this.activeGame, costs);
         resourceUpdateEvent();
+        buildEvent(this.uiState.selectedBuilding);
     }
 
     handleLaneClick() {

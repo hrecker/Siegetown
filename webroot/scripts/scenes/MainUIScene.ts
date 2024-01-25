@@ -1,4 +1,4 @@
-import { addBaseDamagedListener, addEnemyBaseDamagedListener, addResourceUpdateListener, gameRestartedEvent } from "../events/EventMessenger";
+import { addBaseDamagedListener, addBuildListener, addEnemyBaseDamagedListener, addResourceUpdateListener, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame, getGrowth } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -18,6 +18,8 @@ export class MainUIScene extends Phaser.Scene {
     baseHealthText: Phaser.GameObjects.Text;
     enemyBaseHealthText: Phaser.GameObjects.Text;
 
+    townhallBuildButton: Phaser.GameObjects.Text;
+    townhallBuildButtonOutline: Phaser.GameObjects.Rectangle;
     fieldBuildButtonOutline: Phaser.GameObjects.Rectangle;
     lumberyardBuildButtonOutline: Phaser.GameObjects.Rectangle;
 
@@ -51,12 +53,14 @@ export class MainUIScene extends Phaser.Scene {
     }
 
     createBuildBuildingButtonText(buildingType: Building, y: number): Phaser.GameObjects.Text {
-        let text = "Build " + buildingType + ":\n";
-        // Assume that everything at least costs gold
-        let costs = buildingCosts(buildingType);
-        text += "Gold: " + costs.gold;
-        if (costs.wood > 0) {
-            text += "\nWood: " + costs.wood;
+        let text = "Build " + buildingType ;
+        if (buildingType != Building.Townhall) {
+            // Assume that everything at least costs gold
+            let costs = buildingCosts(buildingType);
+            text += ":\nGold: " + costs.gold;
+            if (costs.wood > 0) {
+                text += "\nWood: " + costs.wood;
+            }
         }
         return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
     }
@@ -96,8 +100,13 @@ export class MainUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = Building.Empty;
 
-        let fieldBuildButton = this.createBuildBuildingButtonText(Building.Field, 10);
-        let lumberyardBuildButton = this.createBuildBuildingButtonText(Building.Lumberyard, 60);
+        this.townhallBuildButton = this.createBuildBuildingButtonText(Building.Townhall, 10);
+        let fieldBuildButton = this.createBuildBuildingButtonText(Building.Field, 30);
+        let lumberyardBuildButton = this.createBuildBuildingButtonText(Building.Lumberyard, 70);
+        this.townhallBuildButtonOutline = this.add.rectangle(this.townhallBuildButton.getTopLeft().x - 1, this.townhallBuildButton.getTopLeft().y - 1,
+            this.townhallBuildButton.width + 1, this.townhallBuildButton.height + 1).setOrigin(0, 0);
+        this.townhallBuildButtonOutline.isStroked = true;
+        this.townhallBuildButtonOutline.setVisible(false);
         this.fieldBuildButtonOutline = this.add.rectangle(fieldBuildButton.getTopLeft().x - 1, fieldBuildButton.getTopLeft().y - 1,
             fieldBuildButton.width + 1, fieldBuildButton.height + 1).setOrigin(0, 0);
         this.fieldBuildButtonOutline.isStroked = true;
@@ -126,12 +135,16 @@ export class MainUIScene extends Phaser.Scene {
         this.restartButtonOutline.isStroked = true;
         this.setGameEndVisible(false);
 
+        this.townhallBuildButton.setInteractive();
         fieldBuildButton.setInteractive();
         lumberyardBuildButton.setInteractive();
         warriorBuildButton.setInteractive();
         slingshotterBuildButton.setInteractive();
         this.restartButton.setInteractive();
         
+        this.townhallBuildButton.on('pointerdown', () => {
+            this.selectBuild(Building.Townhall);
+        });
         fieldBuildButton.on('pointerdown', () => {
             this.selectBuild(Building.Field);
         });
@@ -159,6 +172,7 @@ export class MainUIScene extends Phaser.Scene {
         addResourceUpdateListener(this.resourceUpdateListener, this);
         addBaseDamagedListener(this.baseDamagedListener, this);
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
+        addBuildListener(this.buildListener, this);
 
         this.scale.on("resize", this.resize, this);
     }
@@ -169,6 +183,7 @@ export class MainUIScene extends Phaser.Scene {
         } else {
             this.uiState.selectedBuilding = selection;
         }
+        this.townhallBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Townhall);
         this.fieldBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Field);
         this.lumberyardBuildButtonOutline.setVisible(this.uiState.selectedBuilding == Building.Lumberyard);
     }
@@ -207,6 +222,14 @@ export class MainUIScene extends Phaser.Scene {
         if (health <= 0) {
             scene.gameResultText.text = "Victory!";
             scene.setGameEndVisible(true);
+        }
+    }
+
+    buildListener(scene: MainUIScene, building: Building) {
+        scene.selectBuild(Building.Empty);
+        if (building == Building.Townhall) {
+            scene.townhallBuildButton.removeInteractive();
+            scene.townhallBuildButtonOutline.setVisible(false);
         }
     }
 }

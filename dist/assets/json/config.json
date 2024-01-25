@@ -40,6 +40,11 @@
                 "gold": 2,
                 "food": 0,
                 "wood": 0
+            },
+            "cost": {
+                "gold": 0,
+                "food": 0,
+                "wood": 0
             }
         },
         "empty": {

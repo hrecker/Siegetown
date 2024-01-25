@@ -28,8 +28,6 @@ function startingGrid(): Building[][] {
             grid[i][j] = Building.Empty;
         }
     }
-    let center = Math.floor((config()["baseWidth"] - 1) / 2);
-    grid[center][center] = Building.Townhall;
     return grid;
 }
 

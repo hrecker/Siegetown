@@ -1,3 +1,5 @@
+import { Building } from "../model/Base";
+
 // Callback types
 type EmptyCallback = {
     callback: (scene: Phaser.Scene) => void;
@@ -7,12 +9,17 @@ type NumberCallback = {
     callback: (scene: Phaser.Scene, value: number) => void;
     scene: Phaser.Scene;
 }
+type BuildingCallback = {
+    callback: (scene: Phaser.Scene, building: Building) => void;
+    scene: Phaser.Scene;
+}
 
 // Callback lists
 let resourceUpdateCallbacks: EmptyCallback[] = [];
 let baseDamagedCallbacks: NumberCallback[] = [];
 let enemyBaseDamagedCallbacks: NumberCallback[] = [];
 let gameRestartedCallbacks: EmptyCallback[] = [];
+let buildCallbacks: BuildingCallback[] = [];
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
@@ -60,4 +67,16 @@ export function addGameRestartedListener(callback: (scene: Phaser.Scene) => void
 export function gameRestartedEvent() {
     gameRestartedCallbacks.forEach(callback =>
         callback.callback(callback.scene));
+}
+
+export function addBuildListener(callback: (scene: Phaser.Scene, building: Building) => void, scene: Phaser.Scene) {
+    buildCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function buildEvent(building: Building) {
+    buildCallbacks.forEach(callback =>
+        callback.callback(callback.scene, building));
 }
