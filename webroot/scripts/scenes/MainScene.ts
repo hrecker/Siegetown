@@ -1,7 +1,8 @@
 import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, resetGame, updateGame } from "../game/Game";
+import { ActiveGame, chargeCosts, getBuffs, resetGame, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
+import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, buildingProduction, unitCosts } from "../model/Resources";
 import { createUnit, Unit, UnitType } from "../model/Unit";
@@ -166,7 +167,16 @@ export class MainScene extends Phaser.Scene {
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
         let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
             healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
-        return createUnit(type, unit, healthBarBackground, healthBar);
+        let buffs: Buffs;
+        if (isEnemy) {
+            buffs = {
+                damageBuff: 0,
+                healthBuff: 0,
+            }
+        } else {
+            buffs = getBuffs(this.activeGame);
+        }
+        return createUnit(type, buffs, unit, healthBarBackground, healthBar);
     }
 
     getBuildingText(building: Building): string {
@@ -177,12 +187,15 @@ export class MainScene extends Phaser.Scene {
                 return "L";
             case Building.Townhall:
                 return "T";
+            case Building.Barracks:
+                return "B";
         }
         return "";
     }
 
     getGrowthText(building: Building): string {
         let production = buildingProduction(building);
+        let buffs = buildingBuffs(building);
         let result = "";
         if (production.gold != 0) {
             result += "+" + production.gold + "G";
@@ -192,6 +205,12 @@ export class MainScene extends Phaser.Scene {
         }
         if (production.wood != 0) {
             result += "+" + production.wood + "W";
+        }
+        if (buffs.damageBuff != 0) {
+            result += "+" + buffs.damageBuff + "D";
+        }
+        if (buffs.healthBuff != 0) {
+            result += "+" + buffs.healthBuff + "H";
         }
         return result;
     }

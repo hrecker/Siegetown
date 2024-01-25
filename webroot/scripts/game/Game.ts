@@ -1,7 +1,8 @@
 import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
+import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { Resources } from "../model/Resources";
+import { Resources, buildingProduction } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { MainScene } from "../scenes/MainScene";
 
@@ -103,10 +104,25 @@ export function getGrowth(game: ActiveGame): Resources {
     }
     for (let i = 0; i < game.base.grid.length; i++) {
         for (let j = 0; j < game.base.grid[i].length; j++) {
-            let building = game.base.grid[i][j];
-            result.gold += config()["buildings"][building]["produce"]["gold"];
-            result.food += config()["buildings"][building]["produce"]["food"];
-            result.wood += config()["buildings"][building]["produce"]["wood"];
+            let production = buildingProduction(game.base.grid[i][j]);
+            result.gold += production.gold;
+            result.food += production.food;
+            result.wood += production.wood;
+        }
+    }
+    return result;
+}
+
+export function getBuffs(game: ActiveGame): Buffs {
+    let result = {
+        damageBuff: 0,
+        healthBuff: 0,
+    }
+    for (let i = 0; i < game.base.grid.length; i++) {
+        for (let j = 0; j < game.base.grid[i].length; j++) {
+            let buffs = buildingBuffs(game.base.grid[i][j]);
+            result.damageBuff += buffs.damageBuff;
+            result.healthBuff += buffs.healthBuff;
         }
     }
     return result;
@@ -173,7 +189,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                 // Attack the enemy
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
                     player.lastAttackTime = time;
-                    if (updateHealth(lane.enemyUnits[0], -config()["units"][player.type]["damage"]) <= 0) {
+                    if (updateHealth(lane.enemyUnits[0], -player.damage) <= 0) {
                         enemyUnitsToRemove.add(0);
                     }
                 }
@@ -211,7 +227,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                 // Attack the player unit
                 if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= config()["unitAttackRate"]) {
                     enemy.lastAttackTime = time;
-                    if (updateHealth(lane.playerUnits[0], -config()["units"][enemy.type]["damage"]) <= 0) {
+                    if (updateHealth(lane.playerUnits[0], -enemy.damage) <= 0) {
                         playerUnitsToRemove.add(0);
                     }
                 }

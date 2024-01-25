@@ -37,9 +37,7 @@
     "buildings": {
         "townhall": {
             "produce": {
-                "gold": 2,
-                "food": 0,
-                "wood": 0
+                "gold": 20
             },
             "cost": {
                 "gold": 0,
@@ -49,16 +47,11 @@
         },
         "empty": {
             "produce": {
-                "gold": 0,
-                "food": 0,
-                "wood": 0
             }
         },
         "field": {
             "produce": {
-                "gold": 0,
-                "food": 2,
-                "wood": 0
+                "food": 20
             },
             "cost": {
                 "gold": 30,
@@ -68,14 +61,23 @@
         },
         "lumberyard": {
             "produce": {
-                "gold": 0,
-                "food": 0,
-                "wood": 10
+                "wood": 100
             },
             "cost": {
                 "gold": 50,
                 "food": 0,
                 "wood": 0
+            }
+        },
+        "barracks": {
+            "produce": {
+                "damageBuff": 1,
+                "healthBuff": 1
+            },
+            "cost": {
+                "gold": 100,
+                "food": 20,
+                "wood": 50
             }
         }
     }

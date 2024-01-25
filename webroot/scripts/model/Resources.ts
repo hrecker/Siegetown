@@ -22,18 +22,30 @@ export function unitCosts(unit: UnitType): Resources {
 
 function values(base): Resources {
     return {
-        gold: base["gold"],
+        gold: ("gold" in base) ? base["gold"] : 0,
         food: ("food" in base) ? base["food"] : 0,
         wood: ("wood" in base) ? base["wood"] : 0
     }
 }
 
 function costs(baseKey: string, typeKey: string): Resources {
-    let costs = config()[baseKey][typeKey]["cost"];
-    return values(costs)
+    if ("cost" in config()[baseKey][typeKey]) {
+        return values(config()[baseKey][typeKey]["cost"])
+    }
+    return {
+        gold: 0,
+        food: 0,
+        wood: 0
+    }
 }
 
 function production(baseKey: string, typeKey: string): Resources {
-    let produces = config()[baseKey][typeKey]["produce"];
-    return values(produces)
+    if ("produce" in config()[baseKey][typeKey]) {
+        return values(config()[baseKey][typeKey]["produce"])
+    }
+    return {
+        gold: 0,
+        food: 0,
+        wood: 0
+    }
 }
