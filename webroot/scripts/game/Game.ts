@@ -220,6 +220,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         xLimit = -1;
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
+            let topRightX = enemy.gameObject.getTopRight().x;
 
             // Stop when in range of the first player unit
             if (! enemyPastLine(enemy.gameObject.x) &&
@@ -231,6 +232,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                         playerUnitsToRemove.add(0);
                     }
                 }
+                xLimit = topRightX;
                 continue;
             }
 
@@ -244,7 +246,6 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                     enemy.gameObject.x += overlap;
                 }
             }
-            let topRightX = enemy.gameObject.getTopRight().x;
             if (topRightX < 0) {
                 game.baseHealth = Math.max(0, game.baseHealth - 1);
                 baseDamagedEvent(game.baseHealth);
