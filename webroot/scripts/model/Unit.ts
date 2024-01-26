@@ -16,11 +16,12 @@ export type Unit = {
     damage: number;
     lastAttackTime: number;
     gameObject: Phaser.GameObjects.Arc;
+    label: Phaser.GameObjects.Text;
     healthBarBackground: Phaser.GameObjects.Rectangle;
     healthBar: Phaser.GameObjects.Rectangle;
 }
 
-export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Arc, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {
+export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Arc, label: Phaser.GameObjects.Text, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {
     let maxHealth = config()["units"][type]["maxHealth"] + buffs.healthBuff;
     return {
         id: getNewId(),
@@ -30,6 +31,7 @@ export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.Game
         damage: config()["units"][type]["damage"] + buffs.damageBuff,
         lastAttackTime: 0,
         gameObject: gameObject,
+        label: label,
         healthBarBackground: healthBarBackground,
         healthBar: healthBar
     }

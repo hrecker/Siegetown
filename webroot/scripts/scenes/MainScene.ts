@@ -167,6 +167,9 @@ export class MainScene extends Phaser.Scene {
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
         let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
             healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
+        // Create the label for the unit
+        let label = this.add.text(unit.x, unit.y, String(type).charAt(0)).setOrigin(0.5, 0.5).setFontSize(56).setColor("black");
+        // Get any buffs to health or damage
         let buffs: Buffs;
         if (isEnemy) {
             buffs = {
@@ -176,7 +179,7 @@ export class MainScene extends Phaser.Scene {
         } else {
             buffs = getBuffs(this.activeGame);
         }
-        return createUnit(type, buffs, unit, healthBarBackground, healthBar);
+        return createUnit(type, buffs, unit, label, healthBarBackground, healthBar);
     }
 
     getBuildingText(building: Building): string {
@@ -229,15 +232,17 @@ export class MainScene extends Phaser.Scene {
     update(time, delta) {
         updateGame(this.activeGame, time, this.game.renderer.width, this);
 
-        // Keep unit health bars in sync with the units
+        // Keep unit health bars and labels in sync with the units
         this.activeGame.lanes.forEach(lane => {
             for (let i = 0; i < lane.playerUnits.length; i++) {
                 lane.playerUnits[i].healthBar.x = lane.playerUnits[i].gameObject.x - (healthBarWidth / 2);
                 lane.playerUnits[i].healthBarBackground.x = lane.playerUnits[i].gameObject.x;
+                lane.playerUnits[i].label.x = lane.playerUnits[i].gameObject.x;
             }
             for (let i = 0; i < lane.enemyUnits.length; i++) {
                 lane.enemyUnits[i].healthBar.x = lane.enemyUnits[i].gameObject.x - (healthBarWidth / 2);
                 lane.enemyUnits[i].healthBarBackground.x = lane.enemyUnits[i].gameObject.x;
+                lane.enemyUnits[i].label.x = lane.enemyUnits[i].gameObject.x;
             }
         });
     }
