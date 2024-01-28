@@ -49,4 +49,5 @@ export function destroyUnit(unit: Unit) {
     unit.gameObject.destroy();
     unit.healthBarBackground.destroy();
     unit.healthBar.destroy();
+    unit.label.destroy();
 }

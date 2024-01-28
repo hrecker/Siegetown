@@ -1,8 +1,9 @@
 import 'phaser';
 
 import { LoadingScene } from "./scenes/LoadingScene";
-import { MainScene } from './scenes/MainScene';
+import { BaseScene } from './scenes/BaseScene';
 import { MainUIScene } from './scenes/MainUIScene';
+import { LaneScene } from './scenes/LaneScene';
 
 var config: Phaser.Types.Core.GameConfig = {
     scale: {
@@ -20,7 +21,8 @@ var config: Phaser.Types.Core.GameConfig = {
     },
     scene: [
         LoadingScene,
-        MainScene,
+        BaseScene,
+        LaneScene,
         MainUIScene,
     ]
 };

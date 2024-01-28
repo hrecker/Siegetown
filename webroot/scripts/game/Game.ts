@@ -4,7 +4,8 @@ import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, buildingProduction } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
-import { MainScene } from "../scenes/MainScene";
+import { BaseScene } from "../scenes/BaseScene";
+import { LaneScene } from "../scenes/LaneScene";
 
 export type Lane = {
     playerUnits: Unit[];
@@ -128,7 +129,7 @@ export function getBuffs(game: ActiveGame): Buffs {
     return result;
 }
 
-export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: MainScene) {
+export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: LaneScene) {
     if (game.baseHealth <= 0 || game.enemyBaseHealth <= 0) {
         return;
     }

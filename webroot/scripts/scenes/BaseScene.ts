@@ -1,27 +1,20 @@
 import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, getBuffs, resetGame, updateGame } from "../game/Game";
+import { ActiveGame, chargeCosts, resetGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
-import { Buffs, buildingBuffs } from "../model/Buffs";
+import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { buildingCosts, buildingProduction, unitCosts } from "../model/Resources";
-import { createUnit, Unit, UnitType } from "../model/Unit";
+import { buildingCosts, buildingProduction } from "../model/Resources";
 
 const boardWidth = 300;
 const boardMargin = 10;
-const enemyColor = 0x911c04;
-
-const healthBarWidth = 64;
-const healthBarHeight = 6;
-export const healthBarYPos = 36;
-const healthBarFillColor = 0x32a852;
 
 type GridText = {
     mainText: Phaser.GameObjects.Text;
     growthText: Phaser.GameObjects.Text;
 }
 
-export class MainScene extends Phaser.Scene {
+export class BaseScene extends Phaser.Scene {
     sceneCreated: boolean;
     activeGame: ActiveGame;
     uiState: UIState;
@@ -35,7 +28,7 @@ export class MainScene extends Phaser.Scene {
 
     constructor() {
         super({
-            key: "MainScene"
+            key: "BaseScene"
         });
     }
 
@@ -86,18 +79,10 @@ export class MainScene extends Phaser.Scene {
             }
         }
 
-        // Draw the lanes
-        this.laneTopY = this.boardTopLeftY + boardWidth + boardMargin;
-        this.laneHeight = (this.game.renderer.height - this.laneTopY) / config()["numLanes"];
-        for (let i = 0; i < config()["numLanes"]; i++) {
-            let y = this.laneTopY + (i * this.laneHeight);
-            graphics.strokeLineShape(new Phaser.Geom.Line(0, y, this.game.renderer.width, y));
-        }
-
         // Handle mouse clicks
         this.input.on("pointerup", () => {
             this.handleGridClick();
-            this.handleLaneClick();
+            //this.handleLaneClick();
         });
 
         this.resize(true);
@@ -136,52 +121,6 @@ export class MainScene extends Phaser.Scene {
         buildEvent(this.uiState.selectedBuilding);
     }
 
-    handleLaneClick() {
-        if (this.uiState.selectedUnit == UnitType.None) {
-            return;
-        }
-
-        let lane = Math.floor((this.input.activePointer.worldY - this.laneTopY) / this.laneHeight);
-
-        if (lane < 0 || lane >= config()["numLanes"]) {
-            return;
-        }
-
-        let costs = unitCosts(this.uiState.selectedUnit);
-        if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
-            return;
-        }
-
-        // Build the unit
-        this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
-        chargeCosts(this.activeGame, costs);
-        resourceUpdateEvent();
-    }
-
-    createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {
-        let unit = this.add.circle(isEnemy ? this.game.renderer.width : 0,
-            this.laneTopY + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
-            isEnemy ? enemyColor : 0xffffff);
-        // Create the Unit's health bar
-        let healthBarBackground = this.add.rectangle(unit.x, unit.y,
-            healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
-        let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
-            healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
-        // Create the label for the unit
-        let label = this.add.text(unit.x, unit.y, String(type).charAt(0)).setOrigin(0.5, 0.5).setFontSize(56).setColor("black");
-        // Get any buffs to health or damage
-        let buffs: Buffs;
-        if (isEnemy) {
-            buffs = {
-                damageBuff: 0,
-                healthBuff: 0,
-            }
-        } else {
-            buffs = getBuffs(this.activeGame);
-        }
-        return createUnit(type, buffs, unit, label, healthBarBackground, healthBar);
-    }
-
     getBuildingText(building: Building): string {
         switch(building) {
             case Building.Field:
@@ -218,7 +157,7 @@ export class MainScene extends Phaser.Scene {
         return result;
     }
     
-    gameRestartedListener(scene: MainScene) {
+    gameRestartedListener(scene: BaseScene) {
         resetGame(scene.activeGame);
         // redraw the buildings
         for (let i = 0; i < config()["baseWidth"]; i++) {
@@ -227,23 +166,5 @@ export class MainScene extends Phaser.Scene {
                 scene.gridTexts[i][j].growthText.text = scene.getGrowthText(scene.activeGame.base.grid[i][j]);
             }
         }
-    }
-
-    update(time, delta) {
-        updateGame(this.activeGame, time, this.game.renderer.width, this);
-
-        // Keep unit health bars and labels in sync with the units
-        this.activeGame.lanes.forEach(lane => {
-            for (let i = 0; i < lane.playerUnits.length; i++) {
-                lane.playerUnits[i].healthBar.x = lane.playerUnits[i].gameObject.x - (healthBarWidth / 2);
-                lane.playerUnits[i].healthBarBackground.x = lane.playerUnits[i].gameObject.x;
-                lane.playerUnits[i].label.x = lane.playerUnits[i].gameObject.x;
-            }
-            for (let i = 0; i < lane.enemyUnits.length; i++) {
-                lane.enemyUnits[i].healthBar.x = lane.enemyUnits[i].gameObject.x - (healthBarWidth / 2);
-                lane.enemyUnits[i].healthBarBackground.x = lane.enemyUnits[i].gameObject.x;
-                lane.enemyUnits[i].label.x = lane.enemyUnits[i].gameObject.x;
-            }
-        });
     }
 }
