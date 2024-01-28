@@ -47,7 +47,9 @@ export class LoadingScene extends Phaser.Scene {
             let uiState = createUIState();
             this.scene.start("BaseScene", { activeGame: activeGame, uiState: uiState })
                       .start("LaneScene", { activeGame: activeGame, uiState: uiState })
-                      .start("MainUIScene", { activeGame: activeGame, uiState: uiState })
+                      .start("ResourceUIScene", { activeGame: activeGame, uiState: uiState })
+                      .start("ShopUIScene", { activeGame: activeGame, uiState: uiState })
+                      .start("OverlayUIScene", { activeGame: activeGame, uiState: uiState })
                       .stop();
         })
     }

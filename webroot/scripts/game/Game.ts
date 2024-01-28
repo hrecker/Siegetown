@@ -129,8 +129,12 @@ export function getBuffs(game: ActiveGame): Buffs {
     return result;
 }
 
-export function updateGame(game: ActiveGame, time: number, gameWidth: number, scene: LaneScene) {
-    if (game.baseHealth <= 0 || game.enemyBaseHealth <= 0) {
+export function gameEnded(game: ActiveGame) {
+    return game.baseHealth <= 0 || game.enemyBaseHealth <= 0;
+}
+
+export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
+    if (gameEnded(game)) {
         return;
     }
 
@@ -175,7 +179,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
         }
         // Find the first player that can be interacted with; once a player is halfway across the line it can't be fought
         for (let i = 0; i < lane.playerUnits.length; i++) {
-            if (! playerPastLine(lane.playerUnits[0].gameObject.x, gameWidth)) {
+            if (! playerPastLine(lane.playerUnits[0].gameObject.x, laneWidth)) {
                 firstPlayerX = lane.playerUnits[0].gameObject.x;
                 break;
             }
@@ -185,7 +189,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
             let topLeftX = player.gameObject.getTopLeft().x;
 
             // Stop when in range of the first enemy
-            if (! playerPastLine(player.gameObject.x, gameWidth) &&
+            if (! playerPastLine(player.gameObject.x, laneWidth) &&
                 firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
                 // Attack the enemy
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
@@ -208,7 +212,7 @@ export function updateGame(game: ActiveGame, time: number, gameWidth: number, sc
                     player.gameObject.x -= overlap;
                 }
             }
-            if (topLeftX > gameWidth) {
+            if (topLeftX > laneWidth) {
                 game.enemyBaseHealth = Math.max(0, game.enemyBaseHealth - 1);
                 enemyBaseDamagedEvent(game.enemyBaseHealth);
                 playerUnitsToRemove.add(i);

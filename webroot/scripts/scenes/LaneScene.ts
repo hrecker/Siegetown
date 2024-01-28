@@ -1,10 +1,11 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, getBuffs, updateGame } from "../game/Game";
+import { ActiveGame, chargeCosts, gameEnded, getBuffs, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { unitCosts } from "../model/Resources";
 import { createUnit, Unit, UnitType } from "../model/Unit";
+import { uiBarWidth } from "./ResourceUIScene";
 
 const enemyColor = 0x911c04;
 
@@ -69,12 +70,11 @@ export class LaneScene extends Phaser.Scene {
     }
 
     handleLaneClick() {
-        if (this.uiState.selectedUnit == UnitType.None) {
+        if (this.uiState.selectedUnit == UnitType.None || gameEnded(this.activeGame)) {
             return;
         }
 
         let lane = Math.floor((this.input.activePointer.worldY - laneMargin) / this.laneHeight);
-        console.log("lane: " + lane)
 
         if (lane < 0 || lane >= config()["numLanes"]) {
             return;
@@ -92,7 +92,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {
-        let unit = this.add.circle(isEnemy ? this.game.renderer.width : 0,
+        let unit = this.add.circle(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
             laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
             isEnemy ? enemyColor : 0xffffff);
         // Create the Unit's health bar
@@ -116,7 +116,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        updateGame(this.activeGame, time, this.game.renderer.width, this);
+        updateGame(this.activeGame, time, this.game.renderer.width - uiBarWidth, this);
         
         // Keep unit health bars and labels in sync with the units
         this.activeGame.lanes.forEach(lane => {

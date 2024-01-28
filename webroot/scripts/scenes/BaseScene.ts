@@ -1,10 +1,11 @@
 import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, resetGame } from "../game/Game";
+import { ActiveGame, chargeCosts, gameEnded, resetGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, buildingProduction } from "../model/Resources";
+import { uiBarWidth } from "./ResourceUIScene";
 
 const boardWidth = 300;
 const boardMargin = 10;
@@ -52,7 +53,7 @@ export class BaseScene extends Phaser.Scene {
         }
 
         // Draw the board
-        this.boardTopLeftX = (this.game.renderer.width / 2) - (boardWidth / 2);
+        this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth / 2);
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
 
         let graphics = this.add.graphics({ lineStyle: { width: 4 } });
@@ -92,7 +93,7 @@ export class BaseScene extends Phaser.Scene {
     }
 
     handleGridClick() {
-        if (this.uiState.selectedBuilding == Building.Empty) {
+        if (this.uiState.selectedBuilding == Building.Empty || gameEnded(this.activeGame)) {
             return;
         }
 

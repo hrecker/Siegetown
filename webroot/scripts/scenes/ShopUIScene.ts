@@ -1,22 +1,14 @@
-import { addBaseDamagedListener, addBuildListener, addEnemyBaseDamagedListener, addResourceUpdateListener, gameRestartedEvent } from "../events/EventMessenger";
-import { ActiveGame, getGrowth } from "../game/Game";
+import { addBuildListener, addGameRestartedListener } from "../events/EventMessenger";
+import { ActiveGame, gameEnded } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building, allBuildings } from "../model/Base";
-import { config } from "../model/Config";
 import { buildingCosts, unitCosts } from "../model/Resources";
 import { UnitType } from "../model/Unit";
+import { uiBarWidth } from "./ResourceUIScene";
 
-/** UI displayed over MainScene */
-export class MainUIScene extends Phaser.Scene {
+export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
-
-    // Building UI
-    goldText: Phaser.GameObjects.Text;
-    woodText: Phaser.GameObjects.Text;
-    foodText: Phaser.GameObjects.Text;
-    baseHealthText: Phaser.GameObjects.Text;
-    enemyBaseHealthText: Phaser.GameObjects.Text;
 
     buildButtons: { [type: string] : Phaser.GameObjects.Text }
     buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
@@ -25,15 +17,9 @@ export class MainUIScene extends Phaser.Scene {
     warriorBuildButtonOutline: Phaser.GameObjects.Rectangle;
     slingshotterBuildButtonOutline: Phaser.GameObjects.Rectangle;
 
-    // Game result UI
-    resultBackground: Phaser.GameObjects.Rectangle;
-    gameResultText: Phaser.GameObjects.Text;
-    restartButton: Phaser.GameObjects.Text;
-    restartButtonOutline: Phaser.GameObjects.Rectangle;
-
     constructor() {
         super({
-            key: "MainUIScene"
+            key: "ShopUIScene"
         });
     }
 
@@ -60,7 +46,7 @@ export class MainUIScene extends Phaser.Scene {
                 text += "\nWood: " + costs.wood;
             }
         }
-        return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
+        return this.add.text(10, y, text);
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
@@ -74,14 +60,7 @@ export class MainUIScene extends Phaser.Scene {
         if (costs.wood) {
             text += "\nWood: " + costs.wood;
         }
-        return this.add.text(this.game.renderer.width - 10, y, text, {align: "right"}).setOrigin(1, 0);
-    }
-
-    setGameEndVisible(visible: boolean) {
-        this.resultBackground.visible = visible;
-        this.gameResultText.visible = visible;
-        this.restartButton.visible = visible;
-        this.restartButtonOutline.visible = visible;
+        return this.add.text(10, y, text);
     }
 
     createBuildingBuildButton(building: Building, y: number) {
@@ -97,15 +76,8 @@ export class MainUIScene extends Phaser.Scene {
 
     create() {
         this.resize(true);
-
-        this.goldText = this.add.text(10, 10, "Gold: 0");
-        this.woodText = this.add.text(10, 30, "Wood: 0");
-        this.foodText = this.add.text(10, 50, "Food: 0");
-        this.updateResourceText();
-        this.baseHealthText = this.add.text(10, 70, "");
-        this.baseDamagedListener(this, this.activeGame.baseHealth);
-        this.enemyBaseHealthText = this.add.text(10, 140, "");
-        this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
+        this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 180);
+        this.cameras.main.setBackgroundColor(0x111111);
 
         this.uiState.selectedBuilding = Building.Empty;
 
@@ -124,31 +96,23 @@ export class MainUIScene extends Phaser.Scene {
             });
             this.buildButtons[building] = buildButton;
             this.buildButtonOutlines[building] = buildButtonOutline;
-            y += buildButtonOutline.height;
+            y += buildButtonOutline.height + 5;
         })
 
-        let warriorBuildButton = this.createBuildUnitButtonText(UnitType.Warrior, 130);
-        let slingshotterBuildButton = this.createBuildUnitButtonText(UnitType.Slingshotter, 180);
+        let warriorBuildButton = this.createBuildUnitButtonText(UnitType.Warrior, y);
         this.warriorBuildButtonOutline = this.add.rectangle(warriorBuildButton.getTopLeft().x - 1, warriorBuildButton.getTopLeft().y - 1,
             warriorBuildButton.width + 1, warriorBuildButton.height + 1).setOrigin(0, 0);
         this.warriorBuildButtonOutline.isStroked = true;
         this.warriorBuildButtonOutline.setVisible(false);
+        y += this.warriorBuildButtonOutline.height + 5
+        let slingshotterBuildButton = this.createBuildUnitButtonText(UnitType.Slingshotter, y);
         this.slingshotterBuildButtonOutline = this.add.rectangle(slingshotterBuildButton.getTopLeft().x - 1, slingshotterBuildButton.getTopLeft().y - 1,
             slingshotterBuildButton.width + 1, slingshotterBuildButton.height + 1).setOrigin(0, 0);
         this.slingshotterBuildButtonOutline.isStroked = true;
         this.slingshotterBuildButtonOutline.setVisible(false);
 
-        this.resultBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
-        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!").setFontSize(64).setOrigin(0.5, 0.5);
-        this.restartButton = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart").setFontSize(48).setOrigin(0.5, 0.5);
-        this.restartButtonOutline = this.add.rectangle(this.restartButton.getTopLeft().x - 1, this.restartButton.getTopLeft().y - 1,
-            this.restartButton.width + 1, this.restartButton.height + 1).setOrigin(0, 0);
-        this.restartButtonOutline.isStroked = true;
-        this.setGameEndVisible(false);
-
         warriorBuildButton.setInteractive();
         slingshotterBuildButton.setInteractive();
-        this.restartButton.setInteractive();
         
         warriorBuildButton.on('pointerdown', () => {
             this.selectUnitBuild(UnitType.Warrior);
@@ -157,25 +121,16 @@ export class MainUIScene extends Phaser.Scene {
             this.selectUnitBuild(UnitType.Slingshotter);
         });
 
-        this.restartButton.on('pointerdown', () => {
-            gameRestartedEvent();
-            this.setGameEndVisible(false);
-            this.updateResourceText();
-            this.baseDamagedListener(this, this.activeGame.baseHealth);
-            this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
-            this.selectBuild(Building.Empty);
-            this.selectUnitBuild(UnitType.None);
-        });
-
-        addResourceUpdateListener(this.resourceUpdateListener, this);
-        addBaseDamagedListener(this.baseDamagedListener, this);
-        addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
         addBuildListener(this.buildListener, this);
+        addGameRestartedListener(this.gameRestartedListener, this);
 
         this.scale.on("resize", this.resize, this);
     }
 
     selectBuild(selection: Building) {
+        if (gameEnded(this.activeGame)) {
+            return;
+        }
         if (this.uiState.selectedBuilding == selection) {
             this.uiState.selectedBuilding = Building.Empty;
         } else {
@@ -187,6 +142,9 @@ export class MainUIScene extends Phaser.Scene {
     }
 
     selectUnitBuild(unit: UnitType) {
+        if (gameEnded(this.activeGame)) {
+            return;
+        }
         if (this.uiState.selectedUnit == unit) {
             this.uiState.selectedUnit = UnitType.None;
         } else {
@@ -196,38 +154,26 @@ export class MainUIScene extends Phaser.Scene {
         this.slingshotterBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Slingshotter);
     }
 
-    updateResourceText() {
-        let growth = getGrowth(this.activeGame);
-        this.goldText.text = "Gold (+" + growth.gold + "): " + this.activeGame.gold;
-        this.foodText.text = "Food (+" + growth.food + "): " + this.activeGame.food;
-        this.woodText.text = "Wood (+" + growth.wood + "): " + this.activeGame.wood;
-    }
-
-    resourceUpdateListener(scene: MainUIScene) {
-        scene.updateResourceText();
-    }
-
-    baseDamagedListener(scene: MainUIScene, health: number) {
-        scene.baseHealthText.text = "Base Health: " + health + " / " + config()["baseMaxHealth"];
-        if (health <= 0) {
-            scene.gameResultText.text = "Defeat!";
-            scene.setGameEndVisible(true);
+    setTownhallInteractable(interactable: boolean) {
+        if (interactable) {
+            this.buildButtons[Building.Townhall].setInteractive();
+        } else {
+            this.buildButtons[Building.Townhall].removeInteractive();
+            this.buildButtonOutlines[Building.Townhall].setVisible(false);
         }
     }
 
-    enemyBaseDamagedListener(scene: MainUIScene, health: number) {
-        scene.enemyBaseHealthText.text = "Enemy Base\nHealth: " + health + " / " + config()["enemyBaseMaxHealth"];
-        if (health <= 0) {
-            scene.gameResultText.text = "Victory!";
-            scene.setGameEndVisible(true);
-        }
-    }
-
-    buildListener(scene: MainUIScene, building: Building) {
+    buildListener(scene: ShopUIScene, building: Building) {
         scene.selectBuild(Building.Empty);
         if (building == Building.Townhall) {
-            scene.buildButtons[Building.Townhall].removeInteractive();
-            scene.buildButtonOutlines[Building.Townhall].setVisible(false);
+            // Only can build one townhall in the base
+            scene.setTownhallInteractable(false);
         }
+    }
+
+    gameRestartedListener(scene: ShopUIScene) {
+        scene.selectBuild(Building.Empty);
+        scene.selectUnitBuild(UnitType.None);
+        scene.setTownhallInteractable(true);
     }
 }
