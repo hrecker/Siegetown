@@ -1,9 +1,12 @@
-import { addBaseDamagedListener, addEnemyBaseDamagedListener, gameRestartedEvent } from "../events/EventMessenger";
+import { addBaseDamagedListener, addEnemyBaseDamagedListener, addWaveCountdownUpdatedListener, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 
 /** UI displayed over MainScene */
 export class OverlayUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
+
+    // Time until next wave
+    waveCountdown: Phaser.GameObjects.Text;
 
     // Game result UI
     resultBackground: Phaser.GameObjects.Rectangle;
@@ -39,6 +42,8 @@ export class OverlayUIScene extends Phaser.Scene {
     create() {
         this.resize(true);
 
+        this.waveCountdown = this.add.text(5, 5, "Next wave:\n" + this.minutesText(this.activeGame.secondsUntilWave));
+
         this.resultBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
         this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!").setFontSize(64).setOrigin(0.5, 0.5);
         this.restartButton = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart").setFontSize(48).setOrigin(0.5, 0.5);
@@ -55,6 +60,7 @@ export class OverlayUIScene extends Phaser.Scene {
 
         addBaseDamagedListener(this.baseDamagedListener, this);
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
+        addWaveCountdownUpdatedListener(this.waveCountdownUpdatedListener, this);
 
         this.scale.on("resize", this.resize, this);
     }
@@ -71,5 +77,18 @@ export class OverlayUIScene extends Phaser.Scene {
             scene.gameResultText.text = "Victory!";
             scene.setGameEndVisible(true);
         }
+    }
+
+    minutesText(totalSeconds: number): string {
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = (totalSeconds - (60 * minutes)).toString();
+        if (seconds.length < 2) {
+            seconds = "0" + seconds;
+        }
+        return minutes + ":" + seconds;
+    }
+
+    waveCountdownUpdatedListener(scene: OverlayUIScene, secondsRemaining: number) {
+        scene.waveCountdown.text = "Next wave:\n" + scene.minutesText(secondsRemaining);
     }
 }

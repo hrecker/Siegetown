@@ -20,6 +20,7 @@ let baseDamagedCallbacks: NumberCallback[] = [];
 let enemyBaseDamagedCallbacks: NumberCallback[] = [];
 let gameRestartedCallbacks: EmptyCallback[] = [];
 let buildCallbacks: BuildingCallback[] = [];
+let waveCountdownUpdatedCallbacks: NumberCallback[] = [];
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
@@ -79,4 +80,16 @@ export function addBuildListener(callback: (scene: Phaser.Scene, building: Build
 export function buildEvent(building: Building) {
     buildCallbacks.forEach(callback =>
         callback.callback(callback.scene, building));
+}
+
+export function addWaveCountdownUpdatedListener(callback: (scene: Phaser.Scene, secondsRemaining: number) => void, scene: Phaser.Scene) {
+    waveCountdownUpdatedCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function waveCountdownUpdatedEvent(secondsRemaining: number) {
+    waveCountdownUpdatedCallbacks.forEach(callback =>
+        callback.callback(callback.scene, secondsRemaining));
 }

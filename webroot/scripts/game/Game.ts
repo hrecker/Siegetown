@@ -1,4 +1,4 @@
-import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent } from "../events/EventMessenger";
+import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
@@ -20,6 +20,7 @@ export type ActiveGame = {
     wood: number;
     food: number;
     lanes: Lane[];
+    secondsUntilWave: number;
 }
 
 function startingGrid(): Building[][] {
@@ -54,7 +55,8 @@ export function createGame(): ActiveGame {
         gold: 0,
         wood: 0,
         food: 0,
-        lanes: startingLanes()
+        lanes: startingLanes(),
+        secondsUntilWave: config()["secondsBetweenWaves"],
     };
 }
 
@@ -78,6 +80,7 @@ export function resetGame(game: ActiveGame) {
     game.wood = 0;
     game.food = 0;
     game.lanes = startingLanes();
+    game.secondsUntilWave = config()["secondsBetweenWaves"];
 }
 
 let lastUpdate = -1;
@@ -133,6 +136,15 @@ export function gameEnded(game: ActiveGame) {
     return game.baseHealth <= 0 || game.enemyBaseHealth <= 0;
 }
 
+function selectRandomEnemyType(): UnitType {
+    let unitType = UnitType.Warrior;
+    // Just use a 50/50 chance of each unit type for now
+    if (Math.random() > 0.5) {
+        unitType = UnitType.Slingshotter;
+    }
+    return unitType;
+}
+
 export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game)) {
         return;
@@ -148,17 +160,30 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
         
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();
+        
+        game.secondsUntilWave -= 1;
+        if (game.secondsUntilWave > 0) {
+            waveCountdownUpdatedEvent(game.secondsUntilWave);
+        }
     }
 
-    // Spawn enemy units
-    if (lastEnemySpawn == -1 || time - lastEnemySpawn >= config()["enemySpawnRate"]) {
+    // Start wave of enemies if necessary
+    if (game.secondsUntilWave == 0) {
+        // For now, just spawn two enemies in each lane always as a wave, with no randomization
+        for (let i = 0; i < config()["numLanes"]; i++) {
+            game.lanes[i].enemyUnits.push(scene.createUnit(UnitType.Warrior, i, true));
+            game.lanes[i].enemyUnits.push(scene.createUnit(UnitType.Slingshotter, i, true));
+        }
+
+        lastEnemySpawn = time;
+        //TODO some randomization here?
+        game.secondsUntilWave = config()["secondsBetweenWaves"];
+        waveCountdownUpdatedEvent(game.secondsUntilWave);
+    } else if (lastEnemySpawn == -1 || time - lastEnemySpawn >= config()["enemySpawnRate"]) {
+        // Spawn enemy units
         lastEnemySpawn = time;
         let lane = Math.floor(Math.random() * config()["numLanes"]);
-        let unitType = UnitType.Warrior;
-        // Just use a 50/50 chance of each unit type for now
-        if (Math.random() > 0.5) {
-            unitType = UnitType.Slingshotter;
-        }
+        let unitType = selectRandomEnemyType();
         game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
     }
 
