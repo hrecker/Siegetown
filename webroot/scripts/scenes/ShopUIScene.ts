@@ -33,7 +33,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     createBuildBuildingButtonText(buildingType: Building, y: number): Phaser.GameObjects.Text {
-        let text = "Build " + buildingType ;
+        let text = buildingType.toString();
         if (buildingType != Building.Townhall) {
             // Assume that everything at least costs gold
             let costs = buildingCosts(buildingType);
@@ -46,7 +46,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
-        let text = "Build " + unitType + ":\n";
+        let text = unitType + ":\n";
         // Assume that everything at least costs gold
         let costs = unitCosts(unitType);
         text += "Gold: " + costs.gold;
@@ -56,7 +56,7 @@ export class ShopUIScene extends Phaser.Scene {
         if (costs.wood) {
             text += "\nWood: " + costs.wood;
         }
-        return this.add.text(10, y, text);
+        return this.add.text(uiBarWidth - 10, y, text).setOrigin(1, 0).setAlign("right");
     }
 
     createBuildingBuildButton(building: Building, y: number) {
@@ -77,9 +77,12 @@ export class ShopUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = Building.Empty;
 
+        this.add.text(5, 5, "Buildings");
+        this.add.text(uiBarWidth - 5, 5, "Units").setAlign("right").setOrigin(1, 0);
+
         this.buildButtons = {};
         this.buildButtonOutlines = {};
-        let y = 10;
+        let y = 30;
         allBuildings().forEach(building => {
             let buildButton = this.createBuildBuildingButtonText(building, y);
             let buildButtonOutline = this.add.rectangle(buildButton.getTopLeft().x - 1, buildButton.getTopLeft().y - 1,
@@ -95,7 +98,7 @@ export class ShopUIScene extends Phaser.Scene {
             y += buildButtonOutline.height + 5;
         });
 
-
+        y = 30;
         allUnits().forEach(unit => {
             let buildButton = this.createBuildUnitButtonText(unit, y);
             let buildButtonOutline = this.add.rectangle(buildButton.getTopLeft().x - 1, buildButton.getTopLeft().y - 1,

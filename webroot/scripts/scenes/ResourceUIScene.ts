@@ -2,7 +2,7 @@ import { addBaseDamagedListener, addEnemyBaseDamagedListener, addGameRestartedLi
 import { ActiveGame, getGrowth } from "../game/Game";
 import { config } from "../model/Config";
 
-export const uiBarWidth = 250;
+export const uiBarWidth = 300;
 
 export class ResourceUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
