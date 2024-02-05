@@ -75,7 +75,7 @@ export class LaneScene extends Phaser.Scene {
             return;
         }
 
-        let lane = Math.floor((this.input.activePointer.worldY - laneMargin) / this.laneHeight);
+        let lane = Math.floor((this.input.activePointer.y - sceneTopY - laneMargin) / this.laneHeight);
 
         if (lane < 0 || lane >= config()["numLanes"]) {
             return;
