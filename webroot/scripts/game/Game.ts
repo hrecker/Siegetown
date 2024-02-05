@@ -156,6 +156,8 @@ export function hasBuilding(game: ActiveGame, buildingType: Building): boolean {
     return false;
 }
 
+const rangePixels = 70;
+
 export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game)) {
         return;
@@ -226,7 +228,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
 
             // Stop when in range of the first enemy
             if (! playerPastLine(player.gameObject.x, laneWidth) &&
-                firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"]) {
+                firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"] * rangePixels) {
                 // Attack the enemy
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
                     player.lastAttackTime = time;
@@ -265,7 +267,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
 
             // Stop when in range of the first player unit
             if (! enemyPastLine(enemy.gameObject.x) &&
-                firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"]) {
+                firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"] * rangePixels) {
                 // Attack the player unit
                 if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= config()["unitAttackRate"]) {
                     enemy.lastAttackTime = time;

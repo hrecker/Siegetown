@@ -16,7 +16,7 @@
         "warrior": {
             "maxHealth": 3,
             "damage": 1,
-            "range": 70,
+            "range": 1,
             "speed": 1,
             "cost": {
                 "gold": 10,
@@ -27,7 +27,7 @@
         "slingshotter": {
             "maxHealth": 2,
             "damage": 1,
-            "range": 210,
+            "range": 3,
             "speed": 0.5,
             "cost": {
                 "gold": 10,
@@ -39,7 +39,7 @@
         "clubman": {
             "maxHealth": 4,
             "damage": 2,
-            "range": 70,
+            "range": 1,
             "speed": 1,
             "cost": {
                 "gold": 25,
