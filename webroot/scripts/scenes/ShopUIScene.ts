@@ -3,7 +3,7 @@ import { ActiveGame, gameEnded } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building, allBuildings } from "../model/Base";
 import { buildingCosts, unitCosts } from "../model/Resources";
-import { UnitType } from "../model/Unit";
+import { UnitType, allUnits } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
 export class ShopUIScene extends Phaser.Scene {
@@ -12,10 +12,6 @@ export class ShopUIScene extends Phaser.Scene {
 
     buildButtons: { [type: string] : Phaser.GameObjects.Text }
     buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
-
-    // Unit UI
-    warriorBuildButtonOutline: Phaser.GameObjects.Rectangle;
-    slingshotterBuildButtonOutline: Phaser.GameObjects.Rectangle;
 
     constructor() {
         super({
@@ -97,28 +93,22 @@ export class ShopUIScene extends Phaser.Scene {
             this.buildButtons[building] = buildButton;
             this.buildButtonOutlines[building] = buildButtonOutline;
             y += buildButtonOutline.height + 5;
-        })
-
-        let warriorBuildButton = this.createBuildUnitButtonText(UnitType.Warrior, y);
-        this.warriorBuildButtonOutline = this.add.rectangle(warriorBuildButton.getTopLeft().x - 1, warriorBuildButton.getTopLeft().y - 1,
-            warriorBuildButton.width + 1, warriorBuildButton.height + 1).setOrigin(0, 0);
-        this.warriorBuildButtonOutline.isStroked = true;
-        this.warriorBuildButtonOutline.setVisible(false);
-        y += this.warriorBuildButtonOutline.height + 5
-        let slingshotterBuildButton = this.createBuildUnitButtonText(UnitType.Slingshotter, y);
-        this.slingshotterBuildButtonOutline = this.add.rectangle(slingshotterBuildButton.getTopLeft().x - 1, slingshotterBuildButton.getTopLeft().y - 1,
-            slingshotterBuildButton.width + 1, slingshotterBuildButton.height + 1).setOrigin(0, 0);
-        this.slingshotterBuildButtonOutline.isStroked = true;
-        this.slingshotterBuildButtonOutline.setVisible(false);
-
-        warriorBuildButton.setInteractive();
-        slingshotterBuildButton.setInteractive();
-        
-        warriorBuildButton.on('pointerdown', () => {
-            this.selectUnitBuild(UnitType.Warrior);
         });
-        slingshotterBuildButton.on('pointerdown', () => {
-            this.selectUnitBuild(UnitType.Slingshotter);
+
+
+        allUnits().forEach(unit => {
+            let buildButton = this.createBuildUnitButtonText(unit, y);
+            let buildButtonOutline = this.add.rectangle(buildButton.getTopLeft().x - 1, buildButton.getTopLeft().y - 1,
+                buildButton.width + 1, buildButton.height + 1).setOrigin(0, 0);
+            buildButtonOutline.isStroked = true;
+            buildButtonOutline.setVisible(false);
+            buildButton.setInteractive();
+            buildButton.on('pointerdown', () => {
+                this.selectUnitBuild(unit);
+            });
+            this.buildButtons[unit] = buildButton;
+            this.buildButtonOutlines[unit] = buildButtonOutline;
+            y += buildButtonOutline.height + 5
         });
 
         addBuildListener(this.buildListener, this);
@@ -150,8 +140,9 @@ export class ShopUIScene extends Phaser.Scene {
         } else {
             this.uiState.selectedUnit = unit;
         }
-        this.warriorBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Warrior);
-        this.slingshotterBuildButtonOutline.setVisible(this.uiState.selectedUnit == UnitType.Slingshotter);
+        allUnits().forEach(unit => {
+            this.buildButtonOutlines[unit].setVisible(this.uiState.selectedUnit == unit);
+        });
     }
 
     setTownhallInteractable(interactable: boolean) {

@@ -4,6 +4,7 @@ export enum Building {
     Field = "field",
     Lumberyard = "lumberyard",
     Barracks = "barracks",
+    TrainingGround = "trainingground"
 }
 
 export type Base = {
@@ -16,5 +17,6 @@ export function allBuildings() : Building[] {
         Building.Field,
         Building.Lumberyard,
         Building.Barracks,
+        Building.TrainingGround,
     ]
 }

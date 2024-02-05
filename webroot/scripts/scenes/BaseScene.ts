@@ -132,6 +132,8 @@ export class BaseScene extends Phaser.Scene {
                 return "T";
             case Building.Barracks:
                 return "B";
+            case Building.TrainingGround:
+                return "G";
         }
         return "";
     }

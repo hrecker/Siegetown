@@ -1,6 +1,7 @@
 import { resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, gameEnded, getBuffs, updateGame } from "../game/Game";
+import { ActiveGame, chargeCosts, gameEnded, getBuffs, hasBuilding, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
+import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { unitCosts } from "../model/Resources";
@@ -82,6 +83,12 @@ export class LaneScene extends Phaser.Scene {
 
         let costs = unitCosts(this.uiState.selectedUnit);
         if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
+            return;
+        }
+
+        let buildReq: Building = config()["units"][this.uiState.selectedUnit]["buildRequirement"];
+        // Verify that the building requirement is met
+        if (! hasBuilding(this.activeGame, buildReq)) {
             return;
         }
 

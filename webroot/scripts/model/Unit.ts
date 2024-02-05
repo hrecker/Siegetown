@@ -5,7 +5,8 @@ import { config } from "./Config"
 export enum UnitType {
     None = "none",
     Warrior = "warrior",
-    Slingshotter = "slingshotter"
+    Slingshotter = "slingshotter",
+    Clubman = "clubman"
 }
 
 export type Unit = {
@@ -19,6 +20,14 @@ export type Unit = {
     label: Phaser.GameObjects.Text;
     healthBarBackground: Phaser.GameObjects.Rectangle;
     healthBar: Phaser.GameObjects.Rectangle;
+}
+
+export function allUnits(): UnitType[] {
+    return [
+        UnitType.Warrior,
+        UnitType.Slingshotter,
+        UnitType.Clubman
+    ]
 }
 
 export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Arc, label: Phaser.GameObjects.Text, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {

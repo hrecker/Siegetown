@@ -145,6 +145,17 @@ function selectRandomEnemyType(): UnitType {
     return unitType;
 }
 
+export function hasBuilding(game: ActiveGame, buildingType: Building): boolean {
+    for (let i = 0; i < game.base.grid.length; i++) {
+        for (let j = 0; j < game.base.grid[i].length; j++) {
+            if (game.base.grid[i][j] == buildingType) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game)) {
         return;

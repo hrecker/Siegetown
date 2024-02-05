@@ -21,7 +21,8 @@
             "cost": {
                 "gold": 10,
                 "food": 10
-            }
+            },
+            "buildRequirement": "townhall"
         },
         "slingshotter": {
             "maxHealth": 2,
@@ -32,7 +33,19 @@
                 "gold": 10,
                 "food": 5,
                 "wood": 5
-            }
+            },
+            "buildRequirement": "townhall"
+        },
+        "clubman": {
+            "maxHealth": 4,
+            "damage": 2,
+            "range": 70,
+            "speed": 1,
+            "cost": {
+                "gold": 25,
+                "food": 20
+            },
+            "buildRequirement": "trainingground"
         }
     },
 
@@ -80,6 +93,14 @@
                 "gold": 100,
                 "food": 20,
                 "wood": 50
+            }
+        },
+        "trainingground": {
+            "produce": {},
+            "cost": {
+                "gold": 200,
+                "food": 100,
+                "wood": 100
             }
         }
     }
