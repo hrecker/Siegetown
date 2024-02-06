@@ -2,6 +2,7 @@ import { addBuildListener, addGameRestartedListener } from "../events/EventMesse
 import { ActiveGame, gameEnded } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building, allBuildings } from "../model/Base";
+import { config } from "../model/Config";
 import { buildingCosts, unitCosts } from "../model/Resources";
 import { UnitType, allUnits } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
@@ -12,6 +13,7 @@ export class ShopUIScene extends Phaser.Scene {
 
     buildButtons: { [type: string] : Phaser.GameObjects.Text }
     buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
+    tooltips: { [type: string] : Phaser.GameObjects.Text }
 
     constructor() {
         super({
@@ -42,7 +44,7 @@ export class ShopUIScene extends Phaser.Scene {
                 text += "\nWood: " + costs.wood;
             }
         }
-        return this.add.text(10, y, text);
+        return this.add.text(this.getX(10), this.getY(y), text);
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
@@ -56,7 +58,7 @@ export class ShopUIScene extends Phaser.Scene {
         if (costs.wood) {
             text += "\nWood: " + costs.wood;
         }
-        return this.add.text(uiBarWidth - 10, y, text).setOrigin(1, 0).setAlign("right");
+        return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
     }
 
     createBuildingBuildButton(building: Building, y: number) {
@@ -70,18 +72,31 @@ export class ShopUIScene extends Phaser.Scene {
         });
     }
 
+    createTooltip(text: string, x: number, y: number): Phaser.GameObjects.Text {
+        return this.add.text(x, y, text).setBackgroundColor("blue").setWordWrapWidth(250).setOrigin(1, 1);
+    }
+
+    getX(localX: number): number {
+        return localX + this.game.renderer.width - uiBarWidth;
+    }
+
+    getY(localY: number): number {
+        return localY + 180;
+    }
+
     create() {
         this.resize(true);
-        this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 180);
-        this.cameras.main.setBackgroundColor(0x111111);
+        //this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 180);
+        //this.cameras.main.setBackgroundColor(0x111111);
 
         this.uiState.selectedBuilding = Building.Empty;
 
-        this.add.text(5, 5, "Buildings");
-        this.add.text(uiBarWidth - 5, 5, "Units").setAlign("right").setOrigin(1, 0);
+        this.add.text(this.getX(5), this.getY(5), "Buildings");
+        this.add.text(this.getX(uiBarWidth - 5), this.getY(5), "Units").setAlign("right").setOrigin(1, 0);
 
         this.buildButtons = {};
         this.buildButtonOutlines = {};
+        this.tooltips = {};
         let y = 30;
         allBuildings().forEach(building => {
             let buildButton = this.createBuildBuildingButtonText(building, y);
@@ -93,8 +108,15 @@ export class ShopUIScene extends Phaser.Scene {
             buildButton.on('pointerdown', () => {
                 this.selectBuild(building);
             });
+            buildButton.on('pointerover', () => {
+                this.tooltips[building].setVisible(true);
+            });
+            buildButton.on('pointerout', () => {
+                this.tooltips[building].setVisible(false);
+            });
             this.buildButtons[building] = buildButton;
             this.buildButtonOutlines[building] = buildButtonOutline;
+            this.tooltips[building] = this.createTooltip(config()["buildings"][building]["tooltipText"], buildButtonOutline.getTopLeft().x, this.getY(y)).setVisible(false);
             y += buildButtonOutline.height + 5;
         });
 

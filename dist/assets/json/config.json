@@ -58,7 +58,8 @@
                 "gold": 0,
                 "food": 0,
                 "wood": 0
-            }
+            },
+            "tooltipText": "Main town building\n+20 gold"
         },
         "empty": {
             "produce": {
@@ -72,7 +73,8 @@
                 "gold": 30,
                 "food": 0,
                 "wood": 0
-            }
+            },
+            "tooltipText": "+20 food"
         },
         "lumberyard": {
             "produce": {
@@ -82,7 +84,8 @@
                 "gold": 50,
                 "food": 0,
                 "wood": 0
-            }
+            },
+            "tooltipText": "+100 wood"
         },
         "barracks": {
             "produce": {
@@ -93,7 +96,8 @@
                 "gold": 100,
                 "food": 20,
                 "wood": 50
-            }
+            },
+            "tooltipText": "+1 unit damage\n+1 unit health"
         },
         "trainingground": {
             "produce": {},
@@ -101,7 +105,8 @@
                 "gold": 200,
                 "food": 100,
                 "wood": 100
-            }
+            },
+            "tooltipText": "Unlocks clubman unit"
         }
     }
 }
