@@ -2,7 +2,7 @@ import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent, waveCount
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { Resources, buildingProduction } from "../model/Resources";
+import { Resources, adjacentBuffProduction, buildingProduction } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { BaseScene } from "../scenes/BaseScene";
 import { LaneScene } from "../scenes/LaneScene";
@@ -109,6 +109,37 @@ export function getGrowth(game: ActiveGame): Resources {
     for (let i = 0; i < game.base.grid.length; i++) {
         for (let j = 0; j < game.base.grid[i].length; j++) {
             let production = buildingProduction(game.base.grid[i][j]);
+            // Look for any adjacent buildings for buffs
+            if ("adjacentBuff" in config()["buildings"][game.base.grid[i][j]]) {
+                // Build up list of adjacent building types
+                let adjacentBuildings = {};
+                for (let di = -1; di <= 1; di++) {
+                    for (let dj = -1; dj <= 1; dj++) {
+                        if (dj == 0 && di == 0) {
+                            continue;
+                        }
+                        let checkI = i + di;
+                        let checkJ = j + dj;
+                        if (checkI >= 0 && checkI < game.base.grid.length && checkJ >= 0 && checkJ < game.base.grid[checkI].length) {
+                            let adjacentBuilding = game.base.grid[checkI][checkJ];
+                            if (! (adjacentBuilding in adjacentBuildings)) {
+                                adjacentBuildings[adjacentBuilding] = 1;
+                            } else {
+                                adjacentBuildings[adjacentBuilding]++;
+                            }
+                        }
+                    }
+                }
+                // Go through found adjacent buildings and add any buffs as appropriate
+                for (let adjacentBuilding in adjacentBuildings) {
+                    if (adjacentBuilding in config()["buildings"][game.base.grid[i][j]]["adjacentBuff"]) {
+                        let buff = adjacentBuffProduction(game.base.grid[i][j], adjacentBuilding)
+                        production.gold += buff.gold * adjacentBuildings[adjacentBuilding];
+                        production.food += buff.food * adjacentBuildings[adjacentBuilding];
+                        production.wood += buff.wood * adjacentBuildings[adjacentBuilding];
+                    }
+                }
+            }
             result.gold += production.gold;
             result.food += production.food;
             result.wood += production.wood;

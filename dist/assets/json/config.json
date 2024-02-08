@@ -74,6 +74,11 @@
                 "food": 0,
                 "wood": 0
             },
+            "adjacentBuff": {
+                "field": {
+                    "food": 10
+                }
+            },
             "tooltipText": "+20 food"
         },
         "lumberyard": {

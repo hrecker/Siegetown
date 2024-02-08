@@ -16,6 +16,17 @@ export function buildingProduction(building: Building): Resources {
     return production("buildings", building);
 }
 
+export function adjacentBuffProduction(baseBuilding: Building, adjacentBuilding: Building): Resources {
+    if ("adjacentBuff" in config()["buildings"][baseBuilding] && adjacentBuilding in config()["buildings"][baseBuilding]["adjacentBuff"]) {
+        return values(config()["buildings"][baseBuilding]["adjacentBuff"][adjacentBuilding])
+    }
+    return {
+        gold: 0,
+        food: 0,
+        wood: 0
+    }
+}
+
 export function unitCosts(unit: UnitType): Resources {
     return costs("units", unit);
 }
