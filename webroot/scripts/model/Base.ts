@@ -2,7 +2,7 @@ export enum Building {
     Empty = "empty",
     Townhall = "townhall",
     Field = "field",
-    Lumberyard = "lumberyard",
+    Forest = "forest",
     Barracks = "barracks",
     TrainingGround = "trainingground"
 }
@@ -15,7 +15,7 @@ export function allBuildings() : Building[] {
     return [
         Building.Townhall,
         Building.Field,
-        Building.Lumberyard,
+        Building.Forest,
         Building.Barracks,
         Building.TrainingGround,
     ]

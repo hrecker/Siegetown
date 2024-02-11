@@ -126,8 +126,8 @@ export class BaseScene extends Phaser.Scene {
         switch(building) {
             case Building.Field:
                 return "F";
-            case Building.Lumberyard:
-                return "L";
+            case Building.Forest:
+                return "O";
             case Building.Townhall:
                 return "T";
             case Building.Barracks:

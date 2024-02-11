@@ -81,7 +81,7 @@
             },
             "tooltipText": "+20 food"
         },
-        "lumberyard": {
+        "forest": {
             "produce": {
                 "wood": 100
             },
@@ -89,6 +89,11 @@
                 "gold": 50,
                 "food": 0,
                 "wood": 0
+            },
+            "adjacentBuff": {
+                "forest": {
+                    "wood": 10
+                }
             },
             "tooltipText": "+100 wood"
         },
