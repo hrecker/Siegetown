@@ -1,8 +1,8 @@
-import { baseDamagedEvent, enemyBaseDamagedEvent, resourceUpdateEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
+import { baseDamagedEvent, buildEvent, enemyBaseDamagedEvent, resourceUpdateEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { Resources, adjacentBuffProduction, buildingProduction } from "../model/Resources";
+import { Resources, adjacentBuffProduction, buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { BaseScene } from "../scenes/BaseScene";
 import { LaneScene } from "../scenes/LaneScene";
@@ -34,6 +34,17 @@ function startingGrid(): Building[][] {
     return grid;
 }
 
+function startingGrowthByTile(): Resources[][] {
+    let grid: Resources[][] = [];
+    for (let i = 0; i < config()["baseWidth"]; i++) {
+        grid[i] = [];
+        for (let j = 0; j < config()["baseWidth"]; j++) {
+            grid[i][j] = zeroResources();
+        }
+    }
+    return grid;
+}
+
 function startingLanes(): Lane[] {
     let lanes: Lane[] = [];
     for (let i = 0; i < config()["numLanes"]; i++) {
@@ -48,7 +59,9 @@ function startingLanes(): Lane[] {
 export function createGame(): ActiveGame {
     return {
         base: {
-            grid: startingGrid()
+            grid: startingGrid(),
+            growthByTile: startingGrowthByTile(),
+            totalGrowth: zeroResources(),
         },
         baseHealth: config()["baseMaxHealth"],
         enemyBaseHealth: config()["enemyBaseMaxHealth"],
@@ -72,7 +85,9 @@ export function resetGame(game: ActiveGame) {
     lastUpdate = -1;
     lastEnemySpawn = -1;
     game.base = {
-        grid: startingGrid()
+        grid: startingGrid(),
+        growthByTile: startingGrowthByTile(),
+        totalGrowth: zeroResources(),
     };
     game.baseHealth = config()["baseMaxHealth"];
     game.enemyBaseHealth = config()["enemyBaseMaxHealth"];
@@ -100,12 +115,8 @@ export function chargeCosts(game: ActiveGame, costs: Resources) {
     game.wood -= costs.wood;
 }
 
-export function getGrowth(game: ActiveGame): Resources {
-    let result = {
-        gold: 0,
-        food: 0,
-        wood: 0,
-    }
+function refreshGrowth(game: ActiveGame) {
+    let growth = zeroResources();
     for (let i = 0; i < game.base.grid.length; i++) {
         for (let j = 0; j < game.base.grid[i].length; j++) {
             let production = buildingProduction(game.base.grid[i][j]);
@@ -140,12 +151,13 @@ export function getGrowth(game: ActiveGame): Resources {
                     }
                 }
             }
-            result.gold += production.gold;
-            result.food += production.food;
-            result.wood += production.wood;
+            game.base.growthByTile[i][j] = production;
+            growth.gold += production.gold;
+            growth.food += production.food;
+            growth.wood += production.wood;
         }
     }
-    return result;
+    game.base.totalGrowth = growth;
 }
 
 export function getBuffs(game: ActiveGame): Buffs {
@@ -187,6 +199,15 @@ export function hasBuilding(game: ActiveGame, buildingType: Building): boolean {
     return false;
 }
 
+export function buildBuilding(game: ActiveGame, buildingType: Building, x: number, y: number) {
+    game.base.grid[x][y] = buildingType;
+    // Refresh growth per tile
+    refreshGrowth(game);
+    chargeCosts(game, buildingCosts(buildingType));
+    resourceUpdateEvent();
+    buildEvent(buildingType);
+}
+
 const rangePixels = 70;
 
 export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
@@ -197,10 +218,9 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
     if (lastUpdate == -1 || time - lastUpdate >= 1000) {
         lastUpdate = time;
         
-        let growth = getGrowth(game);
-        game.gold += growth.gold;
-        game.food += growth.food;
-        game.wood += growth.wood;
+        game.gold += game.base.totalGrowth.gold;
+        game.food += game.base.totalGrowth.food;
+        game.wood += game.base.totalGrowth.wood;
         
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();

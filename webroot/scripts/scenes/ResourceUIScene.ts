@@ -1,5 +1,5 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, addGameRestartedListener, addResourceUpdateListener } from "../events/EventMessenger";
-import { ActiveGame, getGrowth } from "../game/Game";
+import { ActiveGame } from "../game/Game";
 import { config } from "../model/Config";
 
 export const uiBarWidth = 300;
@@ -62,10 +62,9 @@ export class ResourceUIScene extends Phaser.Scene {
     }
 
     updateResourceText() {
-        let growth = getGrowth(this.activeGame);
-        this.goldText.text = "Gold (+" + growth.gold + "): " + this.activeGame.gold;
-        this.foodText.text = "Food (+" + growth.food + "): " + this.activeGame.food;
-        this.woodText.text = "Wood (+" + growth.wood + "): " + this.activeGame.wood;
+        this.goldText.text = "Gold (+" + this.activeGame.base.totalGrowth.gold + "): " + this.activeGame.gold;
+        this.foodText.text = "Food (+" + this.activeGame.base.totalGrowth.food + "): " + this.activeGame.food;
+        this.woodText.text = "Wood (+" + this.activeGame.base.totalGrowth.wood + "): " + this.activeGame.wood;
     }
 
     resourceUpdateListener(scene: ResourceUIScene) {

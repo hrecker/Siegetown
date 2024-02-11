@@ -8,6 +8,14 @@ export type Resources = {
     wood: number;
 }
 
+export function zeroResources(): Resources {
+    return {
+        gold: 0,
+        food: 0,
+        wood: 0
+    };
+}
+
 export function buildingCosts(building: Building): Resources {
     return costs("buildings", building);
 }
@@ -20,11 +28,7 @@ export function adjacentBuffProduction(baseBuilding: Building, adjacentBuilding:
     if ("adjacentBuff" in config()["buildings"][baseBuilding] && adjacentBuilding in config()["buildings"][baseBuilding]["adjacentBuff"]) {
         return values(config()["buildings"][baseBuilding]["adjacentBuff"][adjacentBuilding])
     }
-    return {
-        gold: 0,
-        food: 0,
-        wood: 0
-    }
+    return zeroResources();
 }
 
 export function unitCosts(unit: UnitType): Resources {
@@ -43,20 +47,12 @@ function costs(baseKey: string, typeKey: string): Resources {
     if ("cost" in config()[baseKey][typeKey]) {
         return values(config()[baseKey][typeKey]["cost"])
     }
-    return {
-        gold: 0,
-        food: 0,
-        wood: 0
-    }
+    return zeroResources();
 }
 
 function production(baseKey: string, typeKey: string): Resources {
     if ("produce" in config()[baseKey][typeKey]) {
         return values(config()[baseKey][typeKey]["produce"])
     }
-    return {
-        gold: 0,
-        food: 0,
-        wood: 0
-    }
+    return zeroResources();
 }

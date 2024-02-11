@@ -1,5 +1,5 @@
 import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, gameEnded, resetGame } from "../game/Game";
+import { ActiveGame, buildBuilding, chargeCosts, gameEnded, resetGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
@@ -72,7 +72,7 @@ export class BaseScene extends Phaser.Scene {
                 let x = this.boardTopLeftX + (boardWidth * i / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
                 let y = this.boardTopLeftY + (boardWidth * j / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
                 let mainText = this.add.text(x, y - 10, this.getBuildingText(this.activeGame.base.grid[i][j])).setOrigin(0.5, 0.5).setFontSize(64);
-                let growthText = this.add.text(x, y + 20, this.getGrowthText(this.activeGame.base.grid[i][j])).setOrigin(0.5, 0.5).setFontSize(14);
+                let growthText = this.add.text(x, y + 20, this.getGrowthText(i, j)).setOrigin(0.5, 0.5).setFontSize(14);
                 this.gridTexts[i][j] = {
                     mainText: mainText,
                     growthText: growthText
@@ -114,12 +114,14 @@ export class BaseScene extends Phaser.Scene {
         }
 
         // Build the building
-        this.activeGame.base.grid[gridX][gridY] = this.uiState.selectedBuilding;
         this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(this.uiState.selectedBuilding);
-        this.gridTexts[gridX][gridY].growthText.text = this.getGrowthText(this.uiState.selectedBuilding);
-        chargeCosts(this.activeGame, costs);
-        resourceUpdateEvent();
-        buildEvent(this.uiState.selectedBuilding);
+        buildBuilding(this.activeGame, this.uiState.selectedBuilding, gridX, gridY);
+        // Update all growth texts as necessary
+        for (let i = 0; i < config()["baseWidth"]; i++) {
+            for (let j = 0; j < config()["baseWidth"]; j++) {
+                this.gridTexts[i][j].growthText.text = this.getGrowthText(i, j);
+            }
+        }
     }
 
     getBuildingText(building: Building): string {
@@ -138,9 +140,9 @@ export class BaseScene extends Phaser.Scene {
         return "";
     }
 
-    getGrowthText(building: Building): string {
-        let production = buildingProduction(building);
-        let buffs = buildingBuffs(building);
+    getGrowthText(x: number, y: number): string {
+        let production = this.activeGame.base.growthByTile[x][y];
+        let buffs = buildingBuffs(this.activeGame.base.grid[x][y]);
         let result = "";
         if (production.gold != 0) {
             result += "+" + production.gold + "G";
@@ -166,7 +168,7 @@ export class BaseScene extends Phaser.Scene {
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 scene.gridTexts[i][j].mainText.text = scene.getBuildingText(scene.activeGame.base.grid[i][j]);
-                scene.gridTexts[i][j].growthText.text = scene.getGrowthText(scene.activeGame.base.grid[i][j]);
+                scene.gridTexts[i][j].growthText.text = scene.getGrowthText(i, j);
             }
         }
     }

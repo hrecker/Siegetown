@@ -1,3 +1,5 @@
+import { Resources } from "./Resources";
+
 export enum Building {
     Empty = "empty",
     Townhall = "townhall",
@@ -9,6 +11,8 @@ export enum Building {
 
 export type Base = {
     grid: Building[][];
+    growthByTile: Resources[][];
+    totalGrowth: Resources;
 }
 
 export function allBuildings() : Building[] {
