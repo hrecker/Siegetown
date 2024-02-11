@@ -12,6 +12,9 @@
 
     "unitAttackRate": 1000,
 
+    "destroyBuildingCost": 100,
+    "destroyBuildingTooltip": "Destroy existing building",
+
     "units": {
         "warrior": {
             "maxHealth": 3,

@@ -14,13 +14,3 @@ export type Base = {
     growthByTile: Resources[][];
     totalGrowth: Resources;
 }
-
-export function allBuildings() : Building[] {
-    return [
-        Building.Townhall,
-        Building.Field,
-        Building.Forest,
-        Building.Barracks,
-        Building.TrainingGround,
-    ]
-}

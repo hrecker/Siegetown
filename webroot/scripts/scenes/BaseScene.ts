@@ -1,10 +1,10 @@
 import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, buildBuilding, chargeCosts, gameEnded, resetGame } from "../game/Game";
-import { UIState } from "../game/UIState";
+import { ActiveGame, buildBuilding, chargeCosts, destroyBuilding, gameEnded, resetGame } from "../game/Game";
+import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { buildingCosts, buildingProduction } from "../model/Resources";
+import { buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const boardWidth = 300;
@@ -93,7 +93,7 @@ export class BaseScene extends Phaser.Scene {
     }
 
     handleGridClick() {
-        if (this.uiState.selectedBuilding == Building.Empty || gameEnded(this.activeGame)) {
+        if (this.uiState.selectedBuilding == UIBuilding.Empty || gameEnded(this.activeGame)) {
             return;
         }
 
@@ -104,18 +104,36 @@ export class BaseScene extends Phaser.Scene {
             return;
         }
 
-        if (this.activeGame.base.grid[gridX][gridY] != Building.Empty) {
+        let isDestroy = this.uiState.selectedBuilding == UIBuilding.Destroy;
+        // Ensure we aren't destroying an empty space, or building on a non-empty space
+        if (isDestroy == (this.activeGame.base.grid[gridX][gridY] == Building.Empty)) {
             return;
         }
 
-        let costs = buildingCosts(this.uiState.selectedBuilding);
+        let costs = zeroResources();
+        if (isDestroy) {
+            costs.gold = config()["destroyBuildingCost"];
+        } else {
+            costs = buildingCosts(BuildingFrom(this.uiState.selectedBuilding));
+        }
         if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
             return;
         }
 
-        // Build the building
-        this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(this.uiState.selectedBuilding);
-        buildBuilding(this.activeGame, this.uiState.selectedBuilding, gridX, gridY);
+        // Don't allow destroying townhall
+        if (isDestroy && this.activeGame.base.grid[gridX][gridY] == Building.Townhall) {
+            return;
+        }
+        
+        // If destroying, destroy the building
+        if (isDestroy) {
+            this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(Building.Empty);
+            destroyBuilding(this.activeGame, gridX, gridY);
+        } else {
+            // Build the building
+            this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(BuildingFrom(this.uiState.selectedBuilding));
+            buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridX, gridY);
+        }
         // Update all growth texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
