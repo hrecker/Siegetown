@@ -4,7 +4,6 @@ import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, adjacentBuffProduction, buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
 import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
-import { BaseScene } from "../scenes/BaseScene";
 import { LaneScene } from "../scenes/LaneScene";
 
 export type Lane = {
@@ -148,7 +147,7 @@ function refreshGrowth(game: ActiveGame) {
                 // Go through found adjacent buildings and add any buffs as appropriate
                 for (let adjacentBuilding in adjacentBuildings) {
                     if (adjacentBuilding in config()["buildings"][game.base.grid[i][j]]["adjacentBuff"]) {
-                        let buff = adjacentBuffProduction(game.base.grid[i][j], adjacentBuilding)
+                        let buff = adjacentBuffProduction(game.base.grid[i][j], adjacentBuilding as Building)
                         production.gold += buff.gold * adjacentBuildings[adjacentBuilding];
                         production.food += buff.food * adjacentBuildings[adjacentBuilding];
                         production.wood += buff.wood * adjacentBuildings[adjacentBuilding];
@@ -271,8 +270,8 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
     // Always move units
     game.lanes.forEach(lane => {
         // Move player units
-        let playerUnitsToRemove = new Set();
-        let enemyUnitsToRemove = new Set();
+        let playerUnitsToRemove = new Set<number>();
+        let enemyUnitsToRemove = new Set<number>();
         let xLimit = -1;
         let firstEnemyX = -1;
         let firstPlayerX = -1;

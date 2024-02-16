@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
       "lib": ["ES2016", "DOM"],
-      "target": "es5",
+      "target": "es6",
       "moduleResolution": "node"
     },
     "include": [

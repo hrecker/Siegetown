@@ -2,7 +2,7 @@ import 'phaser';
 
 import { LoadingScene } from "./scenes/LoadingScene";
 import { BaseScene } from './scenes/BaseScene';
-import { MainUIScene, OverlayUIScene } from './scenes/OverlayUIScene';
+import { OverlayUIScene } from './scenes/OverlayUIScene';
 import { LaneScene } from './scenes/LaneScene';
 import { ResourceUIScene } from './scenes/ResourceUIScene';
 import { ShopUIScene } from './scenes/ShopUIScene';

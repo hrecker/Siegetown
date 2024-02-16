@@ -1,10 +1,10 @@
-import { addGameRestartedListener, buildEvent, resourceUpdateEvent } from "../events/EventMessenger";
-import { ActiveGame, buildBuilding, chargeCosts, destroyBuilding, gameEnded, resetGame } from "../game/Game";
+import { addGameRestartedListener } from "../events/EventMessenger";
+import { ActiveGame, buildBuilding, destroyBuilding, gameEnded, resetGame } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
+import { buildingCosts, zeroResources } from "../model/Resources";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const boardWidth = 300;
