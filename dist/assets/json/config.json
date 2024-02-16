@@ -8,7 +8,9 @@
 
     "secondsBetweenWaves": 60,
 
-    "enemySpawnRate": 12000,
+    "baseEnemySpawnRate": 12000,
+    "enemySpawnRateAcceleration": 50,
+    "maxEnemySpawnRate": 2000,
 
     "unitAttackRate": 1000,
 

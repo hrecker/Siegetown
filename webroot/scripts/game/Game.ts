@@ -21,6 +21,9 @@ export type ActiveGame = {
     food: number;
     lanes: Lane[];
     secondsUntilWave: number;
+    lastEnemySpawn: number;
+    lastUpdate: number;
+    enemySpawnRate: number;
 }
 
 function startingGrid(): Building[][] {
@@ -70,6 +73,9 @@ export function createGame(): ActiveGame {
         food: 0,
         lanes: startingLanes(),
         secondsUntilWave: config()["secondsBetweenWaves"],
+        lastEnemySpawn: -1,
+        lastUpdate: -1,
+        enemySpawnRate: config()["baseEnemySpawnRate"]
     };
 }
 
@@ -82,8 +88,9 @@ export function resetGame(game: ActiveGame) {
             destroyUnit(enemyUnit);
         }
     }
-    lastUpdate = -1;
-    lastEnemySpawn = -1;
+    game.lastUpdate = -1;
+    game.lastEnemySpawn = -1;
+    game.enemySpawnRate = config()["baseEnemySpawnRate"];
     game.base = {
         grid: startingGrid(),
         growthByTile: startingGrowthByTile(),
@@ -97,9 +104,6 @@ export function resetGame(game: ActiveGame) {
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
 }
-
-let lastUpdate = -1;
-let lastEnemySpawn = -1;
 
 function playerPastLine(playerX: number, gameWidth: number) {
     return playerX >= gameWidth;
@@ -226,8 +230,8 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
         return;
     }
 
-    if (lastUpdate == -1 || time - lastUpdate >= 1000) {
-        lastUpdate = time;
+    if (game.lastUpdate == -1 || time - game.lastUpdate >= 1000) {
+        game.lastUpdate = time;
         
         game.gold += game.base.totalGrowth.gold;
         game.food += game.base.totalGrowth.food;
@@ -250,16 +254,18 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
             game.lanes[i].enemyUnits.push(scene.createUnit(UnitType.Slingshotter, i, true));
         }
 
-        lastEnemySpawn = time;
+        game.lastEnemySpawn = time;
         //TODO some randomization here?
         game.secondsUntilWave = config()["secondsBetweenWaves"];
         waveCountdownUpdatedEvent(game.secondsUntilWave);
-    } else if (lastEnemySpawn == -1 || time - lastEnemySpawn >= config()["enemySpawnRate"]) {
+    } else if (game.lastEnemySpawn == -1 || time - game.lastEnemySpawn >= game.enemySpawnRate) {
         // Spawn enemy units
-        lastEnemySpawn = time;
+        game.lastEnemySpawn = time;
         let lane = Math.floor(Math.random() * config()["numLanes"]);
         let unitType = selectRandomEnemyType();
         game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
+        // Accelerate enemy spawns
+        game.enemySpawnRate = Math.max(game.enemySpawnRate - config()["enemySpawnRateAcceleration"], config()["maxEnemySpawnRate"]);
     }
 
     // Always move units
