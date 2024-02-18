@@ -5,6 +5,7 @@ export enum Building {
     Townhall = "townhall",
     Field = "field",
     Forest = "forest",
+    Market = "market",
     Barracks = "barracks",
     TrainingGround = "trainingground"
 }

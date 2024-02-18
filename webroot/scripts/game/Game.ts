@@ -129,7 +129,8 @@ function refreshGrowth(game: ActiveGame) {
                 let adjacentBuildings = {};
                 for (let di = -1; di <= 1; di++) {
                     for (let dj = -1; dj <= 1; dj++) {
-                        if (dj == 0 && di == 0) {
+                        // Only look at orthogonally adjacent tiles
+                        if ((dj == 0 && di == 0) || (dj != 0 && di != 0)) {
                             continue;
                         }
                         let checkI = i + di;

@@ -40,6 +40,7 @@ export class ShopUIScene extends Phaser.Scene {
             UIBuilding.Townhall,
             UIBuilding.Field,
             UIBuilding.Forest,
+            UIBuilding.Market,
             UIBuilding.Barracks,
             UIBuilding.TrainingGround,
             UIBuilding.Destroy,

@@ -12,7 +12,7 @@
     "enemySpawnRateAcceleration": 50,
     "maxEnemySpawnRate": 2000,
 
-    "unitAttackRate": 1000,
+    "unitAttackRate": 1200,
 
     "destroyBuildingCost": 100,
     "destroyBuildingTooltip": "Destroy existing building",
@@ -24,7 +24,7 @@
             "range": 1,
             "speed": 1,
             "cost": {
-                "gold": 10,
+                "gold": 5,
                 "food": 10
             },
             "buildRequirement": "townhall"
@@ -35,8 +35,8 @@
             "range": 3,
             "speed": 0.5,
             "cost": {
-                "gold": 10,
-                "food": 5,
+                "gold": 5,
+                "food": 10,
                 "wood": 5
             },
             "buildRequirement": "townhall"
@@ -47,8 +47,9 @@
             "range": 1,
             "speed": 1,
             "cost": {
-                "gold": 25,
-                "food": 20
+                "gold": 10,
+                "food": 20,
+                "wood": 10
             },
             "buildRequirement": "trainingground"
         }
@@ -57,14 +58,14 @@
     "buildings": {
         "townhall": {
             "produce": {
-                "gold": 20
+                "gold": 2
             },
             "cost": {
                 "gold": 0,
                 "food": 0,
                 "wood": 0
             },
-            "tooltipText": "Main town building\n+20 gold"
+            "tooltipText": "Main town building\n+2 gold"
         },
         "empty": {
             "produce": {
@@ -72,54 +73,69 @@
         },
         "field": {
             "produce": {
-                "food": 20
+                "food": 1
             },
             "cost": {
-                "gold": 30,
+                "gold": 20,
                 "food": 0,
                 "wood": 0
             },
             "adjacentBuff": {
                 "field": {
-                    "food": 10
+                    "food": 0.25
                 }
             },
-            "tooltipText": "+20 food"
+            "tooltipText": "+1 food\n+0.25 food for each adjacent field"
         },
         "forest": {
             "produce": {
-                "wood": 100
+                "wood": 1
             },
             "cost": {
-                "gold": 50,
+                "gold": 25,
                 "food": 0,
                 "wood": 0
             },
             "adjacentBuff": {
                 "forest": {
-                    "wood": 10
+                    "wood": 0.25
                 }
             },
-            "tooltipText": "+100 wood"
+            "tooltipText": "+1 wood\n+0.25 wood for each adjacent forest"
+        },
+        "market": {
+            "produce": {
+                "gold": 5
+            },
+            "cost": {
+                "gold": 75,
+                "food": 0,
+                "wood": 30
+            },
+            "adjacentBuff": {
+                "barracks": {
+                    "gold": 0.5
+                }
+            },
+            "tooltipText": "+5 gold\n+0.5 gold for each adjacent barracks"
         },
         "barracks": {
             "produce": {
-                "damageBuff": 1,
                 "healthBuff": 1
             },
             "cost": {
-                "gold": 100,
-                "food": 20,
+                "gold": 150,
+                "food": 100,
                 "wood": 50
             },
-            "tooltipText": "+1 unit damage\n+1 unit health"
+            "tooltipText": "+1 unit health"
         },
         "trainingground": {
             "produce": {},
             "cost": {
                 "gold": 200,
                 "food": 100,
-                "wood": 100
+                "wood": 150
             },
             "tooltipText": "Unlocks clubman unit"
         }
