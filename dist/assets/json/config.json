@@ -113,11 +113,11 @@
                 "wood": 30
             },
             "adjacentBuff": {
-                "barracks": {
-                    "gold": 0.5
+                "townhall": {
+                    "gold": 1
                 }
             },
-            "tooltipText": "+5 gold\n+0.5 gold for each adjacent barracks"
+            "tooltipText": "+5 gold\n+1 additional gold if adjacent to townhall"
         },
         "barracks": {
             "produce": {
