@@ -95,7 +95,6 @@ export class LaneScene extends Phaser.Scene {
         // Build the unit
         this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
         chargeCosts(this.activeGame, costs);
-        resourceUpdateEvent();
     }
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {

@@ -116,6 +116,7 @@ export function chargeCosts(game: ActiveGame, costs: Resources) {
     game.gold -= costs.gold;
     game.food -= costs.food;
     game.wood -= costs.wood;
+    resourceUpdateEvent();
 }
 
 function refreshGrowth(game: ActiveGame) {
@@ -208,7 +209,6 @@ export function buildBuilding(game: ActiveGame, buildingType: Building, x: numbe
     // Refresh growth per tile
     refreshGrowth(game);
     chargeCosts(game, buildingCosts(buildingType));
-    resourceUpdateEvent();
     buildEvent(buildingType);
 }
 
@@ -219,7 +219,6 @@ export function destroyBuilding(game: ActiveGame, x: number, y: number) {
     let destroyCosts = zeroResources();
     destroyCosts.gold = config()["destroyBuildingCost"];
     chargeCosts(game, destroyCosts);
-    resourceUpdateEvent();
     buildEvent(Building.Empty);
 }
 

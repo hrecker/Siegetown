@@ -206,9 +206,9 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     buildListener(scene: ShopUIScene, building: Building) {
-        scene.selectBuild(UIBuilding.Empty);
+        // Only can build one townhall in the base
         if (building == Building.Townhall) {
-            // Only can build one townhall in the base
+            scene.selectBuild(UIBuilding.Empty);
             scene.setTownhallInteractable(false);
         }
     }
