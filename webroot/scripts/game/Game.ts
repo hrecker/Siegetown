@@ -257,7 +257,10 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
         //TODO some randomization here?
         game.secondsUntilWave = config()["secondsBetweenWaves"];
         waveCountdownUpdatedEvent(game.secondsUntilWave);
-    } else if (game.lastEnemySpawn == -1 || time - game.lastEnemySpawn >= game.enemySpawnRate) {
+    } else if (game.lastEnemySpawn == -1) {
+        // Wait the full spawn time for the first spawn
+        game.lastEnemySpawn = time;
+    } else if (time - game.lastEnemySpawn >= game.enemySpawnRate) {
         // Spawn enemy units
         game.lastEnemySpawn = time;
         let lane = Math.floor(Math.random() * config()["numLanes"]);
