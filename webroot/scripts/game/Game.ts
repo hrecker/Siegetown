@@ -263,7 +263,18 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
     } else if (time - game.lastEnemySpawn >= game.enemySpawnRate) {
         // Spawn enemy units
         game.lastEnemySpawn = time;
-        let lane = Math.floor(Math.random() * config()["numLanes"]);
+        // Pick lane with most or tied for the most player units
+        let possibleLanes = [];
+        let maxUnits = 0;
+        for (let i = 0; i < game.lanes.length; i++) {
+            if (game.lanes[i].playerUnits.length > maxUnits) {
+                maxUnits = game.lanes[i].playerUnits.length;
+                possibleLanes = [i];
+            } else if (game.lanes[i].playerUnits.length == maxUnits) {
+                possibleLanes.push(i);
+            }
+        }
+        let lane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
         let unitType = selectRandomEnemyType();
         game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
         // Accelerate enemy spawns
