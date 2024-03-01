@@ -12,8 +12,6 @@
     "enemySpawnRateAcceleration": 50,
     "maxEnemySpawnRate": 2000,
 
-    "unitAttackRate": 1200,
-
     "destroyBuildingCost": 100,
     "destroyBuildingTooltip": "Destroy existing building",
 
@@ -23,6 +21,7 @@
             "damage": 1,
             "range": 1,
             "speed": 0.5,
+            "attackRate": 1200,
             "cost": {
                 "gold": 5,
                 "food": 10
@@ -34,6 +33,7 @@
             "damage": 1,
             "range": 2,
             "speed": 0.25,
+            "attackRate": 1600,
             "cost": {
                 "gold": 5,
                 "food": 10,
@@ -46,6 +46,7 @@
             "damage": 2,
             "range": 1,
             "speed": 1,
+            "attackRate": 1400,
             "cost": {
                 "gold": 10,
                 "food": 20,

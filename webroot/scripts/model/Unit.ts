@@ -15,6 +15,7 @@ export type Unit = {
     health: number;
     maxHealth: number;
     damage: number;
+    attackRate: number;
     lastAttackTime: number;
     gameObject: Phaser.GameObjects.Arc;
     label: Phaser.GameObjects.Text;
@@ -38,6 +39,7 @@ export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.Game
         health: maxHealth,
         maxHealth: maxHealth,
         damage: config()["units"][type]["damage"] + buffs.damageBuff,
+        attackRate: config()["units"][type]["attackRate"],
         lastAttackTime: 0,
         gameObject: gameObject,
         label: label,

@@ -331,7 +331,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
             if (! playerPastLine(player.gameObject.x, laneWidth) &&
                 firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"] * rangePixels) {
                 // Attack the enemy
-                if (player.lastAttackTime == -1 || time - player.lastAttackTime >= config()["unitAttackRate"]) {
+                if (player.lastAttackTime == -1 || time - player.lastAttackTime >= player.attackRate) {
                     player.lastAttackTime = time;
                     if (updateHealth(lane.enemyUnits[0], -player.damage) <= 0) {
                         enemyUnitsToRemove.add(0);
@@ -370,7 +370,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
             if (! enemyPastLine(enemy.gameObject.x) &&
                 firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"] * rangePixels) {
                 // Attack the player unit
-                if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= config()["unitAttackRate"]) {
+                if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= enemy.attackRate) {
                     enemy.lastAttackTime = time;
                     if (updateHealth(lane.playerUnits[0], -enemy.damage) <= 0) {
                         playerUnitsToRemove.add(0);
