@@ -20,6 +20,7 @@ export type ActiveGame = {
     food: number;
     lanes: Lane[];
     secondsUntilWave: number;
+    currentWave: number;
     lastEnemySpawn: number;
     lastUpdate: number;
     enemySpawnRate: number;
@@ -72,6 +73,7 @@ export function createGame(): ActiveGame {
         food: 0,
         lanes: startingLanes(),
         secondsUntilWave: config()["secondsBetweenWaves"],
+        currentWave: 0,
         lastEnemySpawn: -1,
         lastUpdate: -1,
         enemySpawnRate: config()["baseEnemySpawnRate"]
@@ -102,6 +104,7 @@ export function resetGame(game: ActiveGame) {
     game.food = 0;
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
+    game.currentWave = 0;
 }
 
 function playerPastLine(playerX: number, gameWidth: number) {
@@ -247,11 +250,13 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
-        // For now, just spawn two enemies in each lane always as a wave, with no randomization
-        for (let i = 0; i < config()["numLanes"]; i++) {
-            game.lanes[i].enemyUnits.push(scene.createUnit(UnitType.Warrior, i, true));
-            game.lanes[i].enemyUnits.push(scene.createUnit(UnitType.Slingshotter, i, true));
+        // Spawn 1 random enemy per lane, and repeat for each previous completed wave
+        for (let j = 0; j <= game.currentWave; j++) {
+            for (let i = 0; i < config()["numLanes"]; i++) {
+                game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(), i, true));
+            }
         }
+        game.currentWave++;
 
         game.lastEnemySpawn = time;
         //TODO some randomization here?
