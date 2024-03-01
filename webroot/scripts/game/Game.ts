@@ -26,12 +26,22 @@ export type ActiveGame = {
     enemySpawnRate: number;
 }
 
+function townhallCoordinate(): number {
+    return Math.floor((config()["baseWidth"] - 1) / 2);
+}
+
 function startingGrid(): Building[][] {
     let grid: Building[][] = [];
-    for (let i = 0; i < config()["baseWidth"]; i++) {
+    let baseWidth = config()["baseWidth"];
+    let townhallCoord = townhallCoordinate();
+    for (let i = 0; i < baseWidth; i++) {
         grid[i] = [];
-        for (let j = 0; j < config()["baseWidth"]; j++) {
-            grid[i][j] = Building.Empty;
+        for (let j = 0; j < baseWidth; j++) {
+            if (i == townhallCoord && j == townhallCoord) {
+                grid[i][j] = Building.Townhall;
+            } else {
+                grid[i][j] = Building.Empty;
+            }
         }
     }
     return grid;
@@ -39,10 +49,15 @@ function startingGrid(): Building[][] {
 
 function startingGrowthByTile(): Resources[][] {
     let grid: Resources[][] = [];
+    let townhallCoord = townhallCoordinate();
     for (let i = 0; i < config()["baseWidth"]; i++) {
         grid[i] = [];
         for (let j = 0; j < config()["baseWidth"]; j++) {
-            grid[i][j] = zeroResources();
+            if (i == townhallCoord && j == townhallCoord) {
+                grid[i][j] = buildingProduction(Building.Townhall);
+            } else {
+                grid[i][j] = zeroResources();
+            }
         }
     }
     return grid;
@@ -64,7 +79,7 @@ export function createGame(): ActiveGame {
         base: {
             grid: startingGrid(),
             growthByTile: startingGrowthByTile(),
-            totalGrowth: zeroResources(),
+            totalGrowth: buildingProduction(Building.Townhall),
         },
         baseHealth: config()["baseMaxHealth"],
         enemyBaseHealth: config()["enemyBaseMaxHealth"],
@@ -95,7 +110,7 @@ export function resetGame(game: ActiveGame) {
     game.base = {
         grid: startingGrid(),
         growthByTile: startingGrowthByTile(),
-        totalGrowth: zeroResources(),
+        totalGrowth: buildingProduction(Building.Townhall),
     };
     game.baseHealth = config()["baseMaxHealth"];
     game.enemyBaseHealth = config()["enemyBaseMaxHealth"];

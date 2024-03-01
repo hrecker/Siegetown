@@ -37,7 +37,6 @@ export class ShopUIScene extends Phaser.Scene {
 
     allBuildings() : UIBuilding[] {
         return [
-            UIBuilding.Townhall,
             UIBuilding.Field,
             UIBuilding.Forest,
             UIBuilding.Market,
@@ -49,18 +48,16 @@ export class ShopUIScene extends Phaser.Scene {
 
     createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
         let text = buildingType.toString();
-        if (buildingType != UIBuilding.Townhall) {
-            // Assume that everything at least costs gold
-            let costs = zeroResources();
-            if (buildingType == UIBuilding.Destroy) {
-                costs.gold = config()["destroyBuildingCost"];
-            } else {
-                costs = buildingCosts(BuildingFrom(buildingType));
-            }
-            text += ":\nGold: " + costs.gold;
-            if (costs.wood > 0) {
-                text += "\nWood: " + costs.wood;
-            }
+        // Assume that everything at least costs gold
+        let costs = zeroResources();
+        if (buildingType == UIBuilding.Destroy) {
+            costs.gold = config()["destroyBuildingCost"];
+        } else {
+            costs = buildingCosts(BuildingFrom(buildingType));
+        }
+        text += ":\nGold: " + costs.gold;
+        if (costs.wood > 0) {
+            text += "\nWood: " + costs.wood;
         }
         return this.add.text(this.getX(10), this.getY(y), text);
     }
@@ -162,7 +159,6 @@ export class ShopUIScene extends Phaser.Scene {
             y += buildButtonOutline.height + 5
         });
 
-        addBuildListener(this.buildListener, this);
         addGameRestartedListener(this.gameRestartedListener, this);
 
         this.scale.on("resize", this.resize, this);
@@ -196,26 +192,8 @@ export class ShopUIScene extends Phaser.Scene {
         });
     }
 
-    setTownhallInteractable(interactable: boolean) {
-        if (interactable) {
-            this.buildButtons[Building.Townhall].setInteractive();
-        } else {
-            this.buildButtons[Building.Townhall].removeInteractive();
-            this.buildButtonOutlines[Building.Townhall].setVisible(false);
-        }
-    }
-
-    buildListener(scene: ShopUIScene, building: Building) {
-        // Only can build one townhall in the base
-        if (building == Building.Townhall) {
-            scene.selectBuild(UIBuilding.Empty);
-            scene.setTownhallInteractable(false);
-        }
-    }
-
     gameRestartedListener(scene: ShopUIScene) {
         scene.selectBuild(UIBuilding.Empty);
         scene.selectUnitBuild(UnitType.None);
-        scene.setTownhallInteractable(true);
     }
 }
