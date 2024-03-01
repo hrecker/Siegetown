@@ -63,10 +63,11 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
-        let text = unitType + ":\n";
-        // Assume that everything at least costs gold
+        let text = unitType + ":";
         let costs = unitCosts(unitType);
-        text += "Gold: " + costs.gold;
+        if (costs.gold > 0) {
+            text += "\nGold: " + costs.gold;
+        }
         if (costs.food > 0) {
             text += "\nFood: " + costs.food;
         }
