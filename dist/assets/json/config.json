@@ -17,8 +17,9 @@
     "baseEnemySpawnRate": 12000,
     "enemySpawnRateAcceleration": 100,
     "maxEnemySpawnRate": 2000,
+    "maxEnemiesPerLanePerWave": 3,
 
-    "destroyBuildingCost": 100,
+    "destroyBuildingCost": 500,
     "destroyBuildingTooltip": "Destroy existing building",
 
     "units": {
@@ -52,8 +53,8 @@
             "speed": 1,
             "attackRate": 1400,
             "cost": {
-                "food": 600,
-                "wood": 600
+                "food": 500,
+                "wood": 500
             },
             "buildRequirement": "trainingground"
         }

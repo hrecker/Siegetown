@@ -273,8 +273,8 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
-        // Spawn 1 random enemy per lane, and repeat for each previous completed wave
-        for (let j = 0; j <= game.currentWave; j++) {
+        // Spawn 1 random enemy per lane, and repeat for each previous completed wave (up to a maximum)
+        for (let j = 0; j <= Math.max(game.currentWave, config()["maxEnemiesPerLanePerWave"]); j++) {
             for (let i = 0; i < config()["numLanes"]; i++) {
                 game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), i, true));
             }
