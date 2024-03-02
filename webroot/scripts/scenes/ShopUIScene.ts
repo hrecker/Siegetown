@@ -47,16 +47,20 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
-        let text = buildingType.toString();
-        // Assume that everything at least costs gold
+        let text = buildingType + ":";
         let costs = zeroResources();
         if (buildingType == UIBuilding.Destroy) {
             costs.gold = config()["destroyBuildingCost"];
         } else {
             costs = buildingCosts(BuildingFrom(buildingType));
         }
-        text += ":\nGold: " + costs.gold;
-        if (costs.wood > 0) {
+        if (costs.gold > 0) {
+            text += "\nGold: " + costs.gold;
+        }
+        if (costs.food > 0) {
+            text += "\nFood: " + costs.food;
+        }
+        if (costs.wood) {
             text += "\nWood: " + costs.wood;
         }
         return this.add.text(this.getX(10), this.getY(y), text);
