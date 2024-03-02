@@ -5,6 +5,12 @@
 
     "baseMaxHealth": 10,
     "enemyBaseMaxHealth": 20,
+    
+    "firstEnemies": [
+        "warrior",
+        "warrior",
+        "warrior"
+    ],
 
     "secondsBetweenWaves": 60,
 
@@ -12,7 +18,7 @@
     "enemySpawnRateAcceleration": 100,
     "maxEnemySpawnRate": 2000,
 
-    "destroyBuildingCost": 1000,
+    "destroyBuildingCost": 100,
     "destroyBuildingTooltip": "Destroy existing building",
 
     "units": {

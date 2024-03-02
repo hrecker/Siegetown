@@ -24,6 +24,7 @@ export type ActiveGame = {
     lastEnemySpawn: number;
     lastUpdate: number;
     enemySpawnRate: number;
+    numEnemySpawns: number;
 }
 
 function townhallCoordinate(): number {
@@ -91,7 +92,8 @@ export function createGame(): ActiveGame {
         currentWave: 0,
         lastEnemySpawn: -1,
         lastUpdate: -1,
-        enemySpawnRate: config()["baseEnemySpawnRate"]
+        enemySpawnRate: config()["baseEnemySpawnRate"],
+        numEnemySpawns: 0,
     };
 }
 
@@ -120,6 +122,7 @@ export function resetGame(game: ActiveGame) {
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
+    game.numEnemySpawns = 0;
 }
 
 function playerPastLine(playerX: number, gameWidth: number) {
@@ -202,7 +205,12 @@ export function gameEnded(game: ActiveGame) {
     return game.baseHealth <= 0 || game.enemyBaseHealth <= 0;
 }
 
-function selectRandomEnemyType(): UnitType {
+function selectRandomEnemyType(game: ActiveGame): UnitType {
+    if (game.numEnemySpawns < config()["firstEnemies"].length) {
+        game.numEnemySpawns++;
+        return config()["firstEnemies"][game.numEnemySpawns - 1];
+    }
+
     let unitType = UnitType.Warrior;
     // Just use a 50/50 chance of each unit type for now
     if (Math.random() > 0.5) {
@@ -268,7 +276,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
         // Spawn 1 random enemy per lane, and repeat for each previous completed wave
         for (let j = 0; j <= game.currentWave; j++) {
             for (let i = 0; i < config()["numLanes"]; i++) {
-                game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(), i, true));
+                game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), i, true));
             }
         }
         game.currentWave++;
@@ -295,7 +303,7 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
             }
         }
         let lane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
-        let unitType = selectRandomEnemyType();
+        let unitType = selectRandomEnemyType(game);
         game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
         // Accelerate enemy spawns
         game.enemySpawnRate = Math.max(game.enemySpawnRate - config()["enemySpawnRateAcceleration"], config()["maxEnemySpawnRate"]);
