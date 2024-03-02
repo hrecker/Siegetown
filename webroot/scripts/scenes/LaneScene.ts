@@ -92,6 +92,11 @@ export class LaneScene extends Phaser.Scene {
             return;
         }
 
+        // Verify that a spawn delay isn't active
+        if (this.activeGame.unitSpawnDelaysRemaining[this.uiState.selectedUnit] > 0) {
+            return;
+        }
+
         // Build the unit
         this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
         chargeCosts(this.activeGame, costs);
@@ -117,12 +122,13 @@ export class LaneScene extends Phaser.Scene {
             }
         } else {
             buffs = getBuffs(this.activeGame);
+            this.activeGame.unitSpawnDelaysRemaining[type] = config()["units"][type]["spawnDelay"];
         }
         return createUnit(type, buffs, unit, label, healthBarBackground, healthBar);
     }
 
     update(time, delta) {
-        updateGame(this.activeGame, time, this.game.renderer.width - uiBarWidth, this);
+        updateGame(this.activeGame, time, delta, this.game.renderer.width - uiBarWidth, this);
         
         // Keep unit health bars and labels in sync with the units
         this.activeGame.lanes.forEach(lane => {

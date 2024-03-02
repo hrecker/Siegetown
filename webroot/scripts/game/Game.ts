@@ -3,7 +3,7 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, adjacentBuffProduction, buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
-import { destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
+import { allUnits, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
 
 export type Lane = {
@@ -25,6 +25,7 @@ export type ActiveGame = {
     lastUpdate: number;
     enemySpawnRate: number;
     numEnemySpawns: number;
+    unitSpawnDelaysRemaining: { [type: string] : number }
 }
 
 function townhallCoordinate(): number {
@@ -75,6 +76,14 @@ function startingLanes(): Lane[] {
     return lanes;
 }
 
+function startingUnitSpawnDelays(): { [type: string] : number } {
+    let delays = {};
+    allUnits().forEach(unit => {
+        delays[unit] = 0;
+    })
+    return delays;
+}
+
 export function createGame(): ActiveGame {
     return {
         base: {
@@ -94,6 +103,7 @@ export function createGame(): ActiveGame {
         lastUpdate: -1,
         enemySpawnRate: config()["baseEnemySpawnRate"],
         numEnemySpawns: 0,
+        unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
     };
 }
 
@@ -123,6 +133,7 @@ export function resetGame(game: ActiveGame) {
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
     game.numEnemySpawns = 0;
+    game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
 }
 
 function playerPastLine(playerX: number, gameWidth: number) {
@@ -250,7 +261,7 @@ export function destroyBuilding(game: ActiveGame, x: number, y: number) {
 
 const rangePixels = 70;
 
-export function updateGame(game: ActiveGame, time: number, laneWidth: number, scene: LaneScene) {
+export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game)) {
         return;
     }
@@ -270,6 +281,13 @@ export function updateGame(game: ActiveGame, time: number, laneWidth: number, sc
             waveCountdownUpdatedEvent(game.secondsUntilWave);
         }
     }
+
+    // Tick down timers for unit spawn delays
+    allUnits().forEach(unit => {
+        if (game.unitSpawnDelaysRemaining[unit] > 0) {
+            game.unitSpawnDelaysRemaining[unit] -= delta;
+        }
+    })
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {

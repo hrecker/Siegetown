@@ -44,7 +44,7 @@ export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.Game
         gameObject: gameObject,
         label: label,
         healthBarBackground: healthBarBackground,
-        healthBar: healthBar
+        healthBar: healthBar,
     }
 }
 
