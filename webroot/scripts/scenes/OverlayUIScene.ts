@@ -42,7 +42,7 @@ export class OverlayUIScene extends Phaser.Scene {
     create() {
         this.resize(true);
 
-        this.waveCountdown = this.add.text(5, 5, "Next wave:\n" + this.minutesText(this.activeGame.secondsUntilWave));
+        this.waveCountdown = this.add.text(3, 3, "Next wave:\n" + this.minutesText(this.activeGame.secondsUntilWave));
 
         this.resultBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
         this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!").setFontSize(64).setOrigin(0.5, 0.5);

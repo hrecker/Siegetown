@@ -216,5 +216,8 @@ export class ShopUIScene extends Phaser.Scene {
     gameRestartedListener(scene: ShopUIScene) {
         scene.selectBuild(UIBuilding.Empty);
         scene.selectUnitBuild(UnitType.None);
+        allUnits().forEach(unit => {
+            scene.setUnitLocked(unit, false);
+        })
     }
 }

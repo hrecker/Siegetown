@@ -16,8 +16,8 @@
 
     "baseEnemySpawnRate": 12000,
     "enemySpawnRateAcceleration": 100,
-    "maxEnemySpawnRate": 2000,
-    "maxEnemiesPerLanePerWave": 3,
+    "maxEnemySpawnRate": 5000,
+    "maxEnemiesPerWave": 6,
 
     "destroyBuildingCost": 500,
     "destroyBuildingTooltip": "Destroy existing building",
@@ -29,7 +29,7 @@
             "range": 1,
             "speed": 0.5,
             "attackRate": 1200,
-            "spawnDelay": 4000,
+            "spawnDelay": 3000,
             "cost": {
                 "food": 150
             },
@@ -41,7 +41,7 @@
             "range": 2,
             "speed": 0.25,
             "attackRate": 1600,
-            "spawnDelay": 4000,
+            "spawnDelay": 3500,
             "cost": {
                 "food": 250,
                 "wood": 200
@@ -56,8 +56,8 @@
             "attackRate": 1400,
             "spawnDelay": 4000,
             "cost": {
-                "food": 500,
-                "wood": 500
+                "food": 400,
+                "wood": 400
             },
             "buildRequirement": "trainingground"
         }

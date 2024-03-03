@@ -5,6 +5,7 @@ import { config } from "../model/Config";
 import { Resources, adjacentBuffProduction, buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
 import { allUnits, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
+import { shuffleArray } from "../util/Utils";
 
 export type Lane = {
     playerUnits: Unit[];
@@ -294,11 +295,17 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
-        // Spawn 1 random enemy per lane, and repeat for each previous completed wave (up to a maximum)
-        for (let j = 0; j <= Math.min(game.currentWave, config()["maxEnemiesPerLanePerWave"]); j++) {
-            for (let i = 0; i < config()["numLanes"]; i++) {
-                game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), i, true));
-            }
+        // Spawn 1 random enemy per lane, plus one extra for each previous completed wave (up to a maximum)
+        let totalEnemiesToSpawn = Math.min(config()["numLanes"] + game.currentWave, config()["maxEnemiesPerWave"]);
+        let laneOrder = [];
+        for (let i = 0; i < config()["numLanes"]; i++) {
+            laneOrder.push(i);
+        }
+        // Randomize the lanes to spawn in
+        shuffleArray(laneOrder);
+        for (let i = 0; i < totalEnemiesToSpawn; i++) {
+            let lane = laneOrder[i % config()["numLanes"]];
+            game.lanes[lane].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true));
         }
         game.currentWave++;
 
