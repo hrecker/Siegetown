@@ -1,4 +1,5 @@
 import { Building } from "../model/Base";
+import { UnitType } from "../model/Unit";
 
 // Callback types
 type EmptyCallback = {
@@ -13,6 +14,10 @@ type BuildingCallback = {
     callback: (scene: Phaser.Scene, building: Building) => void;
     scene: Phaser.Scene;
 }
+type UnitCallback = {
+    callback: (scene: Phaser.Scene, unit: UnitType) => void;
+    scene: Phaser.Scene;
+}
 
 // Callback lists
 let resourceUpdateCallbacks: EmptyCallback[] = [];
@@ -21,6 +26,8 @@ let enemyBaseDamagedCallbacks: NumberCallback[] = [];
 let gameRestartedCallbacks: EmptyCallback[] = [];
 let buildCallbacks: BuildingCallback[] = [];
 let waveCountdownUpdatedCallbacks: NumberCallback[] = [];
+let unitBuiltCallbacks: UnitCallback[] = [];
+let unitUnlockedCallbacks: UnitCallback[] = [];
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
@@ -92,4 +99,28 @@ export function addWaveCountdownUpdatedListener(callback: (scene: Phaser.Scene, 
 export function waveCountdownUpdatedEvent(secondsRemaining: number) {
     waveCountdownUpdatedCallbacks.forEach(callback =>
         callback.callback(callback.scene, secondsRemaining));
+}
+
+export function addUnitBuiltListener(callback: (scene: Phaser.Scene, unit: UnitType) => void, scene: Phaser.Scene) {
+    unitBuiltCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function unitBuiltEvent(unit: UnitType) {
+    unitBuiltCallbacks.forEach(callback =>
+        callback.callback(callback.scene, unit));
+}
+
+export function addUnitUnlockedListener(callback: (scene: Phaser.Scene, unit: UnitType) => void, scene: Phaser.Scene) {
+    unitUnlockedCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function unitUnlockedEvent(unit: UnitType) {
+    unitUnlockedCallbacks.forEach(callback =>
+        callback.callback(callback.scene, unit));
 }

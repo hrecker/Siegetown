@@ -1,4 +1,4 @@
-import { resourceUpdateEvent } from "../events/EventMessenger";
+import { resourceUpdateEvent, unitBuiltEvent } from "../events/EventMessenger";
 import { ActiveGame, chargeCosts, gameEnded, getBuffs, hasBuilding, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -100,6 +100,7 @@ export class LaneScene extends Phaser.Scene {
         // Build the unit
         this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
         chargeCosts(this.activeGame, costs);
+        unitBuiltEvent(this.uiState.selectedUnit);
     }
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {

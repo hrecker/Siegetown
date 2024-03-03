@@ -1,4 +1,4 @@
-import { baseDamagedEvent, buildEvent, enemyBaseDamagedEvent, resourceUpdateEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
+import { baseDamagedEvent, buildEvent, enemyBaseDamagedEvent, resourceUpdateEvent, unitUnlockedEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
@@ -286,13 +286,16 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
     allUnits().forEach(unit => {
         if (game.unitSpawnDelaysRemaining[unit] > 0) {
             game.unitSpawnDelaysRemaining[unit] -= delta;
+            if (game.unitSpawnDelaysRemaining[unit] <= 0) {
+                unitUnlockedEvent(unit);
+            }
         }
     })
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
         // Spawn 1 random enemy per lane, and repeat for each previous completed wave (up to a maximum)
-        for (let j = 0; j <= Math.max(game.currentWave, config()["maxEnemiesPerLanePerWave"]); j++) {
+        for (let j = 0; j <= Math.min(game.currentWave, config()["maxEnemiesPerLanePerWave"]); j++) {
             for (let i = 0; i < config()["numLanes"]; i++) {
                 game.lanes[i].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), i, true));
             }

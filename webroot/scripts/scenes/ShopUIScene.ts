@@ -1,4 +1,4 @@
-import { addBuildListener, addGameRestartedListener } from "../events/EventMessenger";
+import { addBuildListener, addGameRestartedListener, addUnitBuiltListener, addUnitUnlockedListener } from "../events/EventMessenger";
 import { ActiveGame, gameEnded } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
@@ -165,8 +165,24 @@ export class ShopUIScene extends Phaser.Scene {
         });
 
         addGameRestartedListener(this.gameRestartedListener, this);
+        addUnitBuiltListener(this.unitBuiltListener, this);
+        addUnitUnlockedListener(this.unitUnlockedListener, this);
 
         this.scale.on("resize", this.resize, this);
+    }
+
+    setUnitLocked(unit: UnitType, locked: boolean) {
+        // Hide unit buttons while locked, then show them again when unlocked
+        let alpha = locked ? 0.5 : 1;
+        this.buildButtons[unit].alpha = alpha;
+    }
+
+    unitBuiltListener(scene: ShopUIScene, unit: UnitType, ) {
+        scene.setUnitLocked(unit, true);
+    }
+
+    unitUnlockedListener(scene: ShopUIScene, unit: UnitType) {
+        scene.setUnitLocked(unit, false);
     }
 
     selectBuild(selection: UIBuilding) {
