@@ -137,12 +137,8 @@ export function resetGame(game: ActiveGame) {
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
 }
 
-function playerPastLine(playerX: number, gameWidth: number) {
-    return playerX >= gameWidth;
-}
-
-function enemyPastLine(enemyX: number) {
-    return enemyX <= 0;
+function unitInteractable(unitX: number, gameWidth: number) {
+    return unitX > 0 && unitX < gameWidth;
 }
 
 export function chargeCosts(game: ActiveGame, costs: Resources) {
@@ -347,14 +343,14 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         let firstPlayerX = -1;
         // Find the first enemy that can be interacted with; once an enemy is halfway across the line it can't be fought
         for (let i = 0; i < lane.enemyUnits.length; i++) {
-            if (! enemyPastLine(lane.enemyUnits[0].gameObject.x)) {
+            if (unitInteractable(lane.enemyUnits[0].gameObject.x, laneWidth)) {
                 firstEnemyX = lane.enemyUnits[0].gameObject.x;
                 break;
             }
         }
         // Find the first player that can be interacted with; once a player is halfway across the line it can't be fought
         for (let i = 0; i < lane.playerUnits.length; i++) {
-            if (! playerPastLine(lane.playerUnits[0].gameObject.x, laneWidth)) {
+            if (unitInteractable(lane.playerUnits[0].gameObject.x, laneWidth)) {
                 firstPlayerX = lane.playerUnits[0].gameObject.x;
                 break;
             }
@@ -364,7 +360,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             let topLeftX = player.gameObject.getTopLeft().x;
 
             // Stop when in range of the first enemy
-            if (! playerPastLine(player.gameObject.x, laneWidth) &&
+            if (unitInteractable(player.gameObject.x, laneWidth) &&
                 firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"] * rangePixels) {
                 // Attack the enemy
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= player.attackRate) {
@@ -403,7 +399,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             let topRightX = enemy.gameObject.getTopRight().x;
 
             // Stop when in range of the first player unit
-            if (! enemyPastLine(enemy.gameObject.x) &&
+            if (unitInteractable(enemy.gameObject.x, laneWidth) &&
                 firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"] * rangePixels) {
                 // Attack the player unit
                 if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= enemy.attackRate) {
