@@ -1,10 +1,11 @@
 import { resourceUpdateEvent, unitBuiltEvent } from "../events/EventMessenger";
-import { ActiveGame, chargeCosts, gameEnded, getBuffs, hasBuilding, updateGame } from "../game/Game";
+import { ActiveGame, canAfford, chargeCosts, gameEnded, getBuffs, hasBuilding, runAction, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
+import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { unitCosts } from "../model/Resources";
+import { actionCosts, unitCosts } from "../model/Resources";
 import { createUnit, Unit, UnitType } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
@@ -71,7 +72,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     handleLaneClick() {
-        if (this.uiState.selectedUnit == UnitType.None || gameEnded(this.activeGame)) {
+        if (gameEnded(this.activeGame)) {
             return;
         }
 
@@ -81,8 +82,33 @@ export class LaneScene extends Phaser.Scene {
             return;
         }
 
+        if (! this.handleActionActivate(lane)) {
+            this.handleUnitPlacement(lane);
+        }
+    }
+
+    handleActionActivate(lane: number): boolean {
+        if (this.uiState.selectedAction == ActionType.None) {
+            return false;
+        }
+
+        let costs = actionCosts(this.uiState.selectedAction);
+        if (! canAfford(this.activeGame, costs)) {
+            return false;
+        }
+
+        runAction(this.activeGame, this.uiState.selectedAction, lane, this);
+        chargeCosts(this.activeGame, costs);
+        return true;
+    }
+
+    handleUnitPlacement(lane: number) {
+        if (this.uiState.selectedUnit == UnitType.None) {
+            return;
+        }
+
         let costs = unitCosts(this.uiState.selectedUnit);
-        if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
+        if (! canAfford(this.activeGame, costs)) {
             return;
         }
 
@@ -98,12 +124,12 @@ export class LaneScene extends Phaser.Scene {
         }
 
         // Build the unit
-        this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false));
+        this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false, false));
         chargeCosts(this.activeGame, costs);
         unitBuiltEvent(this.uiState.selectedUnit);
     }
 
-    createUnit(type: UnitType, lane: number, isEnemy: boolean): Unit {
+    createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
         let unit = this.add.circle(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
             laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
             isEnemy ? enemyColor : 0xffffff);
@@ -123,7 +149,9 @@ export class LaneScene extends Phaser.Scene {
             }
         } else {
             buffs = getBuffs(this.activeGame);
-            this.activeGame.unitSpawnDelaysRemaining[type] = config()["units"][type]["spawnDelay"];
+            if (! ignoreDelays) {
+                this.activeGame.unitSpawnDelaysRemaining[type] = config()["units"][type]["spawnDelay"];
+            }
         }
         return createUnit(type, buffs, unit, label, healthBarBackground, healthBar);
     }

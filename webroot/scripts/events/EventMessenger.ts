@@ -1,3 +1,4 @@
+import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
 import { UnitType } from "../model/Unit";
 
@@ -18,6 +19,10 @@ type UnitCallback = {
     callback: (scene: Phaser.Scene, unit: UnitType) => void;
     scene: Phaser.Scene;
 }
+type ActionCallback = {
+    callback: (scene: Phaser.Scene, action: ActionType) => void;
+    scene: Phaser.Scene;
+}
 
 // Callback lists
 let resourceUpdateCallbacks: EmptyCallback[] = [];
@@ -28,6 +33,7 @@ let buildCallbacks: BuildingCallback[] = [];
 let waveCountdownUpdatedCallbacks: NumberCallback[] = [];
 let unitBuiltCallbacks: UnitCallback[] = [];
 let unitUnlockedCallbacks: UnitCallback[] = [];
+let actionRunCallbacks: ActionCallback[] = [];
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
@@ -123,4 +129,16 @@ export function addUnitUnlockedListener(callback: (scene: Phaser.Scene, unit: Un
 export function unitUnlockedEvent(unit: UnitType) {
     unitUnlockedCallbacks.forEach(callback =>
         callback.callback(callback.scene, unit));
+}
+
+export function addActionRunListener(callback: (scene: Phaser.Scene, unit: ActionType) => void, scene: Phaser.Scene) {
+    actionRunCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function actionRunEvent(action: ActionType) {
+    actionRunCallbacks.forEach(callback =>
+        callback.callback(callback.scene, action));
 }

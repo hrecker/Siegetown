@@ -147,5 +147,24 @@
             },
             "tooltipText": "Unlocks clubman unit"
         }
+    },
+
+    "freezeDuration": 3000,
+    "actions": {
+        "freeze": {
+            "cost": {
+                "gold": 200
+            }
+        },
+        "reinforcements": {
+            "cost": {
+                "gold": 400
+            }
+        },
+        "clear": {
+            "cost": {
+                "gold": 500
+            }
+        }
     }
 }

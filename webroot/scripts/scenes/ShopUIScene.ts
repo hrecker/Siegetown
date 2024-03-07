@@ -1,9 +1,10 @@
-import { addBuildListener, addGameRestartedListener, addUnitBuiltListener, addUnitUnlockedListener } from "../events/EventMessenger";
+import { addActionRunListener, addBuildListener, addGameRestartedListener, addUnitBuiltListener, addUnitUnlockedListener } from "../events/EventMessenger";
 import { ActiveGame, gameEnded } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
+import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
-import { buildingCosts, unitCosts, zeroResources } from "../model/Resources";
+import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
 import { UnitType, allUnits } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
@@ -46,6 +47,20 @@ export class ShopUIScene extends Phaser.Scene {
         ]
     }
 
+    costsText(costs: Resources): string {
+        let text = "";
+        if (costs.gold > 0) {
+            text += "\nGold: " + costs.gold;
+        }
+        if (costs.food > 0) {
+            text += "\nFood: " + costs.food;
+        }
+        if (costs.wood) {
+            text += "\nWood: " + costs.wood;
+        }
+        return text;
+    }
+
     createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
         let text = buildingType + ":";
         let costs = zeroResources();
@@ -54,30 +69,21 @@ export class ShopUIScene extends Phaser.Scene {
         } else {
             costs = buildingCosts(BuildingFrom(buildingType));
         }
-        if (costs.gold > 0) {
-            text += "\nGold: " + costs.gold;
-        }
-        if (costs.food > 0) {
-            text += "\nFood: " + costs.food;
-        }
-        if (costs.wood) {
-            text += "\nWood: " + costs.wood;
-        }
+        text += this.costsText(costs);
         return this.add.text(this.getX(10), this.getY(y), text);
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
         let text = unitType + ":";
         let costs = unitCosts(unitType);
-        if (costs.gold > 0) {
-            text += "\nGold: " + costs.gold;
-        }
-        if (costs.food > 0) {
-            text += "\nFood: " + costs.food;
-        }
-        if (costs.wood) {
-            text += "\nWood: " + costs.wood;
-        }
+        text += this.costsText(costs);
+        return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
+    }
+
+    createBuildActionButtonText(actionType: ActionType, y: number): Phaser.GameObjects.Text {
+        let text = actionType + ":";
+        let costs = actionCosts(actionType);
+        text += this.costsText(costs);
         return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
     }
 
@@ -164,17 +170,42 @@ export class ShopUIScene extends Phaser.Scene {
             y += buildButtonOutline.height + 5
         });
 
+        this.add.text(this.getX(uiBarWidth - 5), this.getY(y + 5), "One-time Actions").setAlign("right").setOrigin(1, 0);
+        y += 30;
+        allActions().forEach(action => {
+            let buildButton = this.createBuildActionButtonText(action, y);
+            let buildButtonOutline = this.createOutline(buildButton);
+            buildButton.setInteractive();
+            buildButton.on('pointerdown', () => {
+                this.selectActionBuild(action);
+            });
+            this.buildButtons[action] = buildButton;
+            this.buildButtonOutlines[action] = buildButtonOutline;
+            y += buildButtonOutline.height + 5
+        });
+
         addGameRestartedListener(this.gameRestartedListener, this);
         addUnitBuiltListener(this.unitBuiltListener, this);
         addUnitUnlockedListener(this.unitUnlockedListener, this);
+        addActionRunListener(this.actionRunListener, this);
 
         this.scale.on("resize", this.resize, this);
     }
 
-    setUnitLocked(unit: UnitType, locked: boolean) {
-        // Hide unit buttons while locked, then show them again when unlocked
+    setButtonLocked(key: string, locked: boolean) {
+        // Hide buttons while locked, then show them again when unlocked
         let alpha = locked ? 0.5 : 1;
-        this.buildButtons[unit].alpha = alpha;
+        this.buildButtons[key].alpha = alpha;
+    }
+
+    setUnitLocked(unit: UnitType, locked: boolean) {
+        this.setButtonLocked(unit, locked);
+    }
+
+    setActionLocked(action: ActionType, locked: boolean) {
+        this.setButtonLocked(action, locked);
+        this.buildButtonOutlines[action].setVisible(false);
+        this.buildButtons[action].disableInteractive();
     }
 
     unitBuiltListener(scene: ShopUIScene, unit: UnitType, ) {
@@ -183,6 +214,11 @@ export class ShopUIScene extends Phaser.Scene {
 
     unitUnlockedListener(scene: ShopUIScene, unit: UnitType) {
         scene.setUnitLocked(unit, false);
+    }
+
+    actionRunListener(scene: ShopUIScene, action: ActionType) {
+        scene.setActionLocked(action, true);
+        scene.uiState.selectedAction = ActionType.None;
     }
 
     selectBuild(selection: UIBuilding) {
@@ -211,6 +247,28 @@ export class ShopUIScene extends Phaser.Scene {
         allUnits().forEach(unit => {
             this.buildButtonOutlines[unit].setVisible(this.uiState.selectedUnit == unit);
         });
+        // Deselect actions when selecting units
+        if (this.uiState.selectedUnit != UnitType.None) {
+            this.selectActionBuild(ActionType.None);
+        }
+    }
+
+    selectActionBuild(action: ActionType) {
+        if (gameEnded(this.activeGame)) {
+            return;
+        }
+        if (this.uiState.selectedAction == action) {
+            this.uiState.selectedAction = ActionType.None;
+        } else {
+            this.uiState.selectedAction = action;
+        }
+        allActions().forEach(action => {
+            this.buildButtonOutlines[action].setVisible(this.uiState.selectedAction == action);
+        });
+        // Deselect units when selecting actions
+        if (this.uiState.selectedAction != ActionType.None) {
+            this.selectUnitBuild(UnitType.None);
+        }
     }
 
     gameRestartedListener(scene: ShopUIScene) {
@@ -218,6 +276,10 @@ export class ShopUIScene extends Phaser.Scene {
         scene.selectUnitBuild(UnitType.None);
         allUnits().forEach(unit => {
             scene.setUnitLocked(unit, false);
+        })
+        allActions().forEach(action => {
+            scene.setActionLocked(action, false);
+            this.buildButtons[action].setInteractive();
         })
     }
 }

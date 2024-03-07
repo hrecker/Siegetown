@@ -1,3 +1,4 @@
+import { ActionType } from "./Action";
 import { Building } from "./Base";
 import { config } from "./Config";
 import { UnitType } from "./Unit";
@@ -33,6 +34,10 @@ export function adjacentBuffProduction(baseBuilding: Building, adjacentBuilding:
 
 export function unitCosts(unit: UnitType): Resources {
     return costs("units", unit);
+}
+
+export function actionCosts(action: ActionType): Resources {
+    return costs("actions", action);
 }
 
 function values(base): Resources {

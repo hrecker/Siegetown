@@ -1,4 +1,5 @@
-import { baseDamagedEvent, buildEvent, enemyBaseDamagedEvent, resourceUpdateEvent, unitUnlockedEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
+import { actionRunEvent, baseDamagedEvent, buildEvent, enemyBaseDamagedEvent, resourceUpdateEvent, unitUnlockedEvent, waveCountdownUpdatedEvent } from "../events/EventMessenger";
+import { ActionType } from "../model/Action";
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
@@ -213,6 +214,10 @@ export function gameEnded(game: ActiveGame) {
     return game.baseHealth <= 0 || game.enemyBaseHealth <= 0;
 }
 
+export function canAfford(game: ActiveGame, costs: Resources) {
+    return game.gold >= costs.gold && game.food >= costs.food && game.wood >= costs.wood;
+}
+
 function selectRandomEnemyType(game: ActiveGame): UnitType {
     if (game.numEnemySpawns < config()["firstEnemies"].length) {
         game.numEnemySpawns++;
@@ -254,6 +259,38 @@ export function destroyBuilding(game: ActiveGame, x: number, y: number) {
     destroyCosts.gold = config()["destroyBuildingCost"];
     chargeCosts(game, destroyCosts);
     buildEvent(Building.Empty);
+}
+
+export function runAction(game: ActiveGame, action: ActionType, lane: number, scene: LaneScene) {
+    switch (action) {
+        case ActionType.Clear:
+            // Clear all units from the given lane
+            game.lanes[lane].playerUnits.forEach(unit => {
+                destroyUnit(unit);
+            });
+            game.lanes[lane].enemyUnits.forEach(unit => {
+                destroyUnit(unit);
+            });
+            game.lanes[lane].playerUnits = [];
+            game.lanes[lane].enemyUnits = [];
+            break;
+        case ActionType.Reinforcements:
+            // Spawn three clubmen
+            for (let i = 0; i < config()["numLanes"]; i++) {
+                game.lanes[i].playerUnits.push(scene.createUnit(UnitType.Clubman, i, false, true));
+            }
+            break;
+        case ActionType.Freeze:
+            // Freeze enemies in this lane for a time
+            game.lanes[lane].playerUnits.forEach(unit => {
+                unit.frozenTimeRemaining = config()["freezeDuration"]
+            });
+            game.lanes[lane].enemyUnits.forEach(unit => {
+                unit.frozenTimeRemaining = config()["freezeDuration"]
+            });
+            break;
+    }
+    actionRunEvent(action);
 }
 
 const rangePixels = 70;
@@ -301,7 +338,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         shuffleArray(laneOrder);
         for (let i = 0; i < totalEnemiesToSpawn; i++) {
             let lane = laneOrder[i % config()["numLanes"]];
-            game.lanes[lane].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true));
+            game.lanes[lane].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true, false));
         }
         game.currentWave++;
 
@@ -328,7 +365,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         }
         let lane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
         let unitType = selectRandomEnemyType(game);
-        game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true));
+        game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true, false));
         // Accelerate enemy spawns
         game.enemySpawnRate = Math.max(game.enemySpawnRate - config()["enemySpawnRateAcceleration"], config()["maxEnemySpawnRate"]);
     }
@@ -358,6 +395,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         for (let i = 0; i < lane.playerUnits.length; i++) {
             let player = lane.playerUnits[i];
             let topLeftX = player.gameObject.getTopLeft().x;
+
+            // If frozen, don't do anything
+            if (player.frozenTimeRemaining > 0) {
+                player.frozenTimeRemaining -= delta;
+                xLimit = topLeftX;
+                continue;
+            }
 
             // Stop when in range of the first enemy
             if (unitInteractable(player.gameObject.x, laneWidth) &&
@@ -397,6 +441,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
             let topRightX = enemy.gameObject.getTopRight().x;
+
+            // If frozen, don't do anything
+            if (enemy.frozenTimeRemaining > 0) {
+                enemy.frozenTimeRemaining -= delta;
+                xLimit = topRightX;
+                continue;
+            }
 
             // Stop when in range of the first player unit
             if (unitInteractable(enemy.gameObject.x, laneWidth) &&

@@ -1,3 +1,4 @@
+import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
 import { UnitType } from "../model/Unit";
 
@@ -16,6 +17,7 @@ export enum UIBuilding {
 export type UIState = {
     selectedBuilding: UIBuilding;
     selectedUnit: UnitType;
+    selectedAction: ActionType;
 }
 
 export function UIBuildingFrom(building: Building): UIBuilding {
@@ -34,5 +36,6 @@ export function createUIState(): UIState {
     return {
         selectedBuilding: UIBuilding.Empty,
         selectedUnit: UnitType.None,
+        selectedAction: ActionType.None,
     }
 }

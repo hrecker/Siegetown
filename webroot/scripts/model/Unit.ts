@@ -17,6 +17,7 @@ export type Unit = {
     damage: number;
     attackRate: number;
     lastAttackTime: number;
+    frozenTimeRemaining: number;
     gameObject: Phaser.GameObjects.Arc;
     label: Phaser.GameObjects.Text;
     healthBarBackground: Phaser.GameObjects.Rectangle;
@@ -45,6 +46,7 @@ export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.Game
         label: label,
         healthBarBackground: healthBarBackground,
         healthBar: healthBar,
+        frozenTimeRemaining: 0,
     }
 }
 
