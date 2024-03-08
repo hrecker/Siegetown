@@ -24,7 +24,6 @@ export type ActiveGame = {
     lastEnemySpawn: number;
     lastUpdate: number;
     enemySpawnRate: number;
-    numEnemySpawns: number;
     unitSpawnDelaysRemaining: { [type: string] : number }
 }
 
@@ -100,7 +99,6 @@ export function createGame(): ActiveGame {
         lastEnemySpawn: -1,
         lastUpdate: -1,
         enemySpawnRate: config()["baseEnemySpawnRate"],
-        numEnemySpawns: 0,
         unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
     };
 }
@@ -128,7 +126,6 @@ export function resetGame(game: ActiveGame) {
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
-    game.numEnemySpawns = 0;
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
 }
 
@@ -215,17 +212,16 @@ export function canAfford(game: ActiveGame, costs: Resources) {
 }
 
 function selectRandomEnemyType(game: ActiveGame): UnitType {
-    if (game.numEnemySpawns < config()["firstEnemies"].length) {
-        game.numEnemySpawns++;
-        return config()["firstEnemies"][game.numEnemySpawns - 1];
-    }
+    let possibleUnits = [];
+    allUnits().forEach(unit => {
+        if (config()["enemyUnitsInitialWave"][unit] <= game.currentWave) {
+            possibleUnits.push(unit);
+        }
+    });
 
-    let unitType = UnitType.Warrior;
-    // Just use a 50/50 chance of each unit type for now
-    if (Math.random() > 0.5) {
-        unitType = UnitType.Slingshotter;
-    }
-    return unitType;
+    // Assume there is always at least one possible unit
+    shuffleArray(possibleUnits);
+    return possibleUnits[0];
 }
 
 export function hasBuilding(game: ActiveGame, buildingType: Building): boolean {
@@ -328,13 +324,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         for (let i = 0; i < config()["numLanes"]; i++) {
             laneOrder.push(i);
         }
+        game.currentWave++;
         // Randomize the lanes to spawn in
         shuffleArray(laneOrder);
         for (let i = 0; i < totalEnemiesToSpawn; i++) {
             let lane = laneOrder[i % config()["numLanes"]];
             game.lanes[lane].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true, false));
         }
-        game.currentWave++;
 
         game.lastEnemySpawn = time;
         //TODO some randomization here?

@@ -5,16 +5,16 @@
 
     "baseMaxHealth": 10,
     "enemyBaseMaxHealth": 20,
-    
-    "firstEnemies": [
-        "warrior",
-        "warrior",
-        "warrior"
-    ],
+
+    "enemyUnitsInitialWave": {
+        "warrior": 0,
+        "slingshotter": 1,
+        "clubman": 4
+    },
 
     "secondsBetweenWaves": 60,
 
-    "baseEnemySpawnRate": 12000,
+    "baseEnemySpawnRate": 11000,
     "enemySpawnRateAcceleration": 100,
     "maxEnemySpawnRate": 5000,
     "maxEnemiesPerWave": 6,

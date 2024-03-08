@@ -279,7 +279,7 @@ export class ShopUIScene extends Phaser.Scene {
         })
         allActions().forEach(action => {
             scene.setActionLocked(action, false);
-            this.buildButtons[action].setInteractive();
+            scene.buildButtons[action].setInteractive();
         })
     }
 }
