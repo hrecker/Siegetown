@@ -22,6 +22,10 @@
     "destroyBuildingCost": 500,
     "destroyBuildingTooltip": "Destroy existing building",
 
+    "startingResources": {
+        "food": 150
+    },
+
     "units": {
         "warrior": {
             "maxHealth": 3,

@@ -3,7 +3,7 @@ import { ActionType } from "../model/Action";
 import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
-import { Resources, adjacentBuffProduction, buildingCosts, buildingProduction, zeroResources } from "../model/Resources";
+import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
 import { allUnits, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
 import { shuffleArray } from "../util/Utils";
@@ -17,9 +17,7 @@ export type ActiveGame = {
     base: Base;
     baseHealth: number;
     enemyBaseHealth: number;
-    gold: number;
-    wood: number;
-    food: number;
+    resources: Resources;
     lanes: Lane[];
     secondsUntilWave: number;
     currentWave: number;
@@ -95,9 +93,7 @@ export function createGame(): ActiveGame {
         },
         baseHealth: config()["baseMaxHealth"],
         enemyBaseHealth: config()["enemyBaseMaxHealth"],
-        gold: 0,
-        wood: 0,
-        food: 0,
+        resources: startingResources(),
         lanes: startingLanes(),
         secondsUntilWave: config()["secondsBetweenWaves"],
         currentWave: 0,
@@ -128,9 +124,7 @@ export function resetGame(game: ActiveGame) {
     };
     game.baseHealth = config()["baseMaxHealth"];
     game.enemyBaseHealth = config()["enemyBaseMaxHealth"];
-    game.gold = 0;
-    game.wood = 0;
-    game.food = 0;
+    game.resources = startingResources();
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
@@ -138,14 +132,16 @@ export function resetGame(game: ActiveGame) {
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
 }
 
+function startingResources(): Resources {
+    return configResources(config()["startingResources"]);
+}
+
 function unitInteractable(unitX: number, gameWidth: number) {
     return unitX > 0 && unitX < gameWidth;
 }
 
 export function chargeCosts(game: ActiveGame, costs: Resources) {
-    game.gold -= costs.gold;
-    game.food -= costs.food;
-    game.wood -= costs.wood;
+    game.resources = subtractResources(game.resources, costs);
     resourceUpdateEvent();
 }
 
@@ -215,7 +211,7 @@ export function gameEnded(game: ActiveGame) {
 }
 
 export function canAfford(game: ActiveGame, costs: Resources) {
-    return game.gold >= costs.gold && game.food >= costs.food && game.wood >= costs.wood;
+    return game.resources.gold >= costs.gold && game.resources.food >= costs.food && game.resources.wood >= costs.wood;
 }
 
 function selectRandomEnemyType(game: ActiveGame): UnitType {
@@ -303,9 +299,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
     if (game.lastUpdate == -1 || time - game.lastUpdate >= 1000) {
         game.lastUpdate = time;
         
-        game.gold += game.base.totalGrowth.gold;
-        game.food += game.base.totalGrowth.food;
-        game.wood += game.base.totalGrowth.wood;
+        game.resources = addResources(game.resources, game.base.totalGrowth);
         
         // Should always be at least some change in resources due to the default townhall
         resourceUpdateEvent();

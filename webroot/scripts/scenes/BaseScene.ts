@@ -1,5 +1,5 @@
 import { addGameRestartedListener } from "../events/EventMessenger";
-import { ActiveGame, buildBuilding, destroyBuilding, gameEnded, resetGame } from "../game/Game";
+import { ActiveGame, buildBuilding, canAfford, destroyBuilding, gameEnded, resetGame } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
@@ -116,7 +116,7 @@ export class BaseScene extends Phaser.Scene {
         } else {
             costs = buildingCosts(BuildingFrom(this.uiState.selectedBuilding));
         }
-        if (this.activeGame.gold < costs.gold || this.activeGame.food < costs.food || this.activeGame.wood < costs.wood) {
+        if (! canAfford(this.activeGame, costs)) {
             return;
         }
 

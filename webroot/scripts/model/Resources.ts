@@ -27,7 +27,7 @@ export function buildingProduction(building: Building): Resources {
 
 export function adjacentBuffProduction(baseBuilding: Building, adjacentBuilding: Building): Resources {
     if ("adjacentBuff" in config()["buildings"][baseBuilding] && adjacentBuilding in config()["buildings"][baseBuilding]["adjacentBuff"]) {
-        return values(config()["buildings"][baseBuilding]["adjacentBuff"][adjacentBuilding])
+        return configResources(config()["buildings"][baseBuilding]["adjacentBuff"][adjacentBuilding])
     }
     return zeroResources();
 }
@@ -40,7 +40,7 @@ export function actionCosts(action: ActionType): Resources {
     return costs("actions", action);
 }
 
-function values(base): Resources {
+export function configResources(base): Resources {
     return {
         gold: ("gold" in base) ? base["gold"] : 0,
         food: ("food" in base) ? base["food"] : 0,
@@ -50,14 +50,30 @@ function values(base): Resources {
 
 function costs(baseKey: string, typeKey: string): Resources {
     if ("cost" in config()[baseKey][typeKey]) {
-        return values(config()[baseKey][typeKey]["cost"])
+        return configResources(config()[baseKey][typeKey]["cost"])
     }
     return zeroResources();
 }
 
 function production(baseKey: string, typeKey: string): Resources {
     if ("produce" in config()[baseKey][typeKey]) {
-        return values(config()[baseKey][typeKey]["produce"])
+        return configResources(config()[baseKey][typeKey]["produce"])
     }
     return zeroResources();
+}
+
+export function subtractResources(start: Resources, diff: Resources): Resources {
+    return {
+        gold: start.gold - diff.gold,
+        food: start.food - diff.food,
+        wood: start.wood - diff.wood,
+    }
+}
+
+export function addResources(start: Resources, diff: Resources): Resources {
+    return {
+        gold: start.gold + diff.gold,
+        food: start.food + diff.food,
+        wood: start.wood + diff.wood,
+    }
 }

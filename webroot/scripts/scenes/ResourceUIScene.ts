@@ -62,9 +62,9 @@ export class ResourceUIScene extends Phaser.Scene {
     }
 
     updateResourceText() {
-        this.goldText.text = "Gold (+" + this.activeGame.base.totalGrowth.gold + "): " + this.activeGame.gold;
-        this.foodText.text = "Food (+" + this.activeGame.base.totalGrowth.food + "): " + this.activeGame.food;
-        this.woodText.text = "Wood (+" + this.activeGame.base.totalGrowth.wood + "): " + this.activeGame.wood;
+        this.goldText.text = "Gold (+" + this.activeGame.base.totalGrowth.gold + "): " + this.activeGame.resources.gold;
+        this.foodText.text = "Food (+" + this.activeGame.base.totalGrowth.food + "): " + this.activeGame.resources.food;
+        this.woodText.text = "Wood (+" + this.activeGame.base.totalGrowth.wood + "): " + this.activeGame.resources.wood;
     }
 
     resourceUpdateListener(scene: ResourceUIScene) {
