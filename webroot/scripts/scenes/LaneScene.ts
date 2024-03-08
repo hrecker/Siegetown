@@ -82,6 +82,12 @@ export class LaneScene extends Phaser.Scene {
             return;
         }
 
+        // Check to be sure the click wasn't on the overlayed UI bar
+        let maxX = this.game.renderer.width - uiBarWidth;
+        if (this.input.activePointer.x >= maxX) {
+            return;
+        }
+
         if (! this.handleActionActivate(lane)) {
             this.handleUnitPlacement(lane);
         }
