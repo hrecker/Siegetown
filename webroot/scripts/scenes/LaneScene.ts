@@ -104,7 +104,7 @@ export class LaneScene extends Phaser.Scene {
             return;
         }
 
-        this.handleActionActivate(lane);
+        this.handleLaneActivate(lane);
     }
 
     handleLaneActivate(lane: number) {
