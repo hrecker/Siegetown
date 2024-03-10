@@ -17,6 +17,17 @@ export const healthBarYPos = 36;
 const healthBarFillColor = 0x32a852;
 const sceneTopY = 350;
 const laneMargin = 2;
+const numberKeyCodes = [
+    Phaser.Input.Keyboard.KeyCodes.ONE,
+    Phaser.Input.Keyboard.KeyCodes.TWO,
+    Phaser.Input.Keyboard.KeyCodes.THREE,
+    Phaser.Input.Keyboard.KeyCodes.FOUR,
+    Phaser.Input.Keyboard.KeyCodes.FIVE,
+    Phaser.Input.Keyboard.KeyCodes.SIX,
+    Phaser.Input.Keyboard.KeyCodes.SEVEN,
+    Phaser.Input.Keyboard.KeyCodes.EIGHT,
+    Phaser.Input.Keyboard.KeyCodes.NINE,
+]
 
 export class LaneScene extends Phaser.Scene {
     sceneCreated: boolean;
@@ -24,6 +35,8 @@ export class LaneScene extends Phaser.Scene {
     uiState: UIState;
 
     laneHeight: number;
+
+    laneButtons: Phaser.Input.Keyboard.Key[];
 
     constructor() {
         super({
@@ -67,15 +80,18 @@ export class LaneScene extends Phaser.Scene {
             this.handleLaneClick();
         });
 
+        // Handle lane hotkeys
+        this.laneButtons = [];
+        for (let i = 0; i < config()["numLanes"]; i++) {
+            this.laneButtons.push(this.input.keyboard.addKey(numberKeyCodes[i]));
+        }
+
         this.resize(true);
         this.scale.on("resize", this.resize, this);
     }
 
-    handleLaneClick() {
-        if (gameEnded(this.activeGame)) {
-            return;
-        }
 
+    handleLaneClick() {
         let lane = Math.floor((this.input.activePointer.y - sceneTopY - laneMargin) / this.laneHeight);
 
         if (lane < 0 || lane >= config()["numLanes"]) {
@@ -85,6 +101,14 @@ export class LaneScene extends Phaser.Scene {
         // Check to be sure the click wasn't on the overlayed UI bar
         let maxX = this.game.renderer.width - uiBarWidth;
         if (this.input.activePointer.x >= maxX) {
+            return;
+        }
+
+        this.handleActionActivate(lane);
+    }
+
+    handleLaneActivate(lane: number) {
+        if (gameEnded(this.activeGame)) {
             return;
         }
 
@@ -164,6 +188,14 @@ export class LaneScene extends Phaser.Scene {
 
     update(time, delta) {
         updateGame(this.activeGame, time, delta, this.game.renderer.width - uiBarWidth, this);
+
+        // Check for lane hotkeys
+        for (let i = 0; i < this.laneButtons.length; i++) {
+            if (this.laneButtons[i].isDown) {
+                this.handleLaneActivate(i);
+                break;
+            }
+        }
         
         // Keep unit health bars and labels in sync with the units
         this.activeGame.lanes.forEach(lane => {
