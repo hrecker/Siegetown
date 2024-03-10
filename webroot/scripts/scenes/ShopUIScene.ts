@@ -1,5 +1,5 @@
 import { addActionRunListener, addBuildListener, addGameRestartedListener, addUnitBuiltListener, addUnitUnlockedListener } from "../events/EventMessenger";
-import { ActiveGame, gameEnded } from "../game/Game";
+import { ActiveGame, gameEnded, hasBuilding } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
@@ -168,6 +168,12 @@ export class ShopUIScene extends Phaser.Scene {
             this.buildButtons[unit] = buildButton;
             this.buildButtonOutlines[unit] = buildButtonOutline;
             y += buildButtonOutline.height + 5
+
+            // Check for building requirements
+            let buildingReq: Building = config()["units"][unit]["buildRequirement"];
+            if (! hasBuilding(this.activeGame, buildingReq)) {
+                this.setButtonDisabled(unit, true);
+            }
         });
 
         this.add.text(this.getX(uiBarWidth - 5), this.getY(y + 5), "One-time Actions").setAlign("right").setOrigin(1, 0);
@@ -188,8 +194,19 @@ export class ShopUIScene extends Phaser.Scene {
         addUnitBuiltListener(this.unitBuiltListener, this);
         addUnitUnlockedListener(this.unitUnlockedListener, this);
         addActionRunListener(this.actionRunListener, this);
+        addBuildListener(this.buildingBuildListener, this);
 
         this.scale.on("resize", this.resize, this);
+    }
+
+    setButtonDisabled(key: string, disabled: boolean) {
+        this.setButtonLocked(key, disabled);
+        if (disabled) {
+            this.buildButtons[key].disableInteractive();
+            this.buildButtonOutlines[key].setVisible(false);
+        } else {
+            this.buildButtons[key].setInteractive();
+        }
     }
 
     setButtonLocked(key: string, locked: boolean) {
@@ -198,26 +215,25 @@ export class ShopUIScene extends Phaser.Scene {
         this.buildButtons[key].alpha = alpha;
     }
 
-    setUnitLocked(unit: UnitType, locked: boolean) {
-        this.setButtonLocked(unit, locked);
-    }
-
-    setActionLocked(action: ActionType, locked: boolean) {
-        this.setButtonLocked(action, locked);
-        this.buildButtonOutlines[action].setVisible(false);
-        this.buildButtons[action].disableInteractive();
+    buildingBuildListener(scene: ShopUIScene, building: Building) {
+        // Check for any unit buttons that need to be enabled
+        allUnits().forEach(unit => {
+            // Check for building requirements
+            let buildingReq: Building = config()["units"][unit]["buildRequirement"];
+            scene.setButtonDisabled(unit, ! hasBuilding(scene.activeGame, buildingReq));
+        });
     }
 
     unitBuiltListener(scene: ShopUIScene, unit: UnitType, ) {
-        scene.setUnitLocked(unit, true);
+        scene.setButtonLocked(unit, true);
     }
 
     unitUnlockedListener(scene: ShopUIScene, unit: UnitType) {
-        scene.setUnitLocked(unit, false);
+        scene.setButtonLocked(unit, false);
     }
 
     actionRunListener(scene: ShopUIScene, action: ActionType) {
-        scene.setActionLocked(action, true);
+        scene.setButtonDisabled(action, true);
         scene.uiState.selectedAction = ActionType.None;
     }
 
@@ -275,11 +291,12 @@ export class ShopUIScene extends Phaser.Scene {
         scene.selectBuild(UIBuilding.Empty);
         scene.selectUnitBuild(UnitType.None);
         allUnits().forEach(unit => {
-            scene.setUnitLocked(unit, false);
+            // Check for building requirements
+            let buildingReq: Building = config()["units"][unit]["buildRequirement"];
+            scene.setButtonDisabled(unit, ! hasBuilding(scene.activeGame, buildingReq));
         })
         allActions().forEach(action => {
-            scene.setActionLocked(action, false);
-            scene.buildButtons[action].setInteractive();
+            scene.setButtonDisabled(action, false);
         })
     }
 }
