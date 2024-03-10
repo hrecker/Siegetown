@@ -2,7 +2,7 @@ import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
 import { UnitType } from "../model/Unit";
 
-// Destroy is its own "building" in the UI, so use a separate enum here
+// Remove is its own "building" in the UI, so use a separate enum here
 export enum UIBuilding {
     Empty = "empty",
     Townhall = "townhall",
@@ -11,7 +11,7 @@ export enum UIBuilding {
     Market = "market",
     Barracks = "barracks",
     TrainingGround = "trainingground",
-    Destroy = "destroy"
+    Remove = "remove"
 }
 
 export type UIState = {
@@ -25,7 +25,7 @@ export function UIBuildingFrom(building: Building): UIBuilding {
 }
 
 export function BuildingFrom(uiBuilding: UIBuilding): Building {
-    if (uiBuilding == UIBuilding.Destroy) {
+    if (uiBuilding == UIBuilding.Remove) {
         // Maybe not the best behavior?
         return Building.Empty;
     }

@@ -243,13 +243,13 @@ export function buildBuilding(game: ActiveGame, buildingType: Building, x: numbe
     buildEvent(buildingType);
 }
 
-export function destroyBuilding(game: ActiveGame, x: number, y: number) {
+export function removeBuilding(game: ActiveGame, x: number, y: number) {
     game.base.grid[x][y] = Building.Empty;
     // Refresh growth per tile
     refreshGrowth(game);
-    let destroyCosts = zeroResources();
-    destroyCosts.gold = config()["destroyBuildingCost"];
-    chargeCosts(game, destroyCosts);
+    let removeCosts = zeroResources();
+    removeCosts.gold = config()["removeBuildingCost"];
+    chargeCosts(game, removeCosts);
     buildEvent(Building.Empty);
 }
 

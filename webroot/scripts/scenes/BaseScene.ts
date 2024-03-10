@@ -1,5 +1,5 @@
 import { addGameRestartedListener } from "../events/EventMessenger";
-import { ActiveGame, buildBuilding, canAfford, destroyBuilding, gameEnded, resetGame } from "../game/Game";
+import { ActiveGame, buildBuilding, canAfford, removeBuilding, gameEnded, resetGame } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
@@ -104,15 +104,15 @@ export class BaseScene extends Phaser.Scene {
             return;
         }
 
-        let isDestroy = this.uiState.selectedBuilding == UIBuilding.Destroy;
-        // Ensure we aren't destroying an empty space, or building on a non-empty space
-        if (isDestroy == (this.activeGame.base.grid[gridX][gridY] == Building.Empty)) {
+        let isRemove = this.uiState.selectedBuilding == UIBuilding.Remove;
+        // Ensure we aren't remove an empty space, or building on a non-empty space
+        if (isRemove == (this.activeGame.base.grid[gridX][gridY] == Building.Empty)) {
             return;
         }
 
         let costs = zeroResources();
-        if (isDestroy) {
-            costs.gold = config()["destroyBuildingCost"];
+        if (isRemove) {
+            costs.gold = config()["removeBuildingCost"];
         } else {
             costs = buildingCosts(BuildingFrom(this.uiState.selectedBuilding));
         }
@@ -120,15 +120,15 @@ export class BaseScene extends Phaser.Scene {
             return;
         }
 
-        // Don't allow destroying townhall
-        if (isDestroy && this.activeGame.base.grid[gridX][gridY] == Building.Townhall) {
+        // Don't allow removing townhall
+        if (isRemove && this.activeGame.base.grid[gridX][gridY] == Building.Townhall) {
             return;
         }
         
-        // If destroying, destroy the building
-        if (isDestroy) {
+        // If removing, remove the building
+        if (isRemove) {
             this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(Building.Empty);
-            destroyBuilding(this.activeGame, gridX, gridY);
+            removeBuilding(this.activeGame, gridX, gridY);
         } else {
             // Build the building
             this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(BuildingFrom(this.uiState.selectedBuilding));

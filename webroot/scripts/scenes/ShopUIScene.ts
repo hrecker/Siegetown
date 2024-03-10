@@ -15,7 +15,7 @@ export class ShopUIScene extends Phaser.Scene {
     buildButtons: { [type: string] : Phaser.GameObjects.Text }
     buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
     tooltips: { [type: string] : Phaser.GameObjects.Text }
-    destroyButtonOutline: Phaser.GameObjects.Rectangle;
+    removeButtonOutline: Phaser.GameObjects.Rectangle;
 
     constructor() {
         super({
@@ -43,7 +43,7 @@ export class ShopUIScene extends Phaser.Scene {
             UIBuilding.Market,
             UIBuilding.Barracks,
             UIBuilding.TrainingGround,
-            UIBuilding.Destroy,
+            UIBuilding.Remove,
         ]
     }
 
@@ -64,8 +64,8 @@ export class ShopUIScene extends Phaser.Scene {
     createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
         let text = buildingType + ":";
         let costs = zeroResources();
-        if (buildingType == UIBuilding.Destroy) {
-            costs.gold = config()["destroyBuildingCost"];
+        if (buildingType == UIBuilding.Remove) {
+            costs.gold = config()["removeBuildingCost"];
         } else {
             costs = buildingCosts(BuildingFrom(buildingType));
         }
@@ -148,8 +148,8 @@ export class ShopUIScene extends Phaser.Scene {
             this.buildButtons[building] = buildButton;
             this.buildButtonOutlines[building] = buildButtonOutline;
             let tooltipText = "";
-            if (building == UIBuilding.Destroy) {
-                tooltipText = config()["destroyBuildingTooltip"];
+            if (building == UIBuilding.Remove) {
+                tooltipText = config()["removeBuildingTooltip"];
             } else {
                 tooltipText = config()["buildings"][building]["tooltipText"];
             }

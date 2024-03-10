@@ -19,8 +19,8 @@
     "maxEnemySpawnRate": 5000,
     "maxEnemiesPerWave": 6,
 
-    "destroyBuildingCost": 500,
-    "destroyBuildingTooltip": "Destroy existing building",
+    "removeBuildingCost": 500,
+    "removeBuildingTooltip": "Remove existing building",
 
     "startingResources": {
         "food": 150
