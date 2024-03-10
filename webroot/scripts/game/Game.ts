@@ -25,6 +25,7 @@ export type ActiveGame = {
     lastUpdate: number;
     enemySpawnRate: number;
     unitSpawnDelaysRemaining: { [type: string] : number }
+    usedActions: ActionType[];
 }
 
 function townhallCoordinate(): number {
@@ -100,6 +101,7 @@ export function createGame(): ActiveGame {
         lastUpdate: -1,
         enemySpawnRate: config()["baseEnemySpawnRate"],
         unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
+        usedActions: [],
     };
 }
 
@@ -127,6 +129,7 @@ export function resetGame(game: ActiveGame) {
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
+    game.usedActions = [];
 }
 
 function startingResources(): Resources {
@@ -282,6 +285,7 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
             });
             break;
     }
+    game.usedActions.push(action);
     actionRunEvent(action);
 }
 
