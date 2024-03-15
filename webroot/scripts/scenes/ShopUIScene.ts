@@ -142,8 +142,11 @@ export class ShopUIScene extends Phaser.Scene {
             let buildButton = this.createBuildBuildingButtonText(building, y);
             let buildButtonOutline = this.createOutline(buildButton);
             buildButton.setInteractive();
+            buildButton.setData("selectable", true);
             buildButton.on('pointerdown', () => {
-                this.selectBuild(building);
+                if (buildButton.getData("selectable")) {
+                    this.selectBuild(building);
+                }
             });
             buildButton.on('pointerover', () => {
                 this.tooltips[building].setVisible(true);
@@ -168,8 +171,11 @@ export class ShopUIScene extends Phaser.Scene {
             let buildButton = this.createBuildUnitButtonText(unit, y);
             let buildButtonOutline = this.createOutline(buildButton);
             buildButton.setInteractive();
+            buildButton.setData("selectable", true);
             buildButton.on('pointerdown', () => {
-                this.selectUnitBuild(unit);
+                if (buildButton.getData("selectable")) {
+                    this.selectUnitBuild(unit);
+                }
             });
             this.buildButtons[unit] = buildButton;
             this.buildButtonOutlines[unit] = buildButtonOutline;
@@ -182,8 +188,11 @@ export class ShopUIScene extends Phaser.Scene {
             let buildButton = this.createBuildActionButtonText(action, y);
             let buildButtonOutline = this.createOutline(buildButton);
             buildButton.setInteractive();
+            buildButton.setData("selectable", true);
             buildButton.on('pointerdown', () => {
-                this.selectActionBuild(action);
+                if (buildButton.getData("selectable")) {
+                    this.selectActionBuild(action);
+                }
             });
             this.buildButtons[action] = buildButton;
             this.buildButtonOutlines[action] = buildButtonOutline;
@@ -202,20 +211,20 @@ export class ShopUIScene extends Phaser.Scene {
 
     setButtonState(key: string, state: ButtonState) {
         let alpha: number;
-        let interactive: boolean;
+        let selectable: boolean;
         let hideOutline: boolean;
         switch (state) {
             case ButtonState.Available:
                 alpha = 1;
-                interactive = true;
+                selectable = true;
                 break;
             case ButtonState.Unavailable:
                 alpha = 0.6;
-                interactive = false;
+                selectable = true;
                 break;
             case ButtonState.Locked:
                 alpha = 0.3;
-                interactive = false;
+                selectable = false;
                 hideOutline = true;
                 break;
         }
@@ -224,10 +233,10 @@ export class ShopUIScene extends Phaser.Scene {
         if (hideOutline) {
             this.buildButtonOutlines[key].setVisible(false);
         }
-        if (interactive) {
-            this.buildButtons[key].setInteractive();
+        if (selectable) {
+            this.buildButtons[key].setData("selectable", true);
         } else {
-            this.buildButtons[key].disableInteractive();
+            this.buildButtons[key].setData("selectable", false);
         }
     }
 
