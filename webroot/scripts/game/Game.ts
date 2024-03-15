@@ -4,7 +4,7 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
-import { allUnits, destroyUnit, Unit, UnitType, updateHealth } from "../model/Unit";
+import { allUnits, destroyUnit, Unit, unitSpeed, UnitType, updateHealth } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
 import { shuffleArray } from "../util/Utils";
 
@@ -411,7 +411,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 continue;
             }
 
-            player.gameObject.x += config()["units"][player.type]["speed"];
+            player.gameObject.x += unitSpeed(player.type);
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
@@ -457,7 +457,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 continue;
             }
 
-            enemy.gameObject.x -= config()["units"][enemy.type]["speed"];
+            enemy.gameObject.x -= unitSpeed(enemy.type);
             
             // Don't pass other units
             if (xLimit != -1) {

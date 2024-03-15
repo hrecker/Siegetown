@@ -64,3 +64,7 @@ export function destroyUnit(unit: Unit) {
     unit.healthBar.destroy();
     unit.label.destroy();
 }
+
+export function unitSpeed(type: UnitType): number {
+    return config()["units"][type]["speed"] / 4.0;
+}

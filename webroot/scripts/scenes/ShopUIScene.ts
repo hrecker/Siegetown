@@ -14,6 +14,12 @@ enum ButtonState {
     Locked
 }
 
+enum ShopButtonType {
+    Building,
+    Unit,
+    Action,
+}
+
 export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
@@ -67,30 +73,34 @@ export class ShopUIScene extends Phaser.Scene {
         return text;
     }
 
+    createBuildButtonText(key: string, y: number, costs: Resources, rightAlign: boolean) {
+        let text = key + ":";
+        text += this.costsText(costs);
+        if (rightAlign) {
+            return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
+        } else {
+            return this.add.text(this.getX(10), this.getY(y), text);
+        }
+    }
+
     createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
-        let text = buildingType + ":";
         let costs = zeroResources();
         if (buildingType == UIBuilding.Remove) {
             costs.gold = config()["removeBuildingCost"];
         } else {
             costs = buildingCosts(BuildingFrom(buildingType));
         }
-        text += this.costsText(costs);
-        return this.add.text(this.getX(10), this.getY(y), text);
+        return this.createBuildButtonText(buildingType, y, costs, false);
     }
 
     createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
-        let text = unitType + ":";
         let costs = unitCosts(unitType);
-        text += this.costsText(costs);
-        return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
+        return this.createBuildButtonText(unitType, y, costs, true);
     }
 
     createBuildActionButtonText(actionType: ActionType, y: number): Phaser.GameObjects.Text {
-        let text = actionType + ":";
         let costs = actionCosts(actionType);
-        text += this.costsText(costs);
-        return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
+        return this.createBuildButtonText(actionType, y, costs, true);
     }
 
     createBuildingBuildButton(building: UIBuilding, y: number) {
@@ -116,6 +126,58 @@ export class ShopUIScene extends Phaser.Scene {
         return this.add.text(x, y, text).setBackgroundColor("blue").setWordWrapWidth(250).setOrigin(1, 1);
     }
 
+    // Returns the gap needed between this button and the next button... a little jank but hey it works
+    createShopButton(buttonType: ShopButtonType, typeKey: string, y: number): number {
+        let buildButton;
+        let tooltipText = "";
+        switch (buttonType) {
+            case ShopButtonType.Building:
+                buildButton = this.createBuildBuildingButtonText(typeKey as UIBuilding, y);
+                if (typeKey == UIBuilding.Remove) {
+                    tooltipText = config()["removeBuildingTooltip"];
+                } else {
+                    tooltipText = config()["buildings"][typeKey]["tooltipText"];
+                }
+                break;
+            case ShopButtonType.Unit:
+                buildButton = this.createBuildUnitButtonText(typeKey as UnitType, y);
+                tooltipText = config()["units"][typeKey]["tooltipText"];
+                break;
+            case ShopButtonType.Action:
+                buildButton = this.createBuildActionButtonText(typeKey as ActionType, y);
+                tooltipText = config()["actions"][typeKey]["tooltipText"];
+                break;
+        }
+        let buildButtonOutline = this.createOutline(buildButton);
+        buildButton.setInteractive();
+        buildButton.setData("selectable", true);
+        buildButton.on('pointerdown', () => {
+            if (buildButton.getData("selectable")) {
+                switch (buttonType) {
+                    case ShopButtonType.Building:
+                        this.selectBuild(typeKey as UIBuilding);
+                        break;
+                    case ShopButtonType.Unit:
+                        this.selectUnitBuild(typeKey as UnitType);
+                        break;
+                    case ShopButtonType.Action:
+                        this.selectActionBuild(typeKey as ActionType);
+                        break;
+                }
+            }
+        });
+        buildButton.on('pointerover', () => {
+            this.tooltips[typeKey].setVisible(true);
+        });
+        buildButton.on('pointerout', () => {
+            this.tooltips[typeKey].setVisible(false);
+        });
+        this.buildButtons[typeKey] = buildButton;
+        this.buildButtonOutlines[typeKey] = buildButtonOutline;
+        this.tooltips[typeKey] = this.createTooltip(tooltipText, buildButtonOutline.getTopLeft().x, this.getY(y)).setVisible(false);
+        return buildButtonOutline.height + 5;
+    }
+
     getX(localX: number): number {
         return localX + this.game.renderer.width - uiBarWidth;
     }
@@ -139,64 +201,18 @@ export class ShopUIScene extends Phaser.Scene {
         this.tooltips = {};
         let y = 30;
         this.allBuildings().forEach(building => {
-            let buildButton = this.createBuildBuildingButtonText(building, y);
-            let buildButtonOutline = this.createOutline(buildButton);
-            buildButton.setInteractive();
-            buildButton.setData("selectable", true);
-            buildButton.on('pointerdown', () => {
-                if (buildButton.getData("selectable")) {
-                    this.selectBuild(building);
-                }
-            });
-            buildButton.on('pointerover', () => {
-                this.tooltips[building].setVisible(true);
-            });
-            buildButton.on('pointerout', () => {
-                this.tooltips[building].setVisible(false);
-            });
-            this.buildButtons[building] = buildButton;
-            this.buildButtonOutlines[building] = buildButtonOutline;
-            let tooltipText = "";
-            if (building == UIBuilding.Remove) {
-                tooltipText = config()["removeBuildingTooltip"];
-            } else {
-                tooltipText = config()["buildings"][building]["tooltipText"];
-            }
-            this.tooltips[building] = this.createTooltip(tooltipText, buildButtonOutline.getTopLeft().x, this.getY(y)).setVisible(false);
-            y += buildButtonOutline.height + 5;
+            y += this.createShopButton(ShopButtonType.Building, building, y);
         });
 
         y = 30;
         allUnits().forEach(unit => {
-            let buildButton = this.createBuildUnitButtonText(unit, y);
-            let buildButtonOutline = this.createOutline(buildButton);
-            buildButton.setInteractive();
-            buildButton.setData("selectable", true);
-            buildButton.on('pointerdown', () => {
-                if (buildButton.getData("selectable")) {
-                    this.selectUnitBuild(unit);
-                }
-            });
-            this.buildButtons[unit] = buildButton;
-            this.buildButtonOutlines[unit] = buildButtonOutline;
-            y += buildButtonOutline.height + 5
+            y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
 
         this.add.text(this.getX(uiBarWidth - 5), this.getY(y + 5), "One-time Actions").setAlign("right").setOrigin(1, 0);
         y += 30;
         allActions().forEach(action => {
-            let buildButton = this.createBuildActionButtonText(action, y);
-            let buildButtonOutline = this.createOutline(buildButton);
-            buildButton.setInteractive();
-            buildButton.setData("selectable", true);
-            buildButton.on('pointerdown', () => {
-                if (buildButton.getData("selectable")) {
-                    this.selectActionBuild(action);
-                }
-            });
-            this.buildButtons[action] = buildButton;
-            this.buildButtonOutlines[action] = buildButtonOutline;
-            y += buildButtonOutline.height + 5
+            y += this.createShopButton(ShopButtonType.Action, action, y);
         });
 
         addGameRestartedListener(this.gameRestartedListener, this);
