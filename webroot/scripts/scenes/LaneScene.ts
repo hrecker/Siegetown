@@ -6,7 +6,7 @@ import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
-import { createUnit, Unit, UnitType } from "../model/Unit";
+import { allUnits, createUnit, Unit, UnitType } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const enemyColor = 0x911c04;
@@ -15,7 +15,7 @@ const healthBarWidth = 64;
 const healthBarHeight = 6;
 export const healthBarYPos = 36;
 const healthBarFillColor = 0x32a852;
-const sceneTopY = 350;
+export const laneSceneTopY = 350;
 const laneMargin = 2;
 const numberKeyCodes = [
     Phaser.Input.Keyboard.KeyCodes.ONE,
@@ -64,12 +64,12 @@ export class LaneScene extends Phaser.Scene {
         }
 
         // Position the scene
-        this.cameras.main.setPosition(0, sceneTopY);
+        this.cameras.main.setPosition(0, laneSceneTopY);
         
         let graphics = this.add.graphics({ lineStyle: { width: 4 } });
 
         // Draw the lanes
-        this.laneHeight = (this.game.renderer.height - sceneTopY) / config()["numLanes"];
+        this.laneHeight = (this.game.renderer.height - laneSceneTopY) / config()["numLanes"];
         for (let i = 0; i < config()["numLanes"]; i++) {
             let y = laneMargin + (i * this.laneHeight);
             graphics.strokeLineShape(new Phaser.Geom.Line(0, y, this.game.renderer.width, y));
@@ -92,7 +92,7 @@ export class LaneScene extends Phaser.Scene {
 
 
     handleLaneClick() {
-        let lane = Math.floor((this.input.activePointer.y - sceneTopY - laneMargin) / this.laneHeight);
+        let lane = Math.floor((this.input.activePointer.y - laneSceneTopY - laneMargin) / this.laneHeight);
 
         if (lane < 0 || lane >= config()["numLanes"]) {
             return;

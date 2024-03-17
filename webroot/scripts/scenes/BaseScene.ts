@@ -1,14 +1,18 @@
-import { addGameRestartedListener } from "../events/EventMessenger";
+import { addGameRestartedListener, addUnitBuiltListener } from "../events/EventMessenger";
 import { ActiveGame, buildBuilding, canAfford, removeBuilding, gameEnded, resetGame } from "../game/Game";
 import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
 import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
+import { UnitType, allUnits } from "../model/Unit";
+import { laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const boardWidth = 300;
 const boardMargin = 10;
+const cooldownMargin = 10;
+const cooldownBarHeight = 100;
 
 type GridText = {
     mainText: Phaser.GameObjects.Text;
@@ -26,6 +30,9 @@ export class BaseScene extends Phaser.Scene {
     boardTopLeftY: number;
     laneTopY: number;
     laneHeight: number;
+
+    unitCooldownIcons: Phaser.GameObjects.Text[];
+    unitCooldownBars: Phaser.GameObjects.Rectangle[];
 
     constructor() {
         super({
@@ -86,10 +93,24 @@ export class BaseScene extends Phaser.Scene {
             //this.handleLaneClick();
         });
 
+        // Create icons and cooldown bars
+        let x = cooldownMargin;
+        let y = laneSceneTopY - cooldownMargin;
+        this.unitCooldownIcons = [];
+        this.unitCooldownBars = [];
+        allUnits().forEach(unit => {
+            let unitIcon = this.add.text(x, y, String(unit).charAt(0)).setBackgroundColor("white").setColor("black").setOrigin(0, 1).setFontSize(24).setVisible(false);
+            this.unitCooldownIcons.push(unitIcon);
+            let unitCooldownBar = this.add.rectangle(x, y - unitIcon.height - cooldownMargin, unitIcon.width, cooldownBarHeight, 0xffffff).setOrigin(0, 1).setVisible(false);
+            this.unitCooldownBars.push(unitCooldownBar);
+            x += unitIcon.width + cooldownMargin;
+        });
+
         this.resize(true);
         this.scale.on("resize", this.resize, this);
 
         addGameRestartedListener(this.gameRestartedListener, this);
+        addUnitBuiltListener(this.unitBuiltListener, this);
     }
 
     handleGridClick() {
@@ -189,6 +210,51 @@ export class BaseScene extends Phaser.Scene {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 scene.gridTexts[i][j].mainText.text = scene.getBuildingText(scene.activeGame.base.grid[i][j]);
                 scene.gridTexts[i][j].growthText.text = scene.getGrowthText(i, j);
+            }
+        }
+    }
+
+    unitBuiltListener(scene: BaseScene, type: UnitType) {
+        let delay = scene.activeGame.unitSpawnDelaysRemaining[type];
+        if (delay > 0) {
+            let maxDelay = config()["units"][type]["spawnDelay"];
+            for (let i = 0; i < scene.unitCooldownIcons.length; i++) {
+                if (! scene.unitCooldownIcons[i].visible) {
+                    scene.unitCooldownIcons[i].setText(String(type).charAt(0));
+                    scene.unitCooldownBars[i].setSize(scene.unitCooldownIcons[i].width, (delay / maxDelay) * cooldownBarHeight);
+                    scene.unitCooldownIcons[i].setData("unitType", type);
+                    scene.unitCooldownIcons[i].setVisible(true);
+                    scene.unitCooldownBars[i].setVisible(true);
+                    break;
+                }
+            }
+        }
+    }
+
+    update(time: number, delta: number): void {
+        let leftShift = 0;
+        for (let i = 0; i < this.unitCooldownIcons.length; i++) {
+            if (! this.unitCooldownIcons[i].visible) {
+                continue;
+            }
+            let type = this.unitCooldownIcons[i].getData("unitType");
+            let delay = this.activeGame.unitSpawnDelaysRemaining[type];
+            if (delay <= 0) {
+                this.unitCooldownIcons[i].setVisible(false);
+                this.unitCooldownBars[i].setVisible(false);
+                leftShift++;
+            } else {
+                let maxDelay = config()["units"][type]["spawnDelay"];
+                this.unitCooldownBars[i].setSize(this.unitCooldownIcons[i].width, (delay / maxDelay) * cooldownBarHeight);
+                if (leftShift > 0) {
+                    this.unitCooldownIcons[i - leftShift].setText(this.unitCooldownIcons[i].text);
+                    this.unitCooldownBars[i - leftShift].setSize(this.unitCooldownBars[i].width, this.unitCooldownBars[i].height);
+                    this.unitCooldownIcons[i].setVisible(false);
+                    this.unitCooldownBars[i].setVisible(false);
+                    this.unitCooldownIcons[i - leftShift].setVisible(true);
+                    this.unitCooldownBars[i - leftShift].setVisible(true);
+                    this.unitCooldownIcons[i - leftShift].setData("unitType", type);
+                }
             }
         }
     }
