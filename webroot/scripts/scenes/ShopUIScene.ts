@@ -18,6 +18,7 @@ enum ShopButtonType {
     Building,
     Unit,
     Action,
+    None,
 }
 
 export class ShopUIScene extends Phaser.Scene {
@@ -28,6 +29,13 @@ export class ShopUIScene extends Phaser.Scene {
     buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
     tooltips: { [type: string] : Phaser.GameObjects.Text }
     removeButtonOutline: Phaser.GameObjects.Rectangle;
+
+    navigationUpButton: Phaser.Input.Keyboard.Key;
+    navigationDownButton: Phaser.Input.Keyboard.Key;
+    navigationUpButtonWasDown: boolean;
+    navigationDownButtonWasDown: boolean;
+    lastSelectedType: ShopButtonType;
+    selectedIndex: number;
 
     constructor() {
         super({
@@ -215,6 +223,11 @@ export class ShopUIScene extends Phaser.Scene {
             y += this.createShopButton(ShopButtonType.Action, action, y);
         });
 
+        this.navigationUpButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.navigationDownButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.lastSelectedType = ShopButtonType.None;
+        this.selectedIndex = -1;
+
         addGameRestartedListener(this.gameRestartedListener, this);
         addUnitBuiltListener(this.unitBuiltListener, this);
         addUnitUnlockedListener(this.unitUnlockedListener, this);
@@ -334,31 +347,54 @@ export class ShopUIScene extends Phaser.Scene {
         if (gameEnded(this.activeGame)) {
             return;
         }
+        // If we are reselecting empty, then no need to do anything here
+        if (selection == UIBuilding.Empty && this.uiState.selectedBuilding == UIBuilding.Empty) {
+            return;
+        }
+
         if (this.uiState.selectedBuilding == selection) {
             this.uiState.selectedBuilding = UIBuilding.Empty;
+            this.selectedIndex = -1;
+            this.lastSelectedType = ShopButtonType.None;
         } else {
             this.uiState.selectedBuilding = selection;
         }
-        this.allBuildings().forEach(building => {
-            this.buildButtonOutlines[building].setVisible(this.uiState.selectedBuilding == building);
-        });
+        for (let i = 0; i < this.allBuildings().length; i++) {
+            let currentBuilding = this.allBuildings()[i];
+            this.buildButtonOutlines[currentBuilding].setVisible(this.uiState.selectedBuilding == currentBuilding);
+            if (this.uiState.selectedBuilding == currentBuilding) {
+                this.selectedIndex = i;
+                this.lastSelectedType = ShopButtonType.Building;
+            }
+        }
     }
 
     selectUnitBuild(unit: UnitType) {
         if (gameEnded(this.activeGame)) {
             return;
         }
+        // If we are reselecting empty, then no need to do anything here
+        if (unit == UnitType.None && this.uiState.selectedUnit == UnitType.None) {
+            return;
+        }
         if (this.uiState.selectedUnit == unit) {
             this.uiState.selectedUnit = UnitType.None;
+            this.selectedIndex = -1;
+            this.lastSelectedType = ShopButtonType.None;
         } else {
             this.uiState.selectedUnit = unit;
         }
-        allUnits().forEach(unit => {
-            this.buildButtonOutlines[unit].setVisible(this.uiState.selectedUnit == unit);
-        });
+        for (let i = 0; i < allUnits().length; i++) {
+            let currentUnit = allUnits()[i];
+            this.buildButtonOutlines[currentUnit].setVisible(this.uiState.selectedUnit == currentUnit);
+            if (this.uiState.selectedUnit == currentUnit) {
+                this.selectedIndex = i;
+            }
+        }
         // Deselect actions when selecting units
         if (this.uiState.selectedUnit != UnitType.None) {
             this.selectActionBuild(ActionType.None);
+            this.lastSelectedType = ShopButtonType.Unit;
         }
     }
 
@@ -366,22 +402,100 @@ export class ShopUIScene extends Phaser.Scene {
         if (gameEnded(this.activeGame)) {
             return;
         }
+        // If we are reselecting empty, then no need to do anything here
+        if (action == ActionType.None && this.uiState.selectedAction == ActionType.None) {
+            return;
+        }
         if (this.uiState.selectedAction == action) {
             this.uiState.selectedAction = ActionType.None;
+            this.selectedIndex = -1;
+            this.lastSelectedType = ShopButtonType.None;
         } else {
             this.uiState.selectedAction = action;
         }
-        allActions().forEach(action => {
-            this.buildButtonOutlines[action].setVisible(this.uiState.selectedAction == action);
-        });
+        for (let i = 0; i < allActions().length; i++) {
+            let currentAction = allActions()[i];
+            this.buildButtonOutlines[currentAction].setVisible(this.uiState.selectedAction == currentAction);
+            if (this.uiState.selectedAction == currentAction) {
+                this.selectedIndex = i;
+            }
+        }
         // Deselect units when selecting actions
         if (this.uiState.selectedAction != ActionType.None) {
             this.selectUnitBuild(UnitType.None);
+            this.lastSelectedType = ShopButtonType.Action;
+        }
+    }
+
+    navigateBuildButtons(up: boolean) {
+        if (this.selectedIndex == -1 || gameEnded(this.activeGame)) {
+            return;
+        }
+        let options;
+        switch (this.lastSelectedType) {
+            case ShopButtonType.Building:
+                options = this.allBuildings();
+                break;
+            case ShopButtonType.Unit:
+                options = allUnits();
+                break;
+            case ShopButtonType.Action:
+                options = allActions();
+                break;
+            case ShopButtonType.None:
+                return;
+        }
+
+        let index = this.selectedIndex;
+        if (up) {
+            index = (index + options.length - 1) % options.length;
+        } else {
+            index = (index + 1) % options.length;
+        }
+        // Find next selectable option
+        while (index != this.selectedIndex) {
+            if (this.buildButtons[options[index]].getData("selectable")) {
+                break;
+            }
+            if (up) {
+                index = (index + options.length - 1) % options.length;
+            } else {
+                index = (index + 1) % options.length;
+            }
+        }
+
+        // If no other selectable option was found, exit
+        if (index == this.selectedIndex) {
+            return;
+        }
+
+        switch (this.lastSelectedType) {
+            case ShopButtonType.Building:
+                this.selectBuild(options[index]);
+                break;
+            case ShopButtonType.Unit:
+                this.selectUnitBuild(options[index]);
+                break;
+            case ShopButtonType.Action:
+                this.selectActionBuild(options[index]);
+                break;
         }
     }
 
     gameRestartedListener(scene: ShopUIScene) {
         scene.selectBuild(UIBuilding.Empty);
         scene.selectUnitBuild(UnitType.None);
+    }
+
+    update(time, delta) {
+        // Check for navigation hotkeys
+        if (this.navigationUpButton.isDown && ! this.navigationUpButtonWasDown) {
+            this.navigateBuildButtons(true);
+        }
+        if (this.navigationDownButton.isDown && ! this.navigationDownButtonWasDown) {
+            this.navigateBuildButtons(false);
+        }
+        this.navigationUpButtonWasDown = this.navigationUpButton.isDown;
+        this.navigationDownButtonWasDown = this.navigationDownButton.isDown;
     }
 }
