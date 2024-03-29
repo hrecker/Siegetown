@@ -85,6 +85,21 @@ export class LaneScene extends Phaser.Scene {
         for (let i = 0; i < config()["numLanes"]; i++) {
             this.laneButtons.push(this.input.keyboard.addKey(numberKeyCodes[i]));
         }
+        
+        this.anims.create({
+            key: 'warrior_walk',
+            frames: [
+                { key: 'warrior_walk1' },
+                { key: 'warrior_walk2' },
+                { key: 'warrior_walk3' },
+                { key: 'warrior_walk4' }
+            ],
+            frameRate: 8,
+            repeat: -1
+        });
+
+        //TODO don't duplicate these 
+
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
@@ -160,16 +175,15 @@ export class LaneScene extends Phaser.Scene {
     }
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
-        let unit = this.add.circle(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
-            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), this.laneHeight / 3,
-            isEnemy ? enemyColor : 0xffffff);
+        let unit = this.add.sprite(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
+            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), "warrior_walk1").setScale(0.15).play("warrior_walk").setFlip(true, false);
         // Create the Unit's health bar
         let healthBarBackground = this.add.rectangle(unit.x, unit.y,
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
         let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
             healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
         // Create the label for the unit
-        let label = this.add.text(unit.x, unit.y, String(type).charAt(0)).setOrigin(0.5, 0.5).setFontSize(56).setColor("black");
+        let label = this.add.text(unit.x, unit.y, String(type).charAt(0)).setOrigin(0.5, 0.5).setFontSize(56).setColor("black").setVisible(false);
         // Get any buffs to health or damage
         let buffs: Buffs;
         if (isEnemy) {

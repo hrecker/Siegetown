@@ -35,6 +35,10 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
+        this.load.image("warrior_walk1", "assets/sprites/units/warrior_walk1.png");
+        this.load.image("warrior_walk2", "assets/sprites/units/warrior_walk2.png");
+        this.load.image("warrior_walk3", "assets/sprites/units/warrior_walk3.png");
+        this.load.image("warrior_walk4", "assets/sprites/units/warrior_walk4.png");
         
         // Load json
         this.load.json("config", "assets/json/config.json");
