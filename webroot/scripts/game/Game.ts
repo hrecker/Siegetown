@@ -407,11 +407,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                         enemyUnitsToRemove.add(0);
                     }
                 }
+                player.gameObject.play("warrior_attack", true);
                 xLimit = topLeftX;
                 continue;
             }
 
             player.gameObject.x += unitSpeed(player.type);
+            player.gameObject.play("warrior_walk", true);
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
@@ -454,10 +456,12 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     }
                 }
                 xLimit = topRightX;
+                enemy.gameObject.play("warrior_attack", true);
                 continue;
             }
 
             enemy.gameObject.x -= unitSpeed(enemy.type);
+            enemy.gameObject.play("warrior_walk", true);
             
             // Don't pass other units
             if (xLimit != -1) {

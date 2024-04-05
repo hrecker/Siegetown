@@ -28,6 +28,12 @@ export class LoadingScene extends Phaser.Scene {
         this.loadingBox.setSize(this.loadingText.width, this.loadingText.height / 2);
     }
 
+    loadSpriteSequence(numSprites: number, baseKey: string, basePath: string) {
+        for (let i = 1; i <= numSprites; i++) {
+            this.load.image(baseKey + i, basePath + i + ".png");
+        }
+    }
+
     loadResources() {
         // Ensure the canvas is the right size
         this.scale.refresh();
@@ -35,10 +41,8 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
-        this.load.image("warrior_walk1", "assets/sprites/units/warrior_walk1.png");
-        this.load.image("warrior_walk2", "assets/sprites/units/warrior_walk2.png");
-        this.load.image("warrior_walk3", "assets/sprites/units/warrior_walk3.png");
-        this.load.image("warrior_walk4", "assets/sprites/units/warrior_walk4.png");
+        this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
+        this.loadSpriteSequence(5, "warrior_attack", "assets/sprites/units/warrior_attack");
         
         // Load json
         this.load.json("config", "assets/json/config.json");

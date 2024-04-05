@@ -86,25 +86,26 @@ export class LaneScene extends Phaser.Scene {
             this.laneButtons.push(this.input.keyboard.addKey(numberKeyCodes[i]));
         }
         
-        this.anims.create({
-            key: 'warrior_walk',
-            frames: [
-                { key: 'warrior_walk1' },
-                { key: 'warrior_walk2' },
-                { key: 'warrior_walk3' },
-                { key: 'warrior_walk4' }
-            ],
-            frameRate: 8,
-            repeat: -1
-        });
-
-        //TODO don't duplicate these 
-
+        // Create animations
+        this.createAnimation("warrior_walk", 4);
+        this.createAnimation("warrior_attack", 5);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
     }
 
+    createAnimation(key: string, numFrames: number) {
+        let frames = [];
+        for (let i = 1; i <= numFrames; i++) {
+            frames.push({ key: key + i });
+        }
+        this.anims.create({
+            key: key,
+            frames: frames,
+            frameRate: 8,
+            repeat: -1
+        });
+    }
 
     handleLaneClick() {
         let lane = Math.floor((this.input.activePointer.y - laneSceneTopY - laneMargin) / this.laneHeight);
@@ -176,7 +177,7 @@ export class LaneScene extends Phaser.Scene {
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
         let unit = this.add.sprite(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
-            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), "warrior_walk1").setScale(0.15).play("warrior_walk").setFlip(true, false);
+            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), "warrior_walk1").setScale(0.15).play("warrior_walk");
         // Create the Unit's health bar
         let healthBarBackground = this.add.rectangle(unit.x, unit.y,
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
@@ -191,6 +192,7 @@ export class LaneScene extends Phaser.Scene {
                 damageBuff: 0,
                 healthBuff: 0,
             }
+            unit.setFlipX(true);
         } else {
             buffs = getBuffs(this.activeGame);
             if (! ignoreDelays) {
