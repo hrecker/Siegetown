@@ -68,3 +68,11 @@ export function destroyUnit(unit: Unit) {
 export function unitSpeed(type: UnitType): number {
     return config()["units"][type]["speed"] / 4.0;
 }
+
+export function walkAnimation(type: UnitType): string {
+    return type + "_walk";
+}
+
+export function attackAnimation(type: UnitType): string {
+    return type + "_attack";
+}

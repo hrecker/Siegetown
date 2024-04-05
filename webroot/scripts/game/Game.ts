@@ -4,7 +4,7 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
-import { allUnits, destroyUnit, Unit, unitSpeed, UnitType, updateHealth } from "../model/Unit";
+import { allUnits, attackAnimation, destroyUnit, Unit, unitSpeed, UnitType, updateHealth, walkAnimation } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
 import { shuffleArray } from "../util/Utils";
 
@@ -407,13 +407,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                         enemyUnitsToRemove.add(0);
                     }
                 }
-                player.gameObject.play("warrior_attack", true);
+                player.gameObject.play(attackAnimation(player.type), true);
                 xLimit = topLeftX;
                 continue;
             }
 
             player.gameObject.x += unitSpeed(player.type);
-            player.gameObject.play("warrior_walk", true);
+            player.gameObject.play(walkAnimation(player.type), true);
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
@@ -456,12 +456,12 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     }
                 }
                 xLimit = topRightX;
-                enemy.gameObject.play("warrior_attack", true);
+                enemy.gameObject.play(attackAnimation(enemy.type), true);
                 continue;
             }
 
             enemy.gameObject.x -= unitSpeed(enemy.type);
-            enemy.gameObject.play("warrior_walk", true);
+            enemy.gameObject.play(walkAnimation(enemy.type), true);
             
             // Don't pass other units
             if (xLimit != -1) {

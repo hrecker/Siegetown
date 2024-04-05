@@ -6,7 +6,7 @@ import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
-import { allUnits, createUnit, Unit, UnitType } from "../model/Unit";
+import { allUnits, createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const enemyColor = 0x911c04;
@@ -89,6 +89,7 @@ export class LaneScene extends Phaser.Scene {
         // Create animations
         this.createAnimation("warrior_walk", 4);
         this.createAnimation("warrior_attack", 5);
+        this.createAnimation("slingshotter_walk", 8);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
@@ -177,7 +178,7 @@ export class LaneScene extends Phaser.Scene {
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
         let unit = this.add.sprite(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
-            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), "warrior_walk1").setScale(0.15).play("warrior_walk");
+            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), walkAnimation(type)).setScale(0.15).play(walkAnimation(type));
         // Create the Unit's health bar
         let healthBarBackground = this.add.rectangle(unit.x, unit.y,
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);

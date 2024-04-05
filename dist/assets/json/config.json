@@ -23,7 +23,8 @@
     "removeBuildingTooltip": "Remove existing building",
 
     "startingResources": {
-        "food": 150
+        "food": 1500,
+        "wood": 1500
     },
 
     "units": {
