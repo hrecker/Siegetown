@@ -91,6 +91,8 @@ export class LaneScene extends Phaser.Scene {
         this.createAnimation("warrior_attack", 5);
         this.createAnimation("slingshotter_walk", 8);
         this.createAnimation("slingshotter_attack", 4);
+        this.createAnimation("clubman_walk", 8);
+        this.createAnimation("clubman_attack", 4);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
