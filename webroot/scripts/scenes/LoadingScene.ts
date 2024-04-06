@@ -44,6 +44,7 @@ export class LoadingScene extends Phaser.Scene {
         this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
         this.loadSpriteSequence(5, "warrior_attack", "assets/sprites/units/warrior_attack");
         this.loadSpriteSequence(8, "slingshotter_walk", "assets/sprites/units/slingshotter_walk");
+        this.loadSpriteSequence(4, "slingshotter_attack", "assets/sprites/units/slingshotter_attack");
         
         // Load json
         this.load.json("config", "assets/json/config.json");
