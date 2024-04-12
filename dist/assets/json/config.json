@@ -14,7 +14,7 @@
 
     "secondsBetweenWaves": 60,
 
-    "baseEnemySpawnRate": 1000,
+    "baseEnemySpawnRate": 11000,
     "enemySpawnRateAcceleration": 100,
     "maxEnemySpawnRate": 5000,
     "maxEnemiesPerWave": 6,
@@ -23,8 +23,7 @@
     "removeBuildingTooltip": "Remove existing building",
 
     "startingResources": {
-        "food": 1500,
-        "wood": 1500
+        "food": 150
     },
 
     "units": {
@@ -66,7 +65,7 @@
                 "food": 400,
                 "wood": 400
             },
-            "buildRequirement": "townhall",
+            "buildRequirement": "trainingground",
             "tooltipText": "Requires Training Ground\nAttack: 2\nHealth: 4\nRange: 1\nSpeed: 4\nAttack Delay: 14"
         }
     },
