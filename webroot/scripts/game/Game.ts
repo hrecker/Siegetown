@@ -388,7 +388,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         }
         for (let i = 0; i < lane.playerUnits.length; i++) {
             let player = lane.playerUnits[i];
-            let topLeftX = player.gameObject.getTopLeft().x;
+            let topLeftX = player.gameObject.x - (rangePixels / 2);
 
             // If frozen, don't do anything
             if (player.frozenTimeRemaining > 0) {
@@ -418,7 +418,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
-                let topRightX = player.gameObject.getTopRight().x;
+                let topRightX = player.gameObject.x + (rangePixels / 2);
                 let overlap = topRightX - xLimit;
                 if (overlap > 0) {
                     player.gameObject.x -= overlap;
@@ -426,7 +426,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             }
             // If the unit didn't actually move, run the idle animation
             if (player.gameObject.x == originalX) {
-                player.gameObject.play(idleAnimation(player.type));
+                player.gameObject.play(idleAnimation(player.type), true);
             } else {
                 player.gameObject.play(walkAnimation(player.type), true);
             }
@@ -445,7 +445,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         xLimit = -1;
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
-            let topRightX = enemy.gameObject.getTopRight().x;
+            let topRightX = enemy.gameObject.x + (rangePixels / 2);
 
             // If frozen, don't do anything
             if (enemy.frozenTimeRemaining > 0) {
@@ -475,7 +475,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             
             // Don't pass other units
             if (xLimit != -1) {
-                let topLeftX = enemy.gameObject.getTopLeft().x;
+                let topLeftX = enemy.gameObject.x - (rangePixels / 2);
                 let overlap = xLimit - topLeftX;
                 if (overlap > 0) {
                     enemy.gameObject.x += overlap;
@@ -483,7 +483,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             }
             // If the unit didn't actually move, run the idle animation
             if (enemy.gameObject.x == originalX) {
-                enemy.gameObject.play(idleAnimation(enemy.type));
+                enemy.gameObject.play(idleAnimation(enemy.type), true);
             } else {
                 enemy.gameObject.play(walkAnimation(enemy.type), true);
             }
