@@ -41,10 +41,13 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
+        this.loadSpriteSequence(2, "warrior_idle", "assets/sprites/units/warrior_idle");
         this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
         this.loadSpriteSequence(5, "warrior_attack", "assets/sprites/units/warrior_attack");
+        this.loadSpriteSequence(2, "slingshotter_idle", "assets/sprites/units/slingshotter_idle");
         this.loadSpriteSequence(8, "slingshotter_walk", "assets/sprites/units/slingshotter_walk");
         this.loadSpriteSequence(4, "slingshotter_attack", "assets/sprites/units/slingshotter_attack");
+        this.loadSpriteSequence(2, "clubman_idle", "assets/sprites/units/clubman_idle");
         this.loadSpriteSequence(8, "clubman_walk", "assets/sprites/units/clubman_walk");
         this.loadSpriteSequence(4, "clubman_attack", "assets/sprites/units/clubman_attack");
         

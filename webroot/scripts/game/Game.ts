@@ -4,7 +4,7 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
-import { allUnits, attackAnimation, destroyUnit, Unit, unitSpeed, UnitType, updateHealth, walkAnimation } from "../model/Unit";
+import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, unitSpeed, UnitType, updateHealth, walkAnimation } from "../model/Unit";
 import { LaneScene } from "../scenes/LaneScene";
 import { shuffleArray } from "../util/Utils";
 
@@ -394,6 +394,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (player.frozenTimeRemaining > 0) {
                 player.frozenTimeRemaining -= delta;
                 xLimit = topLeftX;
+                player.gameObject.play(idleAnimation(player.type), true);
                 continue;
             }
 
@@ -412,8 +413,8 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 continue;
             }
 
+            let originalX = player.gameObject.x;
             player.gameObject.x += unitSpeed(player.type);
-            player.gameObject.play(walkAnimation(player.type), true);
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
@@ -423,6 +424,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     player.gameObject.x -= overlap;
                 }
             }
+            // If the unit didn't actually move, run the idle animation
+            if (player.gameObject.x == originalX) {
+                player.gameObject.play(idleAnimation(player.type));
+            } else {
+                player.gameObject.play(walkAnimation(player.type), true);
+            }
+
             if (topLeftX > laneWidth) {
                 game.enemyBaseHealth = Math.max(0, game.enemyBaseHealth - 1);
                 enemyBaseDamagedEvent(game.enemyBaseHealth);
@@ -433,6 +441,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             }
         }
         // Move enemy units
+        //TODO reduce the duplication here
         xLimit = -1;
         for (let i = 0; i < lane.enemyUnits.length; i++) {
             let enemy = lane.enemyUnits[i];
@@ -442,6 +451,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (enemy.frozenTimeRemaining > 0) {
                 enemy.frozenTimeRemaining -= delta;
                 xLimit = topRightX;
+                enemy.gameObject.play(idleAnimation(enemy.type), true);
                 continue;
             }
 
@@ -460,8 +470,8 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 continue;
             }
 
+            let originalX = enemy.gameObject.x;
             enemy.gameObject.x -= unitSpeed(enemy.type);
-            enemy.gameObject.play(walkAnimation(enemy.type), true);
             
             // Don't pass other units
             if (xLimit != -1) {
@@ -471,6 +481,13 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     enemy.gameObject.x += overlap;
                 }
             }
+            // If the unit didn't actually move, run the idle animation
+            if (enemy.gameObject.x == originalX) {
+                enemy.gameObject.play(idleAnimation(enemy.type));
+            } else {
+                enemy.gameObject.play(walkAnimation(enemy.type), true);
+            }
+
             if (topRightX < 0) {
                 game.baseHealth = Math.max(0, game.baseHealth - 1);
                 baseDamagedEvent(game.baseHealth);
