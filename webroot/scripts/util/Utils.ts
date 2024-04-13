@@ -12,3 +12,16 @@ export function shuffleArray(array) {
 export function vector2Str(vector: Phaser.Types.Math.Vector2Like) {
     return "(" + vector.x + ", " + vector.y + ")";
 }
+
+export function createAnimation(scene: Phaser.Scene, key: string, numFrames: number) {
+    let frames = [];
+    for (let i = 1; i <= numFrames; i++) {
+        frames.push({ key: key + i });
+    }
+    scene.anims.create({
+        key: key,
+        frames: frames,
+        frameRate: 8,
+        repeat: -1
+    });
+}

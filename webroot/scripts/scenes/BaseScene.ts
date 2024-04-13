@@ -6,6 +6,7 @@ import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
 import { UnitType, allUnits } from "../model/Unit";
+import { createAnimation } from "../util/Utils";
 import { laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
 
@@ -14,8 +15,8 @@ const boardMargin = 10;
 const cooldownMargin = 10;
 const cooldownBarHeight = 100;
 
-type GridText = {
-    mainText: Phaser.GameObjects.Text;
+type GridBuilding = {
+    mainSprite: Phaser.GameObjects.Sprite;
     growthText: Phaser.GameObjects.Text;
 }
 
@@ -24,7 +25,7 @@ export class BaseScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
 
-    gridTexts: GridText[][];
+    gridBuildings: GridBuilding[][];
 
     boardTopLeftX: number;
     boardTopLeftY: number;
@@ -59,6 +60,14 @@ export class BaseScene extends Phaser.Scene {
             this.sceneCreated = true;
         }
 
+        // Create animations
+        createAnimation(this, "townhall", 2);
+        createAnimation(this, "field", 2);
+        createAnimation(this, "forest", 2);
+        createAnimation(this, "market", 2);
+        createAnimation(this, "barracks", 2);
+        createAnimation(this, "trainingground", 2);
+
         // Draw the board
         this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth / 2);
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
@@ -72,16 +81,18 @@ export class BaseScene extends Phaser.Scene {
         }
 
         // Draw the buildings
-        this.gridTexts = [];
+        this.gridBuildings = [];
         for (let i = 0; i < config()["baseWidth"]; i++) {
-            this.gridTexts[i] = [];
+            this.gridBuildings[i] = [];
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 let x = this.boardTopLeftX + (boardWidth * i / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
                 let y = this.boardTopLeftY + (boardWidth * j / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
-                let mainText = this.add.text(x, y - 10, this.getBuildingText(this.activeGame.base.grid[i][j])).setOrigin(0.5, 0.5).setFontSize(64);
+                // Just default to townhall to start, the actual sprite is set in the next call
+                let buildingSprite = this.add.sprite(x, y - 10, "townhall").setScale(0.1);
+                this.setBuildingSprite(buildingSprite, this.activeGame.base.grid[i][j]);
                 let growthText = this.add.text(x, y + 20, this.getGrowthText(i, j)).setOrigin(0.5, 0.5).setFontSize(14);
-                this.gridTexts[i][j] = {
-                    mainText: mainText,
+                this.gridBuildings[i][j] = {
+                    mainSprite: buildingSprite,
                     growthText: growthText
                 };
             }
@@ -111,6 +122,15 @@ export class BaseScene extends Phaser.Scene {
 
         addGameRestartedListener(this.gameRestartedListener, this);
         addUnitBuiltListener(this.unitBuiltListener, this);
+    }
+
+    setBuildingSprite(sprite: Phaser.GameObjects.Sprite, buildingType: Building) {
+        if (buildingType == Building.Empty) {
+            sprite.setVisible(false);
+        } else {
+            sprite.setVisible(true);
+            sprite.setTexture(buildingType).play(buildingType, true);
+        }
     }
 
     handleGridClick() {
@@ -148,17 +168,17 @@ export class BaseScene extends Phaser.Scene {
         
         // If removing, remove the building
         if (isRemove) {
-            this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(Building.Empty);
+            this.setBuildingSprite(this.gridBuildings[gridX][gridY].mainSprite, Building.Empty);
             removeBuilding(this.activeGame, gridX, gridY);
         } else {
             // Build the building
-            this.gridTexts[gridX][gridY].mainText.text = this.getBuildingText(BuildingFrom(this.uiState.selectedBuilding));
+            this.setBuildingSprite(this.gridBuildings[gridX][gridY].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
             buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridX, gridY);
         }
         // Update all growth texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                this.gridTexts[i][j].growthText.text = this.getGrowthText(i, j);
+                this.gridBuildings[i][j].growthText.text = this.getGrowthText(i, j);
             }
         }
     }
@@ -208,8 +228,8 @@ export class BaseScene extends Phaser.Scene {
         // redraw the buildings
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                scene.gridTexts[i][j].mainText.text = scene.getBuildingText(scene.activeGame.base.grid[i][j]);
-                scene.gridTexts[i][j].growthText.text = scene.getGrowthText(i, j);
+                this.setBuildingSprite(this.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
+                scene.gridBuildings[i][j].growthText.text = scene.getGrowthText(i, j);
             }
         }
     }

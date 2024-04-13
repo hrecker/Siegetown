@@ -41,6 +41,7 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
+        // units
         this.loadSpriteSequence(2, "warrior_idle", "assets/sprites/units/warrior_idle");
         this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
         this.loadSpriteSequence(5, "warrior_attack", "assets/sprites/units/warrior_attack");
@@ -50,6 +51,14 @@ export class LoadingScene extends Phaser.Scene {
         this.loadSpriteSequence(2, "clubman_idle", "assets/sprites/units/clubman_idle");
         this.loadSpriteSequence(8, "clubman_walk", "assets/sprites/units/clubman_walk");
         this.loadSpriteSequence(4, "clubman_attack", "assets/sprites/units/clubman_attack");
+
+        // buildings
+        this.loadSpriteSequence(2, "townhall", "assets/sprites/buildings/townhall");
+        this.loadSpriteSequence(2, "field", "assets/sprites/buildings/field");
+        this.loadSpriteSequence(2, "forest", "assets/sprites/buildings/forest");
+        this.loadSpriteSequence(2, "market", "assets/sprites/buildings/market");
+        this.loadSpriteSequence(2, "barracks", "assets/sprites/buildings/barracks");
+        this.loadSpriteSequence(2, "trainingground", "assets/sprites/buildings/trainingground");
         
         // Load json
         this.load.json("config", "assets/json/config.json");

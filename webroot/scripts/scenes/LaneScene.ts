@@ -7,6 +7,7 @@ import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
 import { allUnits, createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
+import { createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
 
 const enemyColor = 0x911c04;
@@ -87,31 +88,18 @@ export class LaneScene extends Phaser.Scene {
         }
         
         // Create animations
-        this.createAnimation("warrior_idle", 2);
-        this.createAnimation("warrior_walk", 4);
-        this.createAnimation("warrior_attack", 5);
-        this.createAnimation("slingshotter_idle", 2);
-        this.createAnimation("slingshotter_walk", 8);
-        this.createAnimation("slingshotter_attack", 4);
-        this.createAnimation("clubman_idle", 2);
-        this.createAnimation("clubman_walk", 8);
-        this.createAnimation("clubman_attack", 4);
+        createAnimation(this, "warrior_idle", 2);
+        createAnimation(this, "warrior_walk", 4);
+        createAnimation(this, "warrior_attack", 5);
+        createAnimation(this, "slingshotter_idle", 2);
+        createAnimation(this, "slingshotter_walk", 8);
+        createAnimation(this, "slingshotter_attack", 4);
+        createAnimation(this, "clubman_idle", 2);
+        createAnimation(this, "clubman_walk", 8);
+        createAnimation(this, "clubman_attack", 4);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
-    }
-
-    createAnimation(key: string, numFrames: number) {
-        let frames = [];
-        for (let i = 1; i <= numFrames; i++) {
-            frames.push({ key: key + i });
-        }
-        this.anims.create({
-            key: key,
-            frames: frames,
-            frameRate: 8,
-            repeat: -1
-        });
     }
 
     handleLaneClick() {
