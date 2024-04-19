@@ -17,7 +17,7 @@ const cooldownBarHeight = 100;
 
 type GridBuilding = {
     mainSprite: Phaser.GameObjects.Sprite;
-    growthText: Phaser.GameObjects.Text;
+    tooltip: Phaser.GameObjects.Text;
 }
 
 export class BaseScene extends Phaser.Scene {
@@ -72,7 +72,8 @@ export class BaseScene extends Phaser.Scene {
         this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth / 2);
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
 
-        let graphics = this.add.graphics({ lineStyle: { width: 4 } });
+        let boardLineWidth = 4;
+        let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth } });
 
         for (let i = 0; i <= config()["baseWidth"]; i++) {
             let diff = (boardWidth * i / config()["baseWidth"]);
@@ -82,19 +83,47 @@ export class BaseScene extends Phaser.Scene {
 
         // Draw the buildings
         this.gridBuildings = [];
+        let tileWidth = boardWidth / config()["baseWidth"];
         for (let i = 0; i < config()["baseWidth"]; i++) {
             this.gridBuildings[i] = [];
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                let x = this.boardTopLeftX + (boardWidth * i / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
-                let y = this.boardTopLeftY + (boardWidth * j / config()["baseWidth"]) + (boardWidth / (config()["baseWidth"] * 2));
+                let x = this.boardTopLeftX + (tileWidth * i) + (tileWidth / 2);
+                let y = this.boardTopLeftY + (tileWidth * j) + (tileWidth / 2);
                 // Just default to townhall to start, the actual sprite is set in the next call
-                let buildingSprite = this.add.sprite(x, y - 10, "townhall").setScale(0.1);
+                let buildingSprite = this.add.sprite(x, y, "townhall1");
+                let xScale = (tileWidth - boardLineWidth) / buildingSprite.displayWidth;
+                let yScale = (tileWidth - boardLineWidth) / buildingSprite.displayHeight;
+                buildingSprite.setScale(xScale, yScale);
                 this.setBuildingSprite(buildingSprite, this.activeGame.base.grid[i][j]);
-                let growthText = this.add.text(x, y + 20, this.getGrowthText(i, j)).setOrigin(0.5, 0.5).setFontSize(14);
                 this.gridBuildings[i][j] = {
                     mainSprite: buildingSprite,
-                    growthText: growthText
+                    tooltip: null
                 };
+            }
+        }
+
+        // Draw the tooltips second so that they appear above the buildings
+        for (let i = 0; i < config()["baseWidth"]; i++) {
+            for (let j = 0; j < config()["baseWidth"]; j++) {
+                let x = this.boardTopLeftX + (tileWidth * i) + (tileWidth / 2);
+                let y = this.boardTopLeftY + (tileWidth * j) + (tileWidth / 2);
+                let tooltipOriginX = 0, tooltipOriginY = 0;
+                if (i >= config()["baseWidth"] / 2) {
+                    tooltipOriginX = 1;
+                }
+                if (j >= config()["baseWidth"] / 2) {
+                    tooltipOriginY = 1;
+                }
+                let tooltip = this.add.text(x, y, this.getTooltipText(i, j)).setBackgroundColor("blue").setWordWrapWidth(250).setOrigin(tooltipOriginX, tooltipOriginY);
+                tooltip.setVisible(false);
+                this.gridBuildings[i][j].mainSprite.setInteractive();
+                this.gridBuildings[i][j].mainSprite.on('pointerover', () => {
+                    tooltip.setVisible(true);
+                });
+                this.gridBuildings[i][j].mainSprite.on('pointerout', () => {
+                    tooltip.setVisible(false);
+                });
+                this.gridBuildings[i][j].tooltip = tooltip;
             }
         }
 
@@ -129,7 +158,7 @@ export class BaseScene extends Phaser.Scene {
             sprite.setVisible(false);
         } else {
             sprite.setVisible(true);
-            sprite.setTexture(buildingType).play(buildingType, true);
+            sprite.setTexture(buildingType + "1").play(buildingType, true);
         }
     }
 
@@ -175,50 +204,33 @@ export class BaseScene extends Phaser.Scene {
             this.setBuildingSprite(this.gridBuildings[gridX][gridY].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
             buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridX, gridY);
         }
-        // Update all growth texts as necessary
+        // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                this.gridBuildings[i][j].growthText.text = this.getGrowthText(i, j);
+                this.gridBuildings[i][j].tooltip.text = this.getTooltipText(i, j);
             }
         }
     }
 
-    getBuildingText(building: Building): string {
-        switch(building) {
-            case Building.Field:
-                return "F";
-            case Building.Forest:
-                return "O";
-            case Building.Market:
-                return "M";
-            case Building.Townhall:
-                return "T";
-            case Building.Barracks:
-                return "B";
-            case Building.TrainingGround:
-                return "G";
-        }
-        return "";
-    }
-
-    getGrowthText(x: number, y: number): string {
+    getTooltipText(x: number, y: number): string {
+        let building = this.activeGame.base.grid[x][y];
         let production = this.activeGame.base.growthByTile[x][y];
         let buffs = buildingBuffs(this.activeGame.base.grid[x][y]);
-        let result = "";
+        let result = building + "\n";
         if (production.gold != 0) {
-            result += "+" + production.gold + "G";
+            result += "+" + production.gold + " gold/second";
         }
         if (production.food != 0) {
-            result += "+" + production.food + "F";
+            result += "+" + production.food + " food/second";
         }
         if (production.wood != 0) {
-            result += "+" + production.wood + "W";
+            result += "+" + production.wood + " wood/second";
         }
         if (buffs.damageBuff != 0) {
-            result += "+" + buffs.damageBuff + "D";
+            result += "+" + buffs.damageBuff + " unit damage/second";
         }
         if (buffs.healthBuff != 0) {
-            result += "+" + buffs.healthBuff + "H";
+            result += "+" + buffs.healthBuff + " unit health/second";
         }
         return result;
     }
@@ -229,7 +241,7 @@ export class BaseScene extends Phaser.Scene {
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 this.setBuildingSprite(this.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
-                scene.gridBuildings[i][j].growthText.text = scene.getGrowthText(i, j);
+                scene.gridBuildings[i][j].tooltip.text = scene.getTooltipText(i, j);
             }
         }
     }
