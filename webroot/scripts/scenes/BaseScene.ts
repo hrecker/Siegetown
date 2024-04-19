@@ -240,7 +240,7 @@ export class BaseScene extends Phaser.Scene {
         // redraw the buildings
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                this.setBuildingSprite(this.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
+                scene.setBuildingSprite(scene.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
                 scene.gridBuildings[i][j].tooltip.text = scene.getTooltipText(i, j);
             }
         }
