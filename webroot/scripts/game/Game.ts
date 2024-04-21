@@ -114,7 +114,13 @@ export function resetGame(game: ActiveGame) {
         for (const playerUnit of lane.playerUnits) {
             destroyUnit(playerUnit);
         }
+        for (const playerUnit of lane.playerQueuedUnits) {
+            destroyUnit(playerUnit);
+        }
         for (const enemyUnit of lane.enemyUnits) {
+            destroyUnit(enemyUnit);
+        }
+        for (const enemyUnit of lane.enemyQueuedUnits) {
             destroyUnit(enemyUnit);
         }
     }
@@ -276,7 +282,7 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
         case ActionType.Reinforcements:
             // Spawn three clubmen
             for (let i = 0; i < config()["numLanes"]; i++) {
-                game.lanes[i].playerUnits.push(scene.createUnit(UnitType.Clubman, i, false, true));
+                game.lanes[i].playerQueuedUnits.push(scene.createUnit(UnitType.Clubman, i, false, true));
             }
             break;
         case ActionType.Freeze:
@@ -386,7 +392,6 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 lane.playerQueuedUnits[0].gameObject.x = 0;
                 lane.playerUnits.push(lane.playerQueuedUnits[0]);
                 lane.playerQueuedUnits.splice(0, 1);
-                console.log("Queueud player unit placed");
             }
         }
         if (lane.enemyQueuedUnits.length > 0) {
@@ -401,7 +406,6 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 lane.enemyQueuedUnits[0].gameObject.x = laneWidth;
                 lane.enemyUnits.push(lane.enemyQueuedUnits[0]);
                 lane.enemyQueuedUnits.splice(0, 1);
-                console.log("Queueud enemy unit placed");
             }
         }
     });
