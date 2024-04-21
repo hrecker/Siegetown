@@ -1,5 +1,5 @@
 import { resourceUpdateEvent, unitBuiltEvent } from "../events/EventMessenger";
-import { ActiveGame, canAfford, chargeCosts, gameEnded, getBuffs, hasBuilding, runAction, updateGame } from "../game/Game";
+import { ActiveGame, canAfford, chargeCosts, gameEnded, getBuffs, hasBuilding, queuePlayerUnit, runAction, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
@@ -165,13 +165,13 @@ export class LaneScene extends Phaser.Scene {
         }
 
         // Build the unit
-        this.activeGame.lanes[lane].playerUnits.push(this.createUnit(this.uiState.selectedUnit, lane, false, false));
+        queuePlayerUnit(this.activeGame, lane, this.createUnit(this.uiState.selectedUnit, lane, false, false));
         chargeCosts(this.activeGame, costs);
         unitBuiltEvent(this.uiState.selectedUnit);
     }
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
-        let unit = this.add.sprite(isEnemy ? this.game.renderer.width - uiBarWidth : 0,
+        let unit = this.add.sprite(-2000,
             laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), walkAnimation(type)).setScale(0.15).play(walkAnimation(type));
         // Create the Unit's health bar
         let healthBarBackground = this.add.rectangle(unit.x, unit.y,

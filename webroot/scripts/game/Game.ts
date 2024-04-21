@@ -10,7 +10,9 @@ import { shuffleArray } from "../util/Utils";
 
 export type Lane = {
     playerUnits: Unit[];
+    playerQueuedUnits: Unit[];
     enemyUnits: Unit[];
+    enemyQueuedUnits: Unit[];
 }
 
 export type ActiveGame = {
@@ -70,7 +72,9 @@ function startingLanes(): Lane[] {
     for (let i = 0; i < config()["numLanes"]; i++) {
         lanes.push({
             playerUnits: [],
-            enemyUnits: []
+            playerQueuedUnits: [],
+            enemyUnits: [],
+            enemyQueuedUnits: [],
         });
     }
     return lanes;
@@ -289,6 +293,10 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
     actionRunEvent(action);
 }
 
+export function queuePlayerUnit(game: ActiveGame, lane: number, unit: Unit) {
+    game.lanes[lane].playerQueuedUnits.push(unit);
+}
+
 const rangePixels = 70;
 
 export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
@@ -318,7 +326,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                 unitUnlockedEvent(unit);
             }
         }
-    })
+    });
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
@@ -333,7 +341,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         shuffleArray(laneOrder);
         for (let i = 0; i < totalEnemiesToSpawn; i++) {
             let lane = laneOrder[i % config()["numLanes"]];
-            game.lanes[lane].enemyUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true, false));
+            game.lanes[lane].enemyQueuedUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true, false));
         }
 
         game.lastEnemySpawn = time;
@@ -359,10 +367,44 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         }
         let lane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
         let unitType = selectRandomEnemyType(game);
-        game.lanes[lane].enemyUnits.push(scene.createUnit(unitType, lane, true, false));
+        game.lanes[lane].enemyQueuedUnits.push(scene.createUnit(unitType, lane, true, false));
         // Accelerate enemy spawns
         game.enemySpawnRate = Math.max(game.enemySpawnRate - config()["enemySpawnRateAcceleration"], config()["maxEnemySpawnRate"]);
     }
+
+    // Add units from player unit queue if there is space
+    game.lanes.forEach(lane => {
+        if (lane.playerQueuedUnits.length > 0) {
+            // Check if there is space for the next unit
+            let isSpace = true;
+            if (lane.playerUnits.length > 0) {
+                // Only spawn if the spawn location would be interactable
+                isSpace = unitInteractable(lane.playerUnits[lane.playerUnits.length - 1].gameObject.x - (rangePixels / 2), laneWidth);
+            }
+
+            if (isSpace) {
+                lane.playerQueuedUnits[0].gameObject.x = 0;
+                lane.playerUnits.push(lane.playerQueuedUnits[0]);
+                lane.playerQueuedUnits.splice(0, 1);
+                console.log("Queueud player unit placed");
+            }
+        }
+        if (lane.enemyQueuedUnits.length > 0) {
+            // Check if there is space for the next unit
+            let isSpace = true;
+            if (lane.enemyUnits.length > 0) {
+                // Only spawn if the spawn location would be interactable
+                isSpace = unitInteractable(lane.enemyUnits[lane.enemyUnits.length - 1].gameObject.x + (rangePixels / 2), laneWidth);
+            }
+
+            if (isSpace) {
+                lane.enemyQueuedUnits[0].gameObject.x = laneWidth;
+                lane.enemyUnits.push(lane.enemyQueuedUnits[0]);
+                lane.enemyQueuedUnits.splice(0, 1);
+                console.log("Queueud enemy unit placed");
+            }
+        }
+    });
 
     // Always move units
     game.lanes.forEach(lane => {
