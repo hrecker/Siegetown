@@ -54,11 +54,22 @@ export class LoadingScene extends Phaser.Scene {
 
         // buildings
         this.loadSpriteSequence(2, "townhall", "assets/sprites/buildings/townhall");
+        this.load.image("townhall1_gray", "assets/sprites/buildings/townhall1_gray.png");
         this.loadSpriteSequence(2, "field", "assets/sprites/buildings/field");
+        this.load.image("field1_gray", "assets/sprites/buildings/field1_gray.png");
         this.loadSpriteSequence(2, "forest", "assets/sprites/buildings/forest");
+        this.load.image("forest1_gray", "assets/sprites/buildings/forest1_gray.png");
         this.loadSpriteSequence(2, "market", "assets/sprites/buildings/market");
+        this.load.image("market1_gray", "assets/sprites/buildings/market1_gray.png");
         this.loadSpriteSequence(2, "barracks", "assets/sprites/buildings/barracks");
+        this.load.image("barracks1_gray", "assets/sprites/buildings/barracks1_gray.png");
         this.loadSpriteSequence(2, "trainingground", "assets/sprites/buildings/trainingground");
+        this.load.image("trainingground1_gray", "assets/sprites/buildings/trainingground1_gray.png");
+
+        // ui
+        this.load.image("shop_icon_border", "assets/sprites/ui/shop_icon.png");
+        this.load.image("shop_icon_border_selected", "assets/sprites/ui/shop_icon_selected.png");
+        this.load.image("shop_icon_border_locked", "assets/sprites/ui/shop_icon_locked.png");
         
         // Load json
         this.load.json("config", "assets/json/config.json");

@@ -21,12 +21,13 @@ enum ShopButtonType {
     None,
 }
 
+const shopIconScale = 0.1;
 export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
 
-    buildButtons: { [type: string] : Phaser.GameObjects.Text }
-    buildButtonOutlines: { [type: string] : Phaser.GameObjects.Rectangle }
+    buildButtonBorders: { [type: string] : Phaser.GameObjects.Sprite }
+    buildButtonIcons: { [type: string] : Phaser.GameObjects.Sprite }
     tooltips: { [type: string] : Phaser.GameObjects.Text }
     removeButtonOutline: Phaser.GameObjects.Rectangle;
 
@@ -136,31 +137,33 @@ export class ShopUIScene extends Phaser.Scene {
 
     // Returns the gap needed between this button and the next button... a little jank but hey it works
     createShopButton(buttonType: ShopButtonType, typeKey: string, y: number): number {
-        let buildButton;
-        let tooltipText = "";
+        let tooltipText = typeKey + "\n";
+        let buttonX = -1;
         switch (buttonType) {
             case ShopButtonType.Building:
-                buildButton = this.createBuildBuildingButtonText(typeKey as UIBuilding, y);
+                buttonX = uiBarWidth / 4;
                 if (typeKey == UIBuilding.Remove) {
-                    tooltipText = config()["removeBuildingTooltip"];
+                    tooltipText += config()["removeBuildingTooltip"];
                 } else {
-                    tooltipText = config()["buildings"][typeKey]["tooltipText"];
+                    tooltipText += config()["buildings"][typeKey]["tooltipText"];
                 }
                 break;
             case ShopButtonType.Unit:
-                buildButton = this.createBuildUnitButtonText(typeKey as UnitType, y);
-                tooltipText = config()["units"][typeKey]["tooltipText"];
+                buttonX = 3 * uiBarWidth / 4;
+                tooltipText += config()["units"][typeKey]["tooltipText"];
                 break;
             case ShopButtonType.Action:
-                buildButton = this.createBuildActionButtonText(typeKey as ActionType, y);
-                tooltipText = config()["actions"][typeKey]["tooltipText"];
+                buttonX = 3 * uiBarWidth / 4;
+                tooltipText += config()["actions"][typeKey]["tooltipText"];
                 break;
         }
-        let buildButtonOutline = this.createOutline(buildButton);
-        buildButton.setInteractive();
-        buildButton.setData("selectable", true);
-        buildButton.on('pointerdown', () => {
-            if (buildButton.getData("selectable")) {
+        let buildButtonIcon = this.add.sprite(this.getX(buttonX), this.getY(y), typeKey + "1").setScale(shopIconScale);
+        let buildButtonBackground = this.add.sprite(this.getX(buttonX), this.getY(y), "shop_icon_border").setScale(shopIconScale);
+        //TODO shop sprites for non buildings
+        buildButtonBackground.setInteractive();
+        buildButtonBackground.setData("selectable", true);
+        buildButtonBackground.on('pointerdown', () => {
+            if (buildButtonBackground.getData("selectable")) {
                 switch (buttonType) {
                     case ShopButtonType.Building:
                         this.selectBuild(typeKey as UIBuilding);
@@ -174,16 +177,16 @@ export class ShopUIScene extends Phaser.Scene {
                 }
             }
         });
-        buildButton.on('pointerover', () => {
+        buildButtonBackground.on('pointerover', () => {
             this.tooltips[typeKey].setVisible(true);
         });
-        buildButton.on('pointerout', () => {
+        buildButtonBackground.on('pointerout', () => {
             this.tooltips[typeKey].setVisible(false);
         });
-        this.buildButtons[typeKey] = buildButton;
-        this.buildButtonOutlines[typeKey] = buildButtonOutline;
-        this.tooltips[typeKey] = this.createTooltip(tooltipText, buildButtonOutline.getTopLeft().x, this.getY(y)).setVisible(false);
-        return buildButtonOutline.height + 5;
+        this.buildButtonBorders[typeKey] = buildButtonBackground;
+        this.buildButtonIcons[typeKey] = buildButtonIcon;
+        this.tooltips[typeKey] = this.createTooltip(tooltipText, buildButtonBackground.getTopLeft().x, this.getY(y)).setVisible(false);
+        return buildButtonBackground.displayHeight + 5;
     }
 
     getX(localX: number): number {
@@ -194,30 +197,36 @@ export class ShopUIScene extends Phaser.Scene {
         return localY + 180;
     }
 
+    setGrayScale(iconKey: string, isGrayscale: boolean) {
+        if (isGrayscale) {
+            this.buildButtonIcons[iconKey].setTexture(iconKey + "1_gray");
+        } else {
+            this.buildButtonIcons[iconKey].setTexture(iconKey + "1");
+        }
+    }
+
     create() {
         this.resize(true);
-        //this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 180);
-        //this.cameras.main.setBackgroundColor(0x111111);
 
         this.uiState.selectedBuilding = UIBuilding.Empty;
 
-        this.add.text(this.getX(5), this.getY(5), "Buildings");
-        this.add.text(this.getX(uiBarWidth - 5), this.getY(5), "Units").setAlign("right").setOrigin(1, 0);
+        this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings").setOrigin(0.5, 0);
+        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units").setAlign("right").setOrigin(0.5, 0);
 
-        this.buildButtons = {};
-        this.buildButtonOutlines = {};
+        this.buildButtonBorders = {};
+        this.buildButtonIcons = {};
         this.tooltips = {};
-        let y = 30;
+        let y = 50;
         this.allBuildings().forEach(building => {
             y += this.createShopButton(ShopButtonType.Building, building, y);
         });
 
-        y = 30;
+        y = 50;
         allUnits().forEach(unit => {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
 
-        this.add.text(this.getX(uiBarWidth - 5), this.getY(y + 5), "One-time Actions").setAlign("right").setOrigin(1, 0);
+        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y + 5), "Powers").setAlign("right").setOrigin(0.5, 0);
         y += 30;
         allActions().forEach(action => {
             y += this.createShopButton(ShopButtonType.Action, action, y);
@@ -239,33 +248,32 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     setButtonState(key: string, state: ButtonState) {
-        let alpha: number;
         let selectable: boolean;
         let hideOutline: boolean;
         switch (state) {
             case ButtonState.Available:
-                alpha = 1;
                 selectable = true;
                 break;
             case ButtonState.Unavailable:
-                alpha = 0.6;
                 selectable = true;
                 break;
             case ButtonState.Locked:
-                alpha = 0.3;
                 selectable = false;
                 hideOutline = true;
+                this.buildButtonBorders[key].setTexture("shop_icon_border_locked");
                 break;
         }
 
-        this.buildButtons[key].alpha = alpha;
-        if (hideOutline) {
-            this.buildButtonOutlines[key].setVisible(false);
+        this.setGrayScale(key, state != ButtonState.Available);
+
+        // When unlocking, set border to normal border
+        if (state != ButtonState.Locked && this.buildButtonBorders[key].texture.key == "shop_icon_border_locked") {
+            this.buildButtonBorders[key].setTexture("shop_icon_border");
         }
         if (selectable) {
-            this.buildButtons[key].setData("selectable", true);
+            this.buildButtonBorders[key].setData("selectable", true);
         } else {
-            this.buildButtons[key].setData("selectable", false);
+            this.buildButtonBorders[key].setData("selectable", false);
         }
     }
 
@@ -287,8 +295,9 @@ export class ShopUIScene extends Phaser.Scene {
 
     actionRunListener(scene: ShopUIScene, action: ActionType) {
         scene.setButtonState(action, ButtonState.Locked);
-        scene.buildButtonOutlines[action].setVisible(false);
+        scene.buildButtonBorders[action].setTexture("shop_icon_border");
         scene.uiState.selectedAction = ActionType.None;
+        scene.setGrayScale(action, true);
     }
 
     resourceUpdateListener(scene: ShopUIScene) {
@@ -361,10 +370,12 @@ export class ShopUIScene extends Phaser.Scene {
         }
         for (let i = 0; i < this.allBuildings().length; i++) {
             let currentBuilding = this.allBuildings()[i];
-            this.buildButtonOutlines[currentBuilding].setVisible(this.uiState.selectedBuilding == currentBuilding);
             if (this.uiState.selectedBuilding == currentBuilding) {
                 this.selectedIndex = i;
                 this.lastSelectedType = ShopButtonType.Building;
+                this.buildButtonBorders[currentBuilding].setTexture("shop_icon_border_selected");
+            } else {
+                this.buildButtonBorders[currentBuilding].setTexture("shop_icon_border");
             }
         }
     }
@@ -386,7 +397,6 @@ export class ShopUIScene extends Phaser.Scene {
         }
         for (let i = 0; i < allUnits().length; i++) {
             let currentUnit = allUnits()[i];
-            this.buildButtonOutlines[currentUnit].setVisible(this.uiState.selectedUnit == currentUnit);
             if (this.uiState.selectedUnit == currentUnit) {
                 this.selectedIndex = i;
             }
@@ -415,7 +425,6 @@ export class ShopUIScene extends Phaser.Scene {
         }
         for (let i = 0; i < allActions().length; i++) {
             let currentAction = allActions()[i];
-            this.buildButtonOutlines[currentAction].setVisible(this.uiState.selectedAction == currentAction);
             if (this.uiState.selectedAction == currentAction) {
                 this.selectedIndex = i;
             }
@@ -454,7 +463,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
         // Find next selectable option
         while (index != this.selectedIndex) {
-            if (this.buildButtons[options[index]].getData("selectable")) {
+            if (this.buildButtonBorders[options[index]].getData("selectable")) {
                 break;
             }
             if (up) {
