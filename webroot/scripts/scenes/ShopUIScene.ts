@@ -22,6 +22,14 @@ enum ShopButtonType {
 }
 
 const shopIconScale = 0.1;
+const availableIconKey = "available_icon";
+const unavailableIconKey = "unavailable_icon";
+const shopIconAvailable = "shop_icon_border";
+const shopIconAvailableSelected = "shop_icon_border_selected";
+const shopIconUnavailable = "shop_icon_border_unavailable";
+const shopIconUnavailableSelected = "shop_icon_border_selected_unavailable";
+const shopIconLocked = "shop_icon_border_locked";
+
 export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
     uiState: UIState;
@@ -139,6 +147,7 @@ export class ShopUIScene extends Phaser.Scene {
     createShopButton(buttonType: ShopButtonType, typeKey: string, y: number): number {
         let tooltipText = typeKey + "\n";
         let buttonX = -1;
+        let iconTexture;
         switch (buttonType) {
             case ShopButtonType.Building:
                 buttonX = uiBarWidth / 4;
@@ -147,18 +156,23 @@ export class ShopUIScene extends Phaser.Scene {
                 } else {
                     tooltipText += config()["buildings"][typeKey]["tooltipText"];
                 }
+                iconTexture = typeKey + "1";
                 break;
             case ShopButtonType.Unit:
                 buttonX = 3 * uiBarWidth / 4;
                 tooltipText += config()["units"][typeKey]["tooltipText"];
+                iconTexture = typeKey + "_icon";
                 break;
             case ShopButtonType.Action:
                 buttonX = 3 * uiBarWidth / 4;
                 tooltipText += config()["actions"][typeKey]["tooltipText"];
                 break;
         }
-        let buildButtonIcon = this.add.sprite(this.getX(buttonX), this.getY(y), typeKey + "1").setScale(shopIconScale);
-        let buildButtonBackground = this.add.sprite(this.getX(buttonX), this.getY(y), "shop_icon_border").setScale(shopIconScale);
+        let grayIconTexture = typeKey + "_gray";
+        let buildButtonIcon = this.add.sprite(this.getX(buttonX), this.getY(y), iconTexture).setScale(shopIconScale);
+        buildButtonIcon.setData(availableIconKey, iconTexture);
+        buildButtonIcon.setData(unavailableIconKey, grayIconTexture);
+        let buildButtonBackground = this.add.sprite(this.getX(buttonX), this.getY(y), shopIconAvailable).setScale(shopIconScale);
         //TODO shop sprites for non buildings
         buildButtonBackground.setInteractive();
         buildButtonBackground.setData("selectable", true);
@@ -197,11 +211,11 @@ export class ShopUIScene extends Phaser.Scene {
         return localY + 180;
     }
 
-    setGrayScale(iconKey: string, isGrayscale: boolean) {
-        if (isGrayscale) {
-            this.buildButtonIcons[iconKey].setTexture(iconKey + "1_gray");
+    setIcon(iconKey: string, isAvailable: boolean) {
+        if (isAvailable) {
+            this.buildButtonIcons[iconKey].setTexture(this.buildButtonIcons[iconKey].getData(availableIconKey));
         } else {
-            this.buildButtonIcons[iconKey].setTexture(iconKey + "1");
+            this.buildButtonIcons[iconKey].setTexture(this.buildButtonIcons[iconKey].getData(unavailableIconKey));
         }
     }
 
@@ -247,29 +261,37 @@ export class ShopUIScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
     }
 
+    isButtonSelected(key: string): boolean {
+        return key == this.uiState.selectedAction || key == this.uiState.selectedBuilding || key == this.uiState.selectedUnit;
+    }
+
     setButtonState(key: string, state: ButtonState) {
         let selectable: boolean;
-        let hideOutline: boolean;
         switch (state) {
             case ButtonState.Available:
                 selectable = true;
+                if (this.isButtonSelected(key)) {
+                    this.buildButtonBorders[key].setTexture(shopIconAvailableSelected);
+                } else {
+                    this.buildButtonBorders[key].setTexture(shopIconAvailable);
+                }
                 break;
             case ButtonState.Unavailable:
                 selectable = true;
+                if (this.isButtonSelected(key)) {
+                    this.buildButtonBorders[key].setTexture(shopIconUnavailableSelected);
+                } else {
+                    this.buildButtonBorders[key].setTexture(shopIconUnavailable);
+                }
                 break;
             case ButtonState.Locked:
                 selectable = false;
-                hideOutline = true;
-                this.buildButtonBorders[key].setTexture("shop_icon_border_locked");
+                this.buildButtonBorders[key].setTexture(shopIconLocked);
                 break;
         }
 
-        this.setGrayScale(key, state != ButtonState.Available);
+        this.setIcon(key, state == ButtonState.Available);
 
-        // When unlocking, set border to normal border
-        if (state != ButtonState.Locked && this.buildButtonBorders[key].texture.key == "shop_icon_border_locked") {
-            this.buildButtonBorders[key].setTexture("shop_icon_border");
-        }
         if (selectable) {
             this.buildButtonBorders[key].setData("selectable", true);
         } else {
@@ -295,9 +317,9 @@ export class ShopUIScene extends Phaser.Scene {
 
     actionRunListener(scene: ShopUIScene, action: ActionType) {
         scene.setButtonState(action, ButtonState.Locked);
-        scene.buildButtonBorders[action].setTexture("shop_icon_border");
+        scene.buildButtonBorders[action].setTexture(shopIconLocked);
         scene.uiState.selectedAction = ActionType.None;
-        scene.setGrayScale(action, true);
+        scene.setIcon(action, false);
     }
 
     resourceUpdateListener(scene: ShopUIScene) {
@@ -352,6 +374,22 @@ export class ShopUIScene extends Phaser.Scene {
         });
     }
 
+    setSelectedBorder(icon: Phaser.GameObjects.Sprite, selected: boolean) {
+        if (selected) {
+            if (icon.texture.key == shopIconAvailable) {
+                icon.setTexture(shopIconAvailableSelected);
+            } else if (icon.texture.key == shopIconUnavailable) {
+                icon.setTexture(shopIconUnavailableSelected);
+            }
+        } else {
+            if (icon.texture.key == shopIconAvailableSelected) {
+                icon.setTexture(shopIconAvailable);
+            } else if (icon.texture.key == shopIconUnavailableSelected) {
+                icon.setTexture(shopIconUnavailable);
+            }
+        }
+    }
+
     selectBuild(selection: UIBuilding) {
         if (gameEnded(this.activeGame)) {
             return;
@@ -373,10 +411,8 @@ export class ShopUIScene extends Phaser.Scene {
             if (this.uiState.selectedBuilding == currentBuilding) {
                 this.selectedIndex = i;
                 this.lastSelectedType = ShopButtonType.Building;
-                this.buildButtonBorders[currentBuilding].setTexture("shop_icon_border_selected");
-            } else {
-                this.buildButtonBorders[currentBuilding].setTexture("shop_icon_border");
             }
+            this.setSelectedBorder(this.buildButtonBorders[currentBuilding], this.uiState.selectedBuilding == currentBuilding);
         }
     }
 
@@ -397,6 +433,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
         for (let i = 0; i < allUnits().length; i++) {
             let currentUnit = allUnits()[i];
+            this.setSelectedBorder(this.buildButtonBorders[currentUnit], this.uiState.selectedUnit == currentUnit);
             if (this.uiState.selectedUnit == currentUnit) {
                 this.selectedIndex = i;
             }
@@ -425,6 +462,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
         for (let i = 0; i < allActions().length; i++) {
             let currentAction = allActions()[i];
+            this.setSelectedBorder(this.buildButtonBorders[currentAction], this.uiState.selectedAction == currentAction);
             if (this.uiState.selectedAction == currentAction) {
                 this.selectedIndex = i;
             }

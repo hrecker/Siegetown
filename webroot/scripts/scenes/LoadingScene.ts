@@ -54,22 +54,29 @@ export class LoadingScene extends Phaser.Scene {
 
         // buildings
         this.loadSpriteSequence(2, "townhall", "assets/sprites/buildings/townhall");
-        this.load.image("townhall1_gray", "assets/sprites/buildings/townhall1_gray.png");
         this.loadSpriteSequence(2, "field", "assets/sprites/buildings/field");
-        this.load.image("field1_gray", "assets/sprites/buildings/field1_gray.png");
+        this.load.image("field_gray", "assets/sprites/ui/field_gray.png");
         this.loadSpriteSequence(2, "forest", "assets/sprites/buildings/forest");
-        this.load.image("forest1_gray", "assets/sprites/buildings/forest1_gray.png");
+        this.load.image("forest_gray", "assets/sprites/ui/forest_gray.png");
         this.loadSpriteSequence(2, "market", "assets/sprites/buildings/market");
-        this.load.image("market1_gray", "assets/sprites/buildings/market1_gray.png");
+        this.load.image("market_gray", "assets/sprites/ui/market_gray.png");
         this.loadSpriteSequence(2, "barracks", "assets/sprites/buildings/barracks");
-        this.load.image("barracks1_gray", "assets/sprites/buildings/barracks1_gray.png");
+        this.load.image("barracks_gray", "assets/sprites/ui/barracks_gray.png");
         this.loadSpriteSequence(2, "trainingground", "assets/sprites/buildings/trainingground");
-        this.load.image("trainingground1_gray", "assets/sprites/buildings/trainingground1_gray.png");
+        this.load.image("trainingground_gray", "assets/sprites/ui/trainingground_gray.png");
 
         // ui
         this.load.image("shop_icon_border", "assets/sprites/ui/shop_icon.png");
+        this.load.image("shop_icon_border_unavailable", "assets/sprites/ui/shop_icon_unavailable.png");
         this.load.image("shop_icon_border_selected", "assets/sprites/ui/shop_icon_selected.png");
+        this.load.image("shop_icon_border_selected_unavailable", "assets/sprites/ui/shop_icon_selected_unavailable.png");
         this.load.image("shop_icon_border_locked", "assets/sprites/ui/shop_icon_locked.png");
+        this.load.image("warrior_icon", "assets/sprites/ui/warrior_icon.png");
+        this.load.image("warrior_gray", "assets/sprites/ui/warrior_gray.png");
+        this.load.image("slingshotter_icon", "assets/sprites/ui/slingshotter_icon.png");
+        this.load.image("slingshotter_gray", "assets/sprites/ui/slingshotter_gray.png");
+        this.load.image("clubman_icon", "assets/sprites/ui/clubman_icon.png");
+        this.load.image("clubman_gray", "assets/sprites/ui/clubman_gray.png");
         
         // Load json
         this.load.json("config", "assets/json/config.json");
