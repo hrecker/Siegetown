@@ -166,6 +166,7 @@ export class ShopUIScene extends Phaser.Scene {
             case ShopButtonType.Action:
                 buttonX = 3 * uiBarWidth / 4;
                 tooltipText += config()["actions"][typeKey]["tooltipText"];
+                iconTexture = typeKey + "_icon";
                 break;
         }
         let grayIconTexture = typeKey + "_gray";
@@ -240,7 +241,7 @@ export class ShopUIScene extends Phaser.Scene {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
 
-        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y + 5), "Powers").setAlign("right").setOrigin(0.5, 0);
+        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers").setAlign("right").setOrigin(0.5, 1);
         y += 30;
         allActions().forEach(action => {
             y += this.createShopButton(ShopButtonType.Action, action, y);
