@@ -1,5 +1,6 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, addWaveCountdownUpdatedListener, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
+import { whiteColor } from "./BaseScene";
 
 /** UI displayed over MainScene */
 export class OverlayUIScene extends Phaser.Scene {
@@ -42,11 +43,11 @@ export class OverlayUIScene extends Phaser.Scene {
     create() {
         this.resize(true);
 
-        this.waveCountdown = this.add.text(3, 3, "Next wave:\n" + this.minutesText(this.activeGame.secondsUntilWave));
+        this.waveCountdown = this.add.text(3, 3, "Next wave:\n" + this.minutesText(this.activeGame.secondsUntilWave), {color: whiteColor});
 
         this.resultBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
-        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!").setFontSize(64).setOrigin(0.5, 0.5);
-        this.restartButton = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart").setFontSize(48).setOrigin(0.5, 0.5);
+        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!", {color: whiteColor}).setFontSize(64).setOrigin(0.5, 0.5);
+        this.restartButton = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart", {color: whiteColor}).setFontSize(48).setOrigin(0.5, 0.5);
         this.restartButtonOutline = this.add.rectangle(this.restartButton.getTopLeft().x - 1, this.restartButton.getTopLeft().y - 1,
             this.restartButton.width + 1, this.restartButton.height + 1).setOrigin(0, 0);
         this.restartButtonOutline.isStroked = true;

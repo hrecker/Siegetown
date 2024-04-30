@@ -1,6 +1,7 @@
 import { createGame } from "../game/Game";
 import { createUIState } from "../game/UIState";
 import { loadConfig } from "../model/Config";
+import { whiteColor } from "./BaseScene";
 
 
 /** Load json and assets */
@@ -106,14 +107,14 @@ export class LoadingScene extends Phaser.Scene {
     create() {
         // Loading message
         // Have to hard-code this because the config isn't loaded yet
-        this.cameras.main.setBackgroundColor("#00303B");
+        this.cameras.main.setBackgroundColor("#3A3858");
         this.loadingText = this.add.text(0, 0, "Loading...",
             { font: "bold 64px Verdana",
-            stroke: "black",
+            stroke: "#212123",
             strokeThickness: 3,
-            color: "#F1F2DA" }).setOrigin(0.5, 0.5);
-        this.loadingFill = this.add.rectangle(0, 0, 0, 0, 0xF1F2DA, 1);
-        this.loadingBox = this.add.rectangle(0, 0, 0, 0).setStrokeStyle(3, 0x000000, 1);
+            color: whiteColor }).setOrigin(0.5, 0.5);
+        this.loadingFill = this.add.rectangle(0, 0, 0, 0, 0xF2F0E5, 1);
+        this.loadingBox = this.add.rectangle(0, 0, 0, 0).setStrokeStyle(3, 0x212123, 1);
         this.loadResources();
     }
 

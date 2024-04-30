@@ -19,7 +19,6 @@ export type Unit = {
     lastAttackTime: number;
     frozenTimeRemaining: number;
     gameObject: Phaser.GameObjects.Sprite;
-    label: Phaser.GameObjects.Text;
     healthBarBackground: Phaser.GameObjects.Rectangle;
     healthBar: Phaser.GameObjects.Rectangle;
 }
@@ -32,7 +31,7 @@ export function allUnits(): UnitType[] {
     ]
 }
 
-export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Sprite, label: Phaser.GameObjects.Text, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {
+export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Sprite, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {
     let maxHealth = config()["units"][type]["maxHealth"] + buffs.healthBuff;
     return {
         id: getNewId(),
@@ -43,7 +42,6 @@ export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.Game
         attackRate: config()["units"][type]["attackRate"],
         lastAttackTime: 0,
         gameObject: gameObject,
-        label: label,
         healthBarBackground: healthBarBackground,
         healthBar: healthBar,
         frozenTimeRemaining: 0,
@@ -62,7 +60,6 @@ export function destroyUnit(unit: Unit) {
     unit.gameObject.destroy();
     unit.healthBarBackground.destroy();
     unit.healthBar.destroy();
-    unit.label.destroy();
 }
 
 export function unitSpeed(type: UnitType): number {

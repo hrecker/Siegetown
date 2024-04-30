@@ -1,4 +1,4 @@
-import { resourceUpdateEvent, unitBuiltEvent } from "../events/EventMessenger";
+import { unitBuiltEvent } from "../events/EventMessenger";
 import { ActiveGame, canAfford, chargeCosts, gameEnded, getBuffs, hasBuilding, queuePlayerUnit, runAction, updateGame } from "../game/Game";
 import { UIState } from "../game/UIState";
 import { ActionType } from "../model/Action";
@@ -6,11 +6,9 @@ import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
-import { allUnits, createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
+import { createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
 import { createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
-
-const enemyColor = 0x911c04;
 
 const healthBarWidth = 64;
 const healthBarHeight = 6;
@@ -67,7 +65,7 @@ export class LaneScene extends Phaser.Scene {
         // Position the scene
         this.cameras.main.setPosition(0, laneSceneTopY);
         
-        let graphics = this.add.graphics({ lineStyle: { width: 4 } });
+        let graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xF2F0E5 } });
 
         // Draw the lanes
         this.laneHeight = (this.game.renderer.height - laneSceneTopY) / config()["numLanes"];
@@ -178,8 +176,6 @@ export class LaneScene extends Phaser.Scene {
             healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
         let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
             healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
-        // Create the label for the unit
-        let label = this.add.text(unit.x, unit.y, String(type).charAt(0)).setOrigin(0.5, 0.5).setFontSize(56).setColor("black").setVisible(false);
         // Get any buffs to health or damage
         let buffs: Buffs;
         if (isEnemy) {
@@ -194,7 +190,7 @@ export class LaneScene extends Phaser.Scene {
                 this.activeGame.unitSpawnDelaysRemaining[type] = config()["units"][type]["spawnDelay"];
             }
         }
-        return createUnit(type, buffs, unit, label, healthBarBackground, healthBar);
+        return createUnit(type, buffs, unit, healthBarBackground, healthBar);
     }
 
     update(time, delta) {
@@ -213,12 +209,10 @@ export class LaneScene extends Phaser.Scene {
             for (let i = 0; i < lane.playerUnits.length; i++) {
                 lane.playerUnits[i].healthBar.x = lane.playerUnits[i].gameObject.x - (healthBarWidth / 2);
                 lane.playerUnits[i].healthBarBackground.x = lane.playerUnits[i].gameObject.x;
-                lane.playerUnits[i].label.x = lane.playerUnits[i].gameObject.x;
             }
             for (let i = 0; i < lane.enemyUnits.length; i++) {
                 lane.enemyUnits[i].healthBar.x = lane.enemyUnits[i].gameObject.x - (healthBarWidth / 2);
                 lane.enemyUnits[i].healthBarBackground.x = lane.enemyUnits[i].gameObject.x;
-                lane.enemyUnits[i].label.x = lane.enemyUnits[i].gameObject.x;
             }
         });
     }

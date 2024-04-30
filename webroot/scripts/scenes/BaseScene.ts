@@ -14,6 +14,7 @@ const boardWidth = 300;
 const boardMargin = 10;
 const cooldownMargin = 10;
 const cooldownBarHeight = 100;
+export const whiteColor = "#F2F0E5";
 
 type GridBuilding = {
     mainSprite: Phaser.GameObjects.Sprite;
@@ -59,6 +60,7 @@ export class BaseScene extends Phaser.Scene {
             // Add event listeners here
             this.sceneCreated = true;
         }
+        this.cameras.main.setBackgroundColor(0x212123);
 
         // Create animations
         createAnimation(this, "townhall", 2);
@@ -73,7 +75,7 @@ export class BaseScene extends Phaser.Scene {
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
 
         let boardLineWidth = 4;
-        let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth } });
+        let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth, color: 0xF2F0E5 } });
 
         for (let i = 0; i <= config()["baseWidth"]; i++) {
             let diff = (boardWidth * i / config()["baseWidth"]);
@@ -114,7 +116,7 @@ export class BaseScene extends Phaser.Scene {
                 if (j >= config()["baseWidth"] / 2) {
                     tooltipOriginY = 1;
                 }
-                let tooltip = this.add.text(x, y, this.getTooltipText(i, j)).setBackgroundColor("blue").setWordWrapWidth(250).setOrigin(tooltipOriginX, tooltipOriginY);
+                let tooltip = this.add.text(x, y, this.getTooltipText(i, j), {color: whiteColor, backgroundColor: "#3A3858"}).setWordWrapWidth(250).setOrigin(tooltipOriginX, tooltipOriginY);
                 tooltip.setVisible(false);
                 this.gridBuildings[i][j].mainSprite.setInteractive();
                 this.gridBuildings[i][j].mainSprite.on('pointerover', () => {

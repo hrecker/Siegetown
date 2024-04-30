@@ -6,6 +6,7 @@ import { Building } from "../model/Base";
 import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
 import { Unit, UnitType, allUnits } from "../model/Unit";
+import { whiteColor } from "./BaseScene";
 import { uiBarWidth } from "./ResourceUIScene";
 
 enum ButtonState {
@@ -103,9 +104,9 @@ export class ShopUIScene extends Phaser.Scene {
         let text = key + ":";
         text += this.costsText(costs);
         if (rightAlign) {
-            return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text).setOrigin(1, 0).setAlign("right");
+            return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text, {color: whiteColor}).setOrigin(1, 0).setAlign("right");
         } else {
-            return this.add.text(this.getX(10), this.getY(y), text);
+            return this.add.text(this.getX(10), this.getY(y), text, {color: whiteColor});
         }
     }
 
@@ -149,7 +150,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     createTooltip(text: string, x: number, y: number): Phaser.GameObjects.Text {
-        return this.add.text(x, y, text).setBackgroundColor("blue").setWordWrapWidth(250).setOrigin(1, 1);
+        return this.add.text(x, y, text, {color: whiteColor, backgroundColor: "#352B42"}).setWordWrapWidth(250).setOrigin(1, 1);
     }
 
     // Returns the gap needed between this button and the next button... a little jank but hey it works
@@ -188,7 +189,7 @@ export class ShopUIScene extends Phaser.Scene {
         buildButtonIcon.setData(availableIconKey, iconTexture);
         buildButtonIcon.setData(unavailableIconKey, grayIconTexture);
         let buildButtonBackground = this.add.sprite(this.getX(buttonX - iconCostMargin), this.getY(y), shopIconAvailable).setScale(shopIconScale);
-        let costsText = this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs)).setOrigin(0, 0.5)
+        this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs), {color: whiteColor}).setOrigin(0, 0.5)
         //TODO shop sprites for non buildings
         buildButtonBackground.setInteractive();
         buildButtonBackground.setData("selectable", true);
@@ -240,8 +241,8 @@ export class ShopUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = UIBuilding.Empty;
 
-        this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings").setOrigin(0.5, 0);
-        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units").setAlign("right").setOrigin(0.5, 0);
+        this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings", {color: whiteColor}).setOrigin(0.5, 0);
+        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0);
 
         this.buildButtonBorders = {};
         this.buildButtonIcons = {};
@@ -256,7 +257,7 @@ export class ShopUIScene extends Phaser.Scene {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
 
-        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers").setAlign("right").setOrigin(0.5, 1);
+        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers", {color: whiteColor}).setAlign("right").setOrigin(0.5, 1);
         y += 30;
         allActions().forEach(action => {
             y += this.createShopButton(ShopButtonType.Action, action, y);

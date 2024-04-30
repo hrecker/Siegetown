@@ -1,6 +1,7 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, addGameRestartedListener, addResourceUpdateListener } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 import { config } from "../model/Config";
+import { whiteColor } from "./BaseScene";
 
 export const uiBarWidth = 300;
 
@@ -36,15 +37,15 @@ export class ResourceUIScene extends Phaser.Scene {
         this.resize(true);
 
         this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 0);
-        this.cameras.main.setBackgroundColor(0x222222);
+        this.cameras.main.setBackgroundColor(0x3A3858);
 
-        this.goldText = this.add.text(10, 10, "Gold: 0");
-        this.woodText = this.add.text(10, 30, "Wood: 0");
-        this.foodText = this.add.text(10, 50, "Food: 0");
+        this.goldText = this.add.text(10, 10, "Gold: 0", {color: whiteColor});
+        this.woodText = this.add.text(10, 30, "Wood: 0", {color: whiteColor});
+        this.foodText = this.add.text(10, 50, "Food: 0", {color: whiteColor});
         this.updateResourceText();
-        this.baseHealthText = this.add.text(10, 70, "");
+        this.baseHealthText = this.add.text(10, 70, "", {color: whiteColor});
         this.baseDamagedListener(this, this.activeGame.baseHealth);
-        this.enemyBaseHealthText = this.add.text(10, 140, "");
+        this.enemyBaseHealthText = this.add.text(10, 140, "", {color: whiteColor});
         this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
 
         addResourceUpdateListener(this.resourceUpdateListener, this);
