@@ -5,7 +5,7 @@ import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
-import { UnitType, allUnits } from "../model/Unit";
+import { Unit, UnitType, allUnits } from "../model/Unit";
 import { uiBarWidth } from "./ResourceUIScene";
 
 enum ButtonState {
@@ -29,6 +29,8 @@ const shopIconAvailableSelected = "shop_icon_border_selected";
 const shopIconUnavailable = "shop_icon_border_unavailable";
 const shopIconUnavailableSelected = "shop_icon_border_selected_unavailable";
 const shopIconLocked = "shop_icon_border_locked";
+const iconCostMargin = 18;
+const iconYMargin = 6;
 
 export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
@@ -77,15 +79,22 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     costsText(costs: Resources): string {
-        let text = "";
+        let costTexts = []
         if (costs.gold > 0) {
-            text += "\nGold: " + costs.gold;
+            costTexts.push(costs.gold + "G");
         }
         if (costs.food > 0) {
-            text += "\nFood: " + costs.food;
+            costTexts.push(costs.food + "F");
         }
         if (costs.wood) {
-            text += "\nWood: " + costs.wood;
+            costTexts.push(costs.wood + "W");
+        }
+        let text = "";
+        for (let i = 0; i < costTexts.length; i++) {
+            if (i != 0) {
+                text += "\n";
+            }
+            text += costTexts[i];
         }
         return text;
     }
@@ -148,13 +157,16 @@ export class ShopUIScene extends Phaser.Scene {
         let tooltipText = typeKey + "\n";
         let buttonX = -1;
         let iconTexture;
+        let costs = zeroResources();
         switch (buttonType) {
             case ShopButtonType.Building:
                 buttonX = uiBarWidth / 4;
                 if (typeKey == UIBuilding.Remove) {
                     tooltipText += config()["removeBuildingTooltip"];
+                    costs.gold = config()["removeBuildingCost"];
                 } else {
                     tooltipText += config()["buildings"][typeKey]["tooltipText"];
+                    costs = buildingCosts(BuildingFrom(typeKey as UIBuilding));
                 }
                 iconTexture = typeKey + "1";
                 break;
@@ -162,18 +174,21 @@ export class ShopUIScene extends Phaser.Scene {
                 buttonX = 3 * uiBarWidth / 4;
                 tooltipText += config()["units"][typeKey]["tooltipText"];
                 iconTexture = typeKey + "_icon";
+                costs = unitCosts(typeKey as UnitType);
                 break;
             case ShopButtonType.Action:
                 buttonX = 3 * uiBarWidth / 4;
                 tooltipText += config()["actions"][typeKey]["tooltipText"];
                 iconTexture = typeKey + "_icon";
+                costs = actionCosts(typeKey as ActionType);
                 break;
         }
         let grayIconTexture = typeKey + "_gray";
-        let buildButtonIcon = this.add.sprite(this.getX(buttonX), this.getY(y), iconTexture).setScale(shopIconScale);
+        let buildButtonIcon = this.add.sprite(this.getX(buttonX - iconCostMargin), this.getY(y), iconTexture).setScale(shopIconScale);
         buildButtonIcon.setData(availableIconKey, iconTexture);
         buildButtonIcon.setData(unavailableIconKey, grayIconTexture);
-        let buildButtonBackground = this.add.sprite(this.getX(buttonX), this.getY(y), shopIconAvailable).setScale(shopIconScale);
+        let buildButtonBackground = this.add.sprite(this.getX(buttonX - iconCostMargin), this.getY(y), shopIconAvailable).setScale(shopIconScale);
+        let costsText = this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs)).setOrigin(0, 0.5)
         //TODO shop sprites for non buildings
         buildButtonBackground.setInteractive();
         buildButtonBackground.setData("selectable", true);
@@ -201,7 +216,7 @@ export class ShopUIScene extends Phaser.Scene {
         this.buildButtonBorders[typeKey] = buildButtonBackground;
         this.buildButtonIcons[typeKey] = buildButtonIcon;
         this.tooltips[typeKey] = this.createTooltip(tooltipText, buildButtonBackground.getTopLeft().x, this.getY(y)).setVisible(false);
-        return buildButtonBackground.displayHeight + 5;
+        return buildButtonBackground.displayHeight + iconYMargin;
     }
 
     getX(localX: number): number {
