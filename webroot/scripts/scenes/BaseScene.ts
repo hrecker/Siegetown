@@ -253,7 +253,7 @@ export class BaseScene extends Phaser.Scene {
         if (delay > 0) {
             let maxDelay = config()["units"][type]["spawnDelay"];
             for (let i = 0; i < scene.unitCooldownIcons.length; i++) {
-                if (! scene.unitCooldownIcons[i].visible) {
+                if (! scene.unitCooldownIcons[i].visible || scene.unitCooldownIcons[i].getData("unitType") == type) {
                     scene.unitCooldownIcons[i].setText(String(type).charAt(0));
                     scene.unitCooldownBars[i].setSize(scene.unitCooldownIcons[i].width, (delay / maxDelay) * cooldownBarHeight);
                     scene.unitCooldownIcons[i].setData("unitType", type);
