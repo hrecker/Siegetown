@@ -32,6 +32,7 @@ const shopIconUnavailableSelected = "shop_icon_border_selected_unavailable";
 const shopIconLocked = "shop_icon_border_locked";
 const iconCostMargin = 18;
 const iconYMargin = 6;
+const buttonXMarginLeft = 65;
 
 export class ShopUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
@@ -161,7 +162,7 @@ export class ShopUIScene extends Phaser.Scene {
         let costs = zeroResources();
         switch (buttonType) {
             case ShopButtonType.Building:
-                buttonX = uiBarWidth / 4;
+                buttonX = buttonXMarginLeft;
                 if (typeKey == UIBuilding.Remove) {
                     tooltipText += config()["removeBuildingTooltip"];
                     costs.gold = config()["removeBuildingCost"];
@@ -173,13 +174,13 @@ export class ShopUIScene extends Phaser.Scene {
                 }
                 break;
             case ShopButtonType.Unit:
-                buttonX = 3 * uiBarWidth / 4;
+                buttonX = buttonXMarginLeft + uiBarWidth / 2;
                 tooltipText += config()["units"][typeKey]["tooltipText"];
                 iconTexture = typeKey + "_icon";
                 costs = unitCosts(typeKey as UnitType);
                 break;
             case ShopButtonType.Action:
-                buttonX = 3 * uiBarWidth / 4;
+                buttonX = buttonXMarginLeft + uiBarWidth / 2;
                 tooltipText += config()["actions"][typeKey]["tooltipText"];
                 iconTexture = typeKey + "_icon";
                 costs = actionCosts(typeKey as ActionType);
@@ -242,27 +243,37 @@ export class ShopUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = UIBuilding.Empty;
 
-        this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings", {color: whiteColor}).setOrigin(0.5, 0);
-        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0);
+        let buildingLabel = this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings", {color: whiteColor}).setOrigin(0.5, 0);
+        let unitLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0);
 
         this.buildButtonBorders = {};
         this.buildButtonIcons = {};
         this.tooltips = {};
-        let y = 50;
+        let initialY = 50;
+        let y = initialY;
         this.allBuildings().forEach(building => {
             y += this.createShopButton(ShopButtonType.Building, building, y);
         });
+        let buildRectangleTopY = buildingLabel.getTopLeft().y - 8;
+        let buildRectangle = this.add.rectangle(this.getX(1), buildRectangleTopY, uiBarWidth / 2, this.game.renderer.height - buildRectangleTopY - 1).setOrigin(0, 0);
+        buildRectangle.isStroked = true;
 
         y = 50;
         allUnits().forEach(unit => {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
+        let unitRectangleTopY = unitLabel.getTopLeft().y - 8;
+        let unitRectangle = this.add.rectangle(this.getX(uiBarWidth / 2 + 1), unitRectangleTopY, uiBarWidth / 2 - 2, y - 20).setOrigin(0, 0);
+        unitRectangle.isStroked = true;
 
-        this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers", {color: whiteColor}).setAlign("right").setOrigin(0.5, 1);
+        let powerLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers", {color: whiteColor}).setAlign("right").setOrigin(0.5, 1);
         y += 30;
         allActions().forEach(action => {
             y += this.createShopButton(ShopButtonType.Action, action, y);
         });
+        let powerRectangleTopY = powerLabel.getTopLeft().y - 8;
+        let powerRectangle = this.add.rectangle(this.getX(uiBarWidth / 2 + 1), powerRectangleTopY, uiBarWidth / 2 - 2, this.game.renderer.height - powerRectangleTopY - 1).setOrigin(0, 0);
+        powerRectangle.isStroked = true;
 
         this.navigationUpButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.navigationDownButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
