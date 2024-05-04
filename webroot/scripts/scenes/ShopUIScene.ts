@@ -165,11 +165,12 @@ export class ShopUIScene extends Phaser.Scene {
                 if (typeKey == UIBuilding.Remove) {
                     tooltipText += config()["removeBuildingTooltip"];
                     costs.gold = config()["removeBuildingCost"];
+                    iconTexture = typeKey + "_icon";
                 } else {
                     tooltipText += config()["buildings"][typeKey]["tooltipText"];
                     costs = buildingCosts(BuildingFrom(typeKey as UIBuilding));
+                    iconTexture = typeKey + "1";
                 }
-                iconTexture = typeKey + "1";
                 break;
             case ShopButtonType.Unit:
                 buttonX = 3 * uiBarWidth / 4;

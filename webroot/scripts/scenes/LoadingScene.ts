@@ -84,6 +84,8 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("clear_gray", "assets/sprites/ui/clear_gray.png");
         this.load.image("reinforcements_icon", "assets/sprites/ui/reinforcements_icon.png");
         this.load.image("reinforcements_gray", "assets/sprites/ui/reinforcements_gray.png");
+        this.load.image("remove_icon", "assets/sprites/ui/remove_icon.png");
+        this.load.image("remove_gray", "assets/sprites/ui/remove_gray.png");
 
         
         // Load json
