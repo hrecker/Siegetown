@@ -7,7 +7,7 @@ import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
 import { Unit, UnitType, allUnits } from "../model/Unit";
 import { whiteColor } from "./BaseScene";
-import { uiBarWidth } from "./ResourceUIScene";
+import { statusBarHeight, uiBarWidth } from "./ResourceUIScene";
 
 enum ButtonState {
     Available,
@@ -227,7 +227,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     getY(localY: number): number {
-        return localY + 180;
+        return localY + statusBarHeight;
     }
 
     setIcon(iconKey: string, isAvailable: boolean) {
@@ -243,13 +243,13 @@ export class ShopUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = UIBuilding.Empty;
 
-        let buildingLabel = this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "Buildings", {color: whiteColor}).setOrigin(0.5, 0);
-        let unitLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0);
+        let buildingLabel = this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "🏠 Buildings", {color: whiteColor}).setOrigin(0.5, 0).setPadding(0, 3);
+        let unitLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "⚔️ Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0).setPadding(0, 3);
 
         this.buildButtonBorders = {};
         this.buildButtonIcons = {};
         this.tooltips = {};
-        let initialY = 50;
+        let initialY = 52;
         let y = initialY;
         this.allBuildings().forEach(building => {
             y += this.createShopButton(ShopButtonType.Building, building, y);
@@ -258,7 +258,7 @@ export class ShopUIScene extends Phaser.Scene {
         let buildRectangle = this.add.rectangle(this.getX(1), buildRectangleTopY, uiBarWidth / 2, this.game.renderer.height - buildRectangleTopY - 1).setOrigin(0, 0);
         buildRectangle.isStroked = true;
 
-        y = 50;
+        y = 52;
         allUnits().forEach(unit => {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
@@ -266,14 +266,19 @@ export class ShopUIScene extends Phaser.Scene {
         let unitRectangle = this.add.rectangle(this.getX(uiBarWidth / 2 + 1), unitRectangleTopY, uiBarWidth / 2 - 2, y - 20).setOrigin(0, 0);
         unitRectangle.isStroked = true;
 
-        let powerLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "Powers", {color: whiteColor}).setAlign("right").setOrigin(0.5, 1);
+        let powerLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(y), "⚡ Powers", {color: whiteColor}).setAlign("right").setOrigin(0.5, 1).setPadding(0, 3);
         y += 30;
         allActions().forEach(action => {
             y += this.createShopButton(ShopButtonType.Action, action, y);
         });
-        let powerRectangleTopY = powerLabel.getTopLeft().y - 8;
+        let powerRectangleTopY = powerLabel.getTopLeft().y - 2;
         let powerRectangle = this.add.rectangle(this.getX(uiBarWidth / 2 + 1), powerRectangleTopY, uiBarWidth / 2 - 2, this.game.renderer.height - powerRectangleTopY - 1).setOrigin(0, 0);
         powerRectangle.isStroked = true;
+
+        //TODO send tooltips to front
+        for (let tooltip in this.tooltips) {
+            this.tooltips[tooltip].setDepth(1);
+        }
 
         this.navigationUpButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.navigationDownButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
