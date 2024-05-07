@@ -9,6 +9,7 @@ import { UnitType, allUnits } from "../model/Unit";
 import { createAnimation } from "../util/Utils";
 import { laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
+import { Tooltip, createTooltip, setTooltipVisible } from "./ShopUIScene";
 
 const boardWidth = 300;
 const boardMargin = 10;
@@ -18,7 +19,7 @@ export const whiteColor = "#F2F0E5";
 
 type GridBuilding = {
     mainSprite: Phaser.GameObjects.Sprite;
-    tooltip: Phaser.GameObjects.Text;
+    tooltip: Tooltip;
 }
 
 export class BaseScene extends Phaser.Scene {
@@ -116,14 +117,13 @@ export class BaseScene extends Phaser.Scene {
                 if (j >= config()["baseWidth"] / 2) {
                     tooltipOriginY = 1;
                 }
-                let tooltip = this.add.text(x, y, this.getTooltipText(i, j), {color: whiteColor, backgroundColor: "#3A3858"}).setWordWrapWidth(250).setOrigin(tooltipOriginX, tooltipOriginY);
-                tooltip.setVisible(false);
+                let tooltip = createTooltip(this, this.getTooltipText(i, j), x, y, tooltipOriginX, tooltipOriginY);
                 this.gridBuildings[i][j].mainSprite.setInteractive();
                 this.gridBuildings[i][j].mainSprite.on('pointerover', () => {
-                    tooltip.setVisible(true);
+                    setTooltipVisible(tooltip, true);
                 });
                 this.gridBuildings[i][j].mainSprite.on('pointerout', () => {
-                    tooltip.setVisible(false);
+                    setTooltipVisible(tooltip, false);
                 });
                 this.gridBuildings[i][j].tooltip = tooltip;
             }
@@ -209,7 +209,7 @@ export class BaseScene extends Phaser.Scene {
         // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                this.gridBuildings[i][j].tooltip.text = this.getTooltipText(i, j);
+                this.gridBuildings[i][j].tooltip.text.text = this.getTooltipText(i, j);
             }
         }
     }
@@ -243,7 +243,7 @@ export class BaseScene extends Phaser.Scene {
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 scene.setBuildingSprite(scene.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
-                scene.gridBuildings[i][j].tooltip.text = scene.getTooltipText(i, j);
+                scene.gridBuildings[i][j].tooltip.text.text = scene.getTooltipText(i, j);
             }
         }
     }

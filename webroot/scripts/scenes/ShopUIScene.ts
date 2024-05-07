@@ -22,6 +22,29 @@ enum ShopButtonType {
     None,
 }
 
+export type Tooltip = {
+    background: Phaser.GameObjects.Rectangle;
+    text: Phaser.GameObjects.Text;
+}
+
+export function createTooltip(scene: Phaser.Scene, text: string, x: number, y: number, textOriginX: number, textOriginY: number): Tooltip {
+    let textObj = scene.add.text(x, y, text, {color: whiteColor }).setWordWrapWidth(250).setOrigin(textOriginX, textOriginY).setVisible(false);
+    let padding = 3;
+    let background = scene.add.rectangle(textObj.getTopLeft().x - padding, textObj.getTopLeft().y - padding, textObj.displayWidth + (2 * padding), textObj.displayHeight + (2 * padding)).setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
+    // Send to front
+    background.setDepth(1);
+    textObj.setDepth(2);
+    return {
+        background: background,
+        text: textObj
+    };
+}
+
+export function setTooltipVisible(tooltip: Tooltip, visible: boolean) {
+    tooltip.background.setVisible(visible);
+    tooltip.text.setVisible(visible);
+}
+
 const shopIconScale = 0.1;
 const availableIconKey = "available_icon";
 const unavailableIconKey = "unavailable_icon";
@@ -40,7 +63,7 @@ export class ShopUIScene extends Phaser.Scene {
 
     buildButtonBorders: { [type: string] : Phaser.GameObjects.Sprite }
     buildButtonIcons: { [type: string] : Phaser.GameObjects.Sprite }
-    tooltips: { [type: string] : Phaser.GameObjects.Text }
+    tooltips: { [type: string] : Tooltip }
     removeButtonOutline: Phaser.GameObjects.Rectangle;
 
     navigationUpButton: Phaser.Input.Keyboard.Key;
@@ -150,10 +173,6 @@ export class ShopUIScene extends Phaser.Scene {
         return buttonOutline;
     }
 
-    createTooltip(text: string, x: number, y: number): Phaser.GameObjects.Text {
-        return this.add.text(x, y, text, {color: whiteColor, backgroundColor: "#352B42"}).setWordWrapWidth(250).setOrigin(1, 1);
-    }
-
     // Returns the gap needed between this button and the next button... a little jank but hey it works
     createShopButton(buttonType: ShopButtonType, typeKey: string, y: number): number {
         let tooltipText = typeKey + "\n";
@@ -211,14 +230,14 @@ export class ShopUIScene extends Phaser.Scene {
             }
         });
         buildButtonBackground.on('pointerover', () => {
-            this.tooltips[typeKey].setVisible(true);
+            setTooltipVisible(this.tooltips[typeKey], true);
         });
         buildButtonBackground.on('pointerout', () => {
-            this.tooltips[typeKey].setVisible(false);
+            setTooltipVisible(this.tooltips[typeKey], false);
         });
         this.buildButtonBorders[typeKey] = buildButtonBackground;
         this.buildButtonIcons[typeKey] = buildButtonIcon;
-        this.tooltips[typeKey] = this.createTooltip(tooltipText, buildButtonBackground.getTopLeft().x, this.getY(y)).setVisible(false);
+        this.tooltips[typeKey] = createTooltip(this, tooltipText, buildButtonBackground.getTopLeft().x, this.getY(y), 1, 1);
         return buildButtonBackground.displayHeight + iconYMargin;
     }
 
@@ -274,11 +293,6 @@ export class ShopUIScene extends Phaser.Scene {
         let powerRectangleTopY = powerLabel.getTopLeft().y - 2;
         let powerRectangle = this.add.rectangle(this.getX(uiBarWidth / 2 + 1), powerRectangleTopY, uiBarWidth / 2 - 2, this.game.renderer.height - powerRectangleTopY - 1).setOrigin(0, 0);
         powerRectangle.isStroked = true;
-
-        //TODO send tooltips to front
-        for (let tooltip in this.tooltips) {
-            this.tooltips[tooltip].setDepth(1);
-        }
 
         this.navigationUpButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.navigationDownButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
