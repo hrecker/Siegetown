@@ -1,6 +1,8 @@
 import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
+import { config } from "../model/Config";
 import { UnitType } from "../model/Unit";
+import { capitalizeFirstLetter } from "../util/Utils";
 
 // Remove is its own "building" in the UI, so use a separate enum here
 export enum UIBuilding {
@@ -37,5 +39,13 @@ export function createUIState(): UIState {
         selectedBuilding: UIBuilding.Empty,
         selectedUnit: UnitType.None,
         selectedAction: ActionType.None,
+    }
+}
+
+export function buildingDisplayName(building: UIBuilding) {
+    if (building in config()["buildings"] && "displayName" in config()["buildings"][building]) {
+        return config()["buildings"][building]["displayName"];
+    } else {
+        return capitalizeFirstLetter(building);
     }
 }

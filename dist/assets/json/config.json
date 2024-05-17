@@ -20,7 +20,7 @@
     "maxEnemiesPerWave": 6,
 
     "removeBuildingCost": 500,
-    "removeBuildingTooltip": "Remove existing building",
+    "removeBuildingTooltip": "💣Remove existing building",
 
     "startingResources": {
         "food": 150,
@@ -39,7 +39,7 @@
                 "food": 150
             },
             "buildRequirement": "townhall",
-            "tooltipText": "Attack: 1\nHealth: 3\nRange: 1\nSpeed: 2\nAttack Delay: 12"
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
         },
         "slingshotter": {
             "maxHealth": 2,
@@ -53,7 +53,7 @@
                 "wood": 200
             },
             "buildRequirement": "townhall",
-            "tooltipText": "Attack: 1\nHealth: 3\nRange: 2\nSpeed: 1\nAttack Delay: 16"
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 2\n🏃Speed: 1\n⏰Attack Delay: 16"
         },
         "clubman": {
             "maxHealth": 4,
@@ -67,7 +67,7 @@
                 "wood": 400
             },
             "buildRequirement": "trainingground",
-            "tooltipText": "Requires Training Ground\nAttack: 2\nHealth: 4\nRange: 1\nSpeed: 4\nAttack Delay: 14"
+            "tooltipText": "Requires Training Ground\n🗡️Attack: 2\n❤️Health: 4\n🏹Range: 1\n🏃Speed: 4\n⏰Attack Delay: 14"
         }
     },
 
@@ -101,7 +101,7 @@
                     "food": 1
                 }
             },
-            "tooltipText": "+10 food\n+1 food for each adjacent field"
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
         },
         "forest": {
             "produce": {
@@ -117,7 +117,7 @@
                     "wood": 1
                 }
             },
-            "tooltipText": "+10 wood\n+1 wood for each adjacent forest"
+            "tooltipText": "🪵+10 wood\n🪵+1 wood for each adjacent forest"
         },
         "market": {
             "produce": {
@@ -133,7 +133,7 @@
                     "gold": 5
                 }
             },
-            "tooltipText": "+10 gold\n+5 additional gold if adjacent to townhall"
+            "tooltipText": "🪙+10 gold\n🪙+5 additional gold if adjacent to townhall"
         },
         "barracks": {
             "produce": {
@@ -144,7 +144,7 @@
                 "food": 750,
                 "wood": 2000
             },
-            "tooltipText": "+1 unit health"
+            "tooltipText": "❤️+1 unit health"
         },
         "trainingground": {
             "produce": {},
@@ -153,7 +153,8 @@
                 "food": 1000,
                 "wood": 3000
             },
-            "tooltipText": "Unlocks clubman unit"
+            "displayName": "Training Ground",
+            "tooltipText": "🔓Unlocks clubman unit"
         }
     },
 
@@ -163,19 +164,19 @@
             "cost": {
                 "gold": 200
             },
-            "tooltipText": "Freeze all units in one lane for 3 seconds"
+            "tooltipText": "🧊Freeze all units in one lane for 3 seconds"
         },
         "reinforcements": {
             "cost": {
                 "gold": 400
             },
-            "tooltipText": "Spawn one clubman in each lane"
+            "tooltipText": "🪖Spawn one clubman in each lane"
         },
         "clear": {
             "cost": {
                 "gold": 500
             },
-            "tooltipText": "Destroy all units in one lane"
+            "tooltipText": "💥Destroy all units in one lane"
         }
     }
 }

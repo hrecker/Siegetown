@@ -1,11 +1,12 @@
 import { addActionRunListener, addBuildListener, addGameRestartedListener, addResourceUpdateListener, addUnitBuiltListener, addUnitUnlockedListener } from "../events/EventMessenger";
 import { ActiveGame, canAfford, gameEnded, hasBuilding } from "../game/Game";
-import { BuildingFrom, UIBuilding, UIState } from "../game/UIState";
+import { BuildingFrom, UIBuilding, UIState, buildingDisplayName } from "../game/UIState";
 import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
 import { Unit, UnitType, allUnits } from "../model/Unit";
+import { capitalizeFirstLetter } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
 import { statusBarHeight, uiBarWidth } from "./ResourceUIScene";
 
@@ -27,10 +28,10 @@ export type Tooltip = {
     text: Phaser.GameObjects.Text;
 }
 
+const tooltipPadding = 3;
 export function createTooltip(scene: Phaser.Scene, text: string, x: number, y: number, textOriginX: number, textOriginY: number): Tooltip {
-    let textObj = scene.add.text(x, y, text, {color: whiteColor }).setWordWrapWidth(250).setOrigin(textOriginX, textOriginY).setVisible(false);
-    let padding = 3;
-    let background = scene.add.rectangle(textObj.getTopLeft().x - padding, textObj.getTopLeft().y - padding, textObj.displayWidth + (2 * padding), textObj.displayHeight + (2 * padding)).setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
+    let textObj = scene.add.text(x, y, text, {color: whiteColor }).setWordWrapWidth(x - 10).setOrigin(textOriginX, textOriginY).setVisible(false).setPadding(0, 3);
+    let background = scene.add.rectangle(textObj.getTopLeft().x - tooltipPadding, textObj.getTopLeft().y - tooltipPadding, textObj.displayWidth + (2 * tooltipPadding), textObj.displayHeight + (2 * tooltipPadding)).setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
     // Send to front
     background.setDepth(1);
     textObj.setDepth(2);
@@ -38,6 +39,12 @@ export function createTooltip(scene: Phaser.Scene, text: string, x: number, y: n
         background: background,
         text: textObj
     };
+}
+
+export function updateTooltip(tooltip: Tooltip, newText: string) {
+    tooltip.text.text = newText;
+    tooltip.background.setPosition(tooltip.text.getTopLeft().x - tooltipPadding, tooltip.text.getTopLeft().y - tooltipPadding);
+    tooltip.background.setSize(tooltip.text.displayWidth + (2 * tooltipPadding), tooltip.text.displayHeight + (2 * tooltipPadding));
 }
 
 export function setTooltipVisible(tooltip: Tooltip, visible: boolean) {
@@ -106,13 +113,13 @@ export class ShopUIScene extends Phaser.Scene {
     costsText(costs: Resources): string {
         let costTexts = []
         if (costs.gold > 0) {
-            costTexts.push(costs.gold + "G");
+            costTexts.push(costs.gold + "🪙");
         }
         if (costs.food > 0) {
-            costTexts.push(costs.food + "F");
+            costTexts.push(costs.food + "🍞");
         }
         if (costs.wood) {
-            costTexts.push(costs.wood + "W");
+            costTexts.push(costs.wood + "🪵");
         }
         let text = "";
         for (let i = 0; i < costTexts.length; i++) {
@@ -122,47 +129,6 @@ export class ShopUIScene extends Phaser.Scene {
             text += costTexts[i];
         }
         return text;
-    }
-
-    createBuildButtonText(key: string, y: number, costs: Resources, rightAlign: boolean) {
-        let text = key + ":";
-        text += this.costsText(costs);
-        if (rightAlign) {
-            return this.add.text(this.getX(uiBarWidth - 10), this.getY(y), text, {color: whiteColor}).setOrigin(1, 0).setAlign("right");
-        } else {
-            return this.add.text(this.getX(10), this.getY(y), text, {color: whiteColor});
-        }
-    }
-
-    createBuildBuildingButtonText(buildingType: UIBuilding, y: number): Phaser.GameObjects.Text {
-        let costs = zeroResources();
-        if (buildingType == UIBuilding.Remove) {
-            costs.gold = config()["removeBuildingCost"];
-        } else {
-            costs = buildingCosts(BuildingFrom(buildingType));
-        }
-        return this.createBuildButtonText(buildingType, y, costs, false);
-    }
-
-    createBuildUnitButtonText(unitType: UnitType, y: number): Phaser.GameObjects.Text {
-        let costs = unitCosts(unitType);
-        return this.createBuildButtonText(unitType, y, costs, true);
-    }
-
-    createBuildActionButtonText(actionType: ActionType, y: number): Phaser.GameObjects.Text {
-        let costs = actionCosts(actionType);
-        return this.createBuildButtonText(actionType, y, costs, true);
-    }
-
-    createBuildingBuildButton(building: UIBuilding, y: number) {
-        let buildButton = this.createBuildBuildingButtonText(building, y);
-        let buildButtonOutline = this.add.rectangle(buildButton.getTopLeft().x - 1, buildButton.getTopLeft().y - 1,
-            buildButton.width + 1, buildButton.height + 1).setOrigin(0, 0);
-        buildButtonOutline.isStroked = true;
-        buildButtonOutline.setVisible(false);
-        buildButton.on('pointerdown', () => {
-            this.selectBuild(building);
-        });
     }
 
     createOutline(button: Phaser.GameObjects.Text): Phaser.GameObjects.Rectangle {
@@ -175,13 +141,14 @@ export class ShopUIScene extends Phaser.Scene {
 
     // Returns the gap needed between this button and the next button... a little jank but hey it works
     createShopButton(buttonType: ShopButtonType, typeKey: string, y: number): number {
-        let tooltipText = typeKey + "\n";
+        let tooltipText = capitalizeFirstLetter(typeKey) + "\n";
         let buttonX = -1;
         let iconTexture;
         let costs = zeroResources();
         switch (buttonType) {
             case ShopButtonType.Building:
                 buttonX = buttonXMarginLeft;
+                tooltipText = buildingDisplayName(typeKey as UIBuilding) + "\n";
                 if (typeKey == UIBuilding.Remove) {
                     tooltipText += config()["removeBuildingTooltip"];
                     costs.gold = config()["removeBuildingCost"];
@@ -210,7 +177,7 @@ export class ShopUIScene extends Phaser.Scene {
         buildButtonIcon.setData(availableIconKey, iconTexture);
         buildButtonIcon.setData(unavailableIconKey, grayIconTexture);
         let buildButtonBackground = this.add.sprite(this.getX(buttonX - iconCostMargin), this.getY(y), shopIconAvailable).setScale(shopIconScale);
-        this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs), {color: whiteColor}).setOrigin(0, 0.5)
+        this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs), {color: whiteColor}).setOrigin(0, 0.5).setPadding(0, 3);
         //TODO shop sprites for non buildings
         buildButtonBackground.setInteractive();
         buildButtonBackground.setData("selectable", true);

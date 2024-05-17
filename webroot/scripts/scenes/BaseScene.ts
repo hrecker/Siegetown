@@ -6,10 +6,10 @@ import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
 import { UnitType, allUnits } from "../model/Unit";
-import { createAnimation } from "../util/Utils";
+import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
-import { Tooltip, createTooltip, setTooltipVisible } from "./ShopUIScene";
+import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
 const boardWidth = 300;
 const boardMargin = 10;
@@ -209,7 +209,9 @@ export class BaseScene extends Phaser.Scene {
         // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
-                this.gridBuildings[i][j].tooltip.text.text = this.getTooltipText(i, j);
+                updateTooltip(this.gridBuildings[i][j].tooltip, this.getTooltipText(i, j));
+                //this.gridBuildings[i][j].tooltip.text.text = this.getTooltipText(i, j);
+                //this.gridBuildings[i][j].tooltip.background.setSize(this.gridBuildings[i][j].tooltip.text.width, 100);
             }
         }
     }
@@ -218,21 +220,21 @@ export class BaseScene extends Phaser.Scene {
         let building = this.activeGame.base.grid[x][y];
         let production = this.activeGame.base.growthByTile[x][y];
         let buffs = buildingBuffs(this.activeGame.base.grid[x][y]);
-        let result = building + "\n";
+        let result = capitalizeFirstLetter(building) + "\n";
         if (production.gold != 0) {
-            result += "+" + production.gold + " gold/second";
+            result += "🪙+" + production.gold + " gold";
         }
         if (production.food != 0) {
-            result += "+" + production.food + " food/second";
+            result += "🍞+" + production.food + " food";
         }
         if (production.wood != 0) {
-            result += "+" + production.wood + " wood/second";
+            result += "🪵+" + production.wood + " wood";
         }
         if (buffs.damageBuff != 0) {
-            result += "+" + buffs.damageBuff + " unit damage/second";
+            result += "🗡️+" + buffs.damageBuff + " unit damage";
         }
         if (buffs.healthBuff != 0) {
-            result += "+" + buffs.healthBuff + " unit health/second";
+            result += "❤️+" + buffs.healthBuff + " unit health";
         }
         return result;
     }
