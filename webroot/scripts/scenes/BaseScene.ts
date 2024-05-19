@@ -14,7 +14,6 @@ import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./Shop
 const boardWidth = 300;
 const boardMargin = 10;
 const cooldownMargin = 10;
-const cooldownBarHeight = 100;
 export const whiteColor = "#F2F0E5";
 
 type GridBuilding = {
@@ -34,8 +33,9 @@ export class BaseScene extends Phaser.Scene {
     laneTopY: number;
     laneHeight: number;
 
-    unitCooldownIcons: Phaser.GameObjects.Text[];
-    unitCooldownBars: Phaser.GameObjects.Rectangle[];
+    unitCooldownIcons: Phaser.GameObjects.Sprite[];
+    unitCooldownIconBackgrounds: Phaser.GameObjects.Rectangle[];
+    unitCooldownAnimations: Phaser.GameObjects.Graphics[];
 
     constructor() {
         super({
@@ -139,13 +139,24 @@ export class BaseScene extends Phaser.Scene {
         let x = cooldownMargin;
         let y = laneSceneTopY - cooldownMargin;
         this.unitCooldownIcons = [];
-        this.unitCooldownBars = [];
+        this.unitCooldownIconBackgrounds = [];
+        this.unitCooldownAnimations = [];
         allUnits().forEach(unit => {
-            let unitIcon = this.add.text(x, y, String(unit).charAt(0)).setBackgroundColor("white").setColor("black").setOrigin(0, 1).setFontSize(24).setVisible(false);
+            let unitIcon = this.add.sprite(x, y, unit + "_icon_small").setOrigin(0, 1).setVisible(false).setScale(0.5).setAlpha(0.8);
+            let unitIconBackground = this.add.rectangle(unitIcon.getTopLeft().x, unitIcon.getTopLeft().y,
+                unitIcon.displayWidth, unitIcon.displayHeight).
+                setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
+            unitIcon.setDepth(1);
+            // Mask the radial cooldown animation to the size of the icon
+            let cooldownMask = this.add.graphics().setVisible(false).fillRect(
+                unitIcon.getTopLeft().x, unitIcon.getTopLeft().y, unitIcon.displayWidth, unitIcon.displayHeight);
+            let unitCooldownAnimation = this.add.graphics().setPosition(unitIcon.getCenter().x, unitIcon.getCenter().y);
+            unitCooldownAnimation.setDepth(2);
+            unitCooldownAnimation.setMask(cooldownMask.createGeometryMask());
+            this.unitCooldownAnimations.push(unitCooldownAnimation)
+            this.unitCooldownIconBackgrounds.push(unitIconBackground);
             this.unitCooldownIcons.push(unitIcon);
-            let unitCooldownBar = this.add.rectangle(x, y - unitIcon.height - cooldownMargin, unitIcon.width, cooldownBarHeight, 0xffffff).setOrigin(0, 1).setVisible(false);
-            this.unitCooldownBars.push(unitCooldownBar);
-            x += unitIcon.width + cooldownMargin;
+            y -= unitIcon.displayWidth + cooldownMargin;
         });
 
         this.resize(true);
@@ -210,8 +221,6 @@ export class BaseScene extends Phaser.Scene {
         for (let i = 0; i < config()["baseWidth"]; i++) {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 updateTooltip(this.gridBuildings[i][j].tooltip, this.getTooltipText(i, j));
-                //this.gridBuildings[i][j].tooltip.text.text = this.getTooltipText(i, j);
-                //this.gridBuildings[i][j].tooltip.background.setSize(this.gridBuildings[i][j].tooltip.text.width, 100);
             }
         }
     }
@@ -250,17 +259,27 @@ export class BaseScene extends Phaser.Scene {
         }
     }
 
+    drawCooldownAnimation(animation: Phaser.GameObjects.Graphics, delayRemaining: number, maxDelay: number) {
+        animation.clear();
+        animation.fillStyle(0, 0.7);
+        animation.beginPath();
+        animation.slice(0, 0, 64,
+            Phaser.Math.DegToRad(270), Phaser.Math.DegToRad(270 - (delayRemaining / maxDelay) * 360.0), true)
+        animation.fillPath();
+    }
+
     unitBuiltListener(scene: BaseScene, type: UnitType) {
         let delay = scene.activeGame.unitSpawnDelaysRemaining[type];
         if (delay > 0) {
             let maxDelay = config()["units"][type]["spawnDelay"];
             for (let i = 0; i < scene.unitCooldownIcons.length; i++) {
                 if (! scene.unitCooldownIcons[i].visible || scene.unitCooldownIcons[i].getData("unitType") == type) {
-                    scene.unitCooldownIcons[i].setText(String(type).charAt(0));
-                    scene.unitCooldownBars[i].setSize(scene.unitCooldownIcons[i].width, (delay / maxDelay) * cooldownBarHeight);
+                    scene.unitCooldownIcons[i].setTexture(type + "_icon_small");
+                    scene.drawCooldownAnimation(scene.unitCooldownAnimations[i], delay, maxDelay);
                     scene.unitCooldownIcons[i].setData("unitType", type);
+                    scene.unitCooldownIconBackgrounds[i].setVisible(true);
                     scene.unitCooldownIcons[i].setVisible(true);
-                    scene.unitCooldownBars[i].setVisible(true);
+                    scene.unitCooldownAnimations[i].setVisible(true);
                     break;
                 }
             }
@@ -276,21 +295,23 @@ export class BaseScene extends Phaser.Scene {
             let type = this.unitCooldownIcons[i].getData("unitType");
             let delay = this.activeGame.unitSpawnDelaysRemaining[type];
             if (delay <= 0) {
+                this.unitCooldownIconBackgrounds[i].setVisible(false);
                 this.unitCooldownIcons[i].setVisible(false);
-                this.unitCooldownBars[i].setVisible(false);
+                this.unitCooldownAnimations[i].setVisible(false);
                 leftShift++;
             } else {
                 let maxDelay = config()["units"][type]["spawnDelay"];
-                this.unitCooldownBars[i].setSize(this.unitCooldownIcons[i].width, (delay / maxDelay) * cooldownBarHeight);
                 if (leftShift > 0) {
-                    this.unitCooldownIcons[i - leftShift].setText(this.unitCooldownIcons[i].text);
-                    this.unitCooldownBars[i - leftShift].setSize(this.unitCooldownBars[i].width, this.unitCooldownBars[i].height);
+                    this.unitCooldownIcons[i - leftShift].setTexture(this.unitCooldownIcons[i].texture.key);
+                    this.unitCooldownIconBackgrounds[i].setVisible(false);
                     this.unitCooldownIcons[i].setVisible(false);
-                    this.unitCooldownBars[i].setVisible(false);
+                    this.unitCooldownAnimations[i].setVisible(false);
+                    this.unitCooldownIconBackgrounds[i - leftShift].setVisible(true);
                     this.unitCooldownIcons[i - leftShift].setVisible(true);
-                    this.unitCooldownBars[i - leftShift].setVisible(true);
+                    this.unitCooldownAnimations[i - leftShift].setVisible(true);
                     this.unitCooldownIcons[i - leftShift].setData("unitType", type);
                 }
+                this.drawCooldownAnimation(this.unitCooldownAnimations[i - leftShift], delay, maxDelay);
             }
         }
     }

@@ -31,7 +31,9 @@ export type Tooltip = {
 const tooltipPadding = 3;
 export function createTooltip(scene: Phaser.Scene, text: string, x: number, y: number, textOriginX: number, textOriginY: number): Tooltip {
     let textObj = scene.add.text(x, y, text, {color: whiteColor }).setWordWrapWidth(x - 10).setOrigin(textOriginX, textOriginY).setVisible(false).setPadding(0, 3);
-    let background = scene.add.rectangle(textObj.getTopLeft().x - tooltipPadding, textObj.getTopLeft().y - tooltipPadding, textObj.displayWidth + (2 * tooltipPadding), textObj.displayHeight + (2 * tooltipPadding)).setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
+    let background = scene.add.rectangle(textObj.getTopLeft().x - tooltipPadding, textObj.getTopLeft().y - tooltipPadding,
+        textObj.displayWidth + (2 * tooltipPadding), textObj.displayHeight + (2 * tooltipPadding)).
+        setFillStyle(0x43436A).setVisible(false).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5);
     // Send to front
     background.setDepth(1);
     textObj.setDepth(2);

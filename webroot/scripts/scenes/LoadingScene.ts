@@ -73,10 +73,13 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("shop_icon_border_selected_unavailable", "assets/sprites/ui/shop_icon_selected_unavailable.png");
         this.load.image("shop_icon_border_locked", "assets/sprites/ui/shop_icon_locked.png");
         this.load.image("warrior_icon", "assets/sprites/ui/warrior_icon.png");
+        this.load.image("warrior_icon_small", "assets/sprites/ui/warrior_icon_small.png");
         this.load.image("warrior_gray", "assets/sprites/ui/warrior_gray.png");
         this.load.image("slingshotter_icon", "assets/sprites/ui/slingshotter_icon.png");
+        this.load.image("slingshotter_icon_small", "assets/sprites/ui/slingshotter_icon_small.png");
         this.load.image("slingshotter_gray", "assets/sprites/ui/slingshotter_gray.png");
         this.load.image("clubman_icon", "assets/sprites/ui/clubman_icon.png");
+        this.load.image("clubman_icon_small", "assets/sprites/ui/clubman_icon_small.png");
         this.load.image("clubman_gray", "assets/sprites/ui/clubman_gray.png");
         this.load.image("freeze_icon", "assets/sprites/ui/freeze_icon.png");
         this.load.image("freeze_gray", "assets/sprites/ui/freeze_gray.png");
