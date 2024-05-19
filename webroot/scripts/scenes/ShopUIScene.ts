@@ -71,6 +71,7 @@ export class ShopUIScene extends Phaser.Scene {
     buildButtonBorders: { [type: string] : Phaser.GameObjects.Sprite }
     buildButtonIcons: { [type: string] : Phaser.GameObjects.Sprite }
     tooltips: { [type: string] : Tooltip }
+    costTooltips: { [type: string] : Tooltip }
     removeButtonOutline: Phaser.GameObjects.Rectangle;
 
     navigationUpButton: Phaser.Input.Keyboard.Key;
@@ -110,16 +111,28 @@ export class ShopUIScene extends Phaser.Scene {
         ]
     }
 
-    costsText(costs: Resources): string {
+    costsText(costs: Resources, useEmoji: boolean): string {
         let costTexts = []
         if (costs.gold > 0) {
-            costTexts.push(costs.gold + "🪙");
+            if (useEmoji) {
+                costTexts.push(costs.gold + "🪙");
+            } else {
+                costTexts.push(costs.gold + " Gold");
+            }
         }
         if (costs.food > 0) {
-            costTexts.push(costs.food + "🍞");
+            if (useEmoji) {
+                costTexts.push(costs.food + "🍞");
+            } else {
+                costTexts.push(costs.food + " Food");
+            }
         }
         if (costs.wood) {
-            costTexts.push(costs.wood + "🪵");
+            if (useEmoji) {
+                costTexts.push(costs.wood + "🪵");
+            } else {
+                costTexts.push(costs.wood + " Wood");
+            }
         }
         let text = "";
         for (let i = 0; i < costTexts.length; i++) {
@@ -177,9 +190,9 @@ export class ShopUIScene extends Phaser.Scene {
         buildButtonIcon.setData(availableIconKey, iconTexture);
         buildButtonIcon.setData(unavailableIconKey, grayIconTexture);
         let buildButtonBackground = this.add.sprite(this.getX(buttonX - iconCostMargin), this.getY(y), shopIconAvailable).setScale(shopIconScale);
-        this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs), {color: whiteColor}).setOrigin(0, 0.5).setPadding(0, 3);
-        //TODO shop sprites for non buildings
+        let costsDisplay = this.add.text(this.getX(buttonX + iconCostMargin), this.getY(y), this.costsText(costs, true), {color: whiteColor}).setOrigin(0, 0.5).setPadding(0, 3);
         buildButtonBackground.setInteractive();
+        costsDisplay.setInteractive();
         buildButtonBackground.setData("selectable", true);
         buildButtonBackground.on('pointerdown', () => {
             if (buildButtonBackground.getData("selectable")) {
@@ -202,9 +215,16 @@ export class ShopUIScene extends Phaser.Scene {
         buildButtonBackground.on('pointerout', () => {
             setTooltipVisible(this.tooltips[typeKey], false);
         });
+        costsDisplay.on('pointerover', () => {
+            setTooltipVisible(this.costTooltips[typeKey], true);
+        });
+        costsDisplay.on('pointerout', () => {
+            setTooltipVisible(this.costTooltips[typeKey], false);
+        });
         this.buildButtonBorders[typeKey] = buildButtonBackground;
         this.buildButtonIcons[typeKey] = buildButtonIcon;
         this.tooltips[typeKey] = createTooltip(this, tooltipText, buildButtonBackground.getTopLeft().x, this.getY(y), 1, 1);
+        this.costTooltips[typeKey] = createTooltip(this, this.costsText(costs, false), costsDisplay.getTopLeft().x, this.getY(y), 1, 1);
         return buildButtonBackground.displayHeight + iconYMargin;
     }
 
@@ -235,6 +255,7 @@ export class ShopUIScene extends Phaser.Scene {
         this.buildButtonBorders = {};
         this.buildButtonIcons = {};
         this.tooltips = {};
+        this.costTooltips = {};
         let initialY = 52;
         let y = initialY;
         this.allBuildings().forEach(building => {
