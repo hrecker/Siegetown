@@ -37,6 +37,9 @@ export class BaseScene extends Phaser.Scene {
     unitCooldownIconBackgrounds: Phaser.GameObjects.Rectangle[];
     unitCooldownAnimations: Phaser.GameObjects.Graphics[];
 
+    previewBackground: Phaser.GameObjects.Rectangle;
+    previewText: Phaser.GameObjects.Text;
+
     constructor() {
         super({
             key: "BaseScene"
@@ -120,6 +123,7 @@ export class BaseScene extends Phaser.Scene {
                 let tooltip = createTooltip(this, this.getTooltipText(i, j), x, y, tooltipOriginX, tooltipOriginY);
                 this.gridBuildings[i][j].mainSprite.setInteractive();
                 this.gridBuildings[i][j].mainSprite.on('pointerover', () => {
+                    console.log("over")
                     setTooltipVisible(tooltip, true);
                 });
                 this.gridBuildings[i][j].mainSprite.on('pointerout', () => {
@@ -132,7 +136,6 @@ export class BaseScene extends Phaser.Scene {
         // Handle mouse clicks
         this.input.on("pointerup", () => {
             this.handleGridClick();
-            //this.handleLaneClick();
         });
 
         // Create icons and cooldown bars
@@ -159,6 +162,11 @@ export class BaseScene extends Phaser.Scene {
             y -= unitIcon.displayWidth + cooldownMargin;
         });
 
+        // Create preview text
+        this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth, laneSceneTopY, 100, 10).
+            setFillStyle(0x43436A).setOrigin(1, 1).setStrokeStyle(1, 0xF2F0E5).setVisible(false);
+        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY - 1, "asdf").setOrigin(1, 1).setVisible(false);
+
         this.resize(true);
         this.scale.on("resize", this.resize, this);
 
@@ -175,21 +183,31 @@ export class BaseScene extends Phaser.Scene {
         }
     }
 
+    getGridMousePosition(): Phaser.Types.Math.Vector2Like {
+        return {
+            x: Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth / config()["baseWidth"])),
+            y: Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth / config()["baseWidth"]))
+        }
+    }
+
+    isOnGrid(gridPos: Phaser.Types.Math.Vector2Like) {
+        return gridPos.x >= 0 && gridPos.x < config()["baseWidth"] && gridPos.y >= 0 && gridPos.y < config()["baseWidth"]
+    }
+
     handleGridClick() {
         if (this.uiState.selectedBuilding == UIBuilding.Empty || gameEnded(this.activeGame)) {
             return;
         }
 
-        let gridX = Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth / config()["baseWidth"]));
-        let gridY = Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth / config()["baseWidth"]));
+        let gridPos = this.getGridMousePosition();
 
-        if (gridX < 0 || gridX >= config()["baseWidth"] || gridY < 0 || gridY >= config()["baseWidth"]) {
+        if (! this.isOnGrid(gridPos)) {
             return;
         }
 
         let isRemove = this.uiState.selectedBuilding == UIBuilding.Remove;
         // Ensure we aren't remove an empty space, or building on a non-empty space
-        if (isRemove == (this.activeGame.base.grid[gridX][gridY] == Building.Empty)) {
+        if (isRemove == (this.activeGame.base.grid[gridPos.x][gridPos.y] == Building.Empty)) {
             return;
         }
 
@@ -202,20 +220,20 @@ export class BaseScene extends Phaser.Scene {
         if (! canAfford(this.activeGame, costs)) {
             return;
         }
-
+ 
         // Don't allow removing townhall
-        if (isRemove && this.activeGame.base.grid[gridX][gridY] == Building.Townhall) {
+        if (isRemove && this.activeGame.base.grid[gridPos.x][gridPos.y] == Building.Townhall) {
             return;
         }
         
         // If removing, remove the building
         if (isRemove) {
-            this.setBuildingSprite(this.gridBuildings[gridX][gridY].mainSprite, Building.Empty);
-            removeBuilding(this.activeGame, gridX, gridY);
+            this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, Building.Empty);
+            removeBuilding(this.activeGame, gridPos.x, gridPos.y);
         } else {
             // Build the building
-            this.setBuildingSprite(this.gridBuildings[gridX][gridY].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
-            buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridX, gridY);
+            this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
+            buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridPos.x, gridPos.y);
         }
         // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
@@ -286,6 +304,21 @@ export class BaseScene extends Phaser.Scene {
         }
     }
 
+    updatePreviewText(text: string) {
+        if (text == this.previewText.text) {
+            return;
+        }
+        this.previewText.text = text;
+        if (text == "") {
+            this.previewBackground.setVisible(false);
+            this.previewText.setVisible(false);
+        } else {
+            this.previewText.setVisible(true);
+            this.previewBackground.setVisible(true);
+            this.previewBackground.setSize(this.previewText.width + 2, this.previewText.height + 2);
+        }
+    }
+
     update(time: number, delta: number): void {
         let leftShift = 0;
         for (let i = 0; i < this.unitCooldownIcons.length; i++) {
@@ -313,6 +346,26 @@ export class BaseScene extends Phaser.Scene {
                 }
                 this.drawCooldownAnimation(this.unitCooldownAnimations[i - leftShift], delay, maxDelay);
             }
+        }
+
+        // If mousing over an open tile with a selected building, show preview text
+        let anyPreview = false;
+        if (this.uiState.selectedBuilding != UIBuilding.Empty) {
+            let gridPos = this.getGridMousePosition();
+            if (this.isOnGrid(gridPos)) {
+                let isRemove = this.uiState.selectedBuilding == UIBuilding.Remove;
+                let currentBuilding = this.activeGame.base.grid[gridPos.x][gridPos.y];
+                if (currentBuilding == Building.Empty && !isRemove) {
+                    this.updatePreviewText("Build " + this.uiState.selectedBuilding);
+                    anyPreview = true;
+                }
+                if (isRemove && (this.activeGame.base.grid[gridPos.x][gridPos.y] == Building.Empty)) {
+
+                }
+            }
+        } 
+        if (! anyPreview) {
+            this.updatePreviewText("");
         }
     }
 }
