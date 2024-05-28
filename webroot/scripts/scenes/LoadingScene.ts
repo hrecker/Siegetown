@@ -54,16 +54,16 @@ export class LoadingScene extends Phaser.Scene {
         this.loadSpriteSequence(4, "clubman_attack", "assets/sprites/units/clubman_attack");
 
         // buildings
-        this.loadSpriteSequence(2, "townhall", "assets/sprites/buildings/townhall");
-        this.loadSpriteSequence(2, "field", "assets/sprites/buildings/field");
+        this.loadSpriteSequence(4, "townhall", "assets/sprites/buildings/townhall");
+        this.loadSpriteSequence(3, "field", "assets/sprites/buildings/field");
         this.load.image("field_gray", "assets/sprites/ui/field_gray.png");
-        this.loadSpriteSequence(2, "forest", "assets/sprites/buildings/forest");
+        this.loadSpriteSequence(6, "forest", "assets/sprites/buildings/forest");
         this.load.image("forest_gray", "assets/sprites/ui/forest_gray.png");
-        this.loadSpriteSequence(2, "market", "assets/sprites/buildings/market");
+        this.loadSpriteSequence(3, "market", "assets/sprites/buildings/market");
         this.load.image("market_gray", "assets/sprites/ui/market_gray.png");
-        this.loadSpriteSequence(2, "barracks", "assets/sprites/buildings/barracks");
+        this.loadSpriteSequence(4, "barracks", "assets/sprites/buildings/barracks");
         this.load.image("barracks_gray", "assets/sprites/ui/barracks_gray.png");
-        this.loadSpriteSequence(2, "trainingground", "assets/sprites/buildings/trainingground");
+        this.loadSpriteSequence(4, "trainingground", "assets/sprites/buildings/trainingground");
         this.load.image("trainingground_gray", "assets/sprites/ui/trainingground_gray.png");
 
         // ui

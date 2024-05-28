@@ -67,12 +67,12 @@ export class BaseScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(0x212123);
 
         // Create animations
-        createAnimation(this, "townhall", 2);
-        createAnimation(this, "field", 2);
-        createAnimation(this, "forest", 2);
-        createAnimation(this, "market", 2);
-        createAnimation(this, "barracks", 2);
-        createAnimation(this, "trainingground", 2);
+        createAnimation(this, "townhall", 4);
+        createAnimation(this, "field", 3);
+        createAnimation(this, "forest", 6);
+        createAnimation(this, "market", 3);
+        createAnimation(this, "barracks", 4);
+        createAnimation(this, "trainingground", 4);
 
         // Draw the board
         this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth / 2);
