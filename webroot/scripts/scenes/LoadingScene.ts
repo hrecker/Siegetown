@@ -42,6 +42,8 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
+        this.load.image("background", "assets/sprites/background_blur.png");
+
         // units
         this.loadSpriteSequence(2, "warrior_idle", "assets/sprites/units/warrior_idle");
         this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
@@ -89,7 +91,6 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("reinforcements_gray", "assets/sprites/ui/reinforcements_gray.png");
         this.load.image("remove_icon", "assets/sprites/ui/remove_icon.png");
         this.load.image("remove_gray", "assets/sprites/ui/remove_gray.png");
-
         
         // Load json
         this.load.json("config", "assets/json/config.json");

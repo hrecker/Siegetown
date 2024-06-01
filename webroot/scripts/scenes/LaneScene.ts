@@ -65,6 +65,9 @@ export class LaneScene extends Phaser.Scene {
         // Position the scene
         this.cameras.main.setPosition(0, laneSceneTopY);
         
+        // Add background rectangle to make lanes more visible
+        this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height - laneSceneTopY, 0, 0.75).setOrigin(0, 0);
+        
         let graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xF2F0E5 } });
 
         // Draw the lanes

@@ -66,6 +66,9 @@ export class BaseScene extends Phaser.Scene {
         }
         this.cameras.main.setBackgroundColor(0x212123);
 
+        let background = this.add.image(-250, 0, "background").setOrigin(0, 0);
+        background.setScale(this.game.renderer.height / background.displayHeight, this.game.renderer.height / background.displayHeight);
+
         // Create animations
         createAnimation(this, "townhall", 4);
         createAnimation(this, "field", 3);
@@ -79,6 +82,8 @@ export class BaseScene extends Phaser.Scene {
         this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
 
         let boardLineWidth = 4;
+        // Add background rectangle to make board more visible
+        this.add.rectangle(this.boardTopLeftX, this.boardTopLeftY, boardWidth, boardWidth, 0, 0.75).setOrigin(0, 0);
         let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth, color: 0xF2F0E5 } });
 
         for (let i = 0; i <= config()["baseWidth"]; i++) {
