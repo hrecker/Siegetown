@@ -9,6 +9,7 @@ import { actionCosts, unitCosts } from "../model/Resources";
 import { createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
 import { createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
+import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
 const healthBarWidth = 64;
 const healthBarHeight = 6;
@@ -36,6 +37,9 @@ export class LaneScene extends Phaser.Scene {
     laneHeight: number;
 
     laneButtons: Phaser.Input.Keyboard.Key[];
+
+    playerLaneQueueIndicators: Tooltip[];
+    enemyLaneQueueIndicators: Tooltip[];
 
     constructor() {
         super({
@@ -72,9 +76,18 @@ export class LaneScene extends Phaser.Scene {
 
         // Draw the lanes
         this.laneHeight = (this.game.renderer.height - laneSceneTopY) / config()["numLanes"];
+        this.playerLaneQueueIndicators = [];
+        this.enemyLaneQueueIndicators = [];
         for (let i = 0; i < config()["numLanes"]; i++) {
             let y = laneMargin + (i * this.laneHeight);
             graphics.strokeLineShape(new Phaser.Geom.Line(0, y, this.game.renderer.width, y));
+            // Prepare the lane queue indicators
+            this.playerLaneQueueIndicators.push(createTooltip(this, "+0", 8, y + 8, 0, 0));
+            this.playerLaneQueueIndicators[i].background.alpha = 0.7;
+            this.playerLaneQueueIndicators[i].text.alpha = 0.7
+            this.enemyLaneQueueIndicators.push(createTooltip(this, "+0", this.game.renderer.width - uiBarWidth - 8, y + 8, 1, 0));
+            this.enemyLaneQueueIndicators[i].background.alpha = 0.7;
+            this.enemyLaneQueueIndicators[i].text.alpha = 0.7;
         }
 
         // Handle mouse clicks
@@ -207,16 +220,30 @@ export class LaneScene extends Phaser.Scene {
             }
         }
         
-        // Keep unit health bars and labels in sync with the units
-        this.activeGame.lanes.forEach(lane => {
-            for (let i = 0; i < lane.playerUnits.length; i++) {
-                lane.playerUnits[i].healthBar.x = lane.playerUnits[i].gameObject.x - (healthBarWidth / 2);
-                lane.playerUnits[i].healthBarBackground.x = lane.playerUnits[i].gameObject.x;
+        for (let i = 0; i < this.activeGame.lanes.length; i++) {
+            let lane = this.activeGame.lanes[i]
+            // Keep unit health bars and labels in sync with the units
+            for (let j = 0; j < lane.playerUnits.length; j++) {
+                lane.playerUnits[j].healthBar.x = lane.playerUnits[j].gameObject.x - (healthBarWidth / 2);
+                lane.playerUnits[j].healthBarBackground.x = lane.playerUnits[j].gameObject.x;
             }
-            for (let i = 0; i < lane.enemyUnits.length; i++) {
-                lane.enemyUnits[i].healthBar.x = lane.enemyUnits[i].gameObject.x - (healthBarWidth / 2);
-                lane.enemyUnits[i].healthBarBackground.x = lane.enemyUnits[i].gameObject.x;
+            for (let j = 0; j < lane.enemyUnits.length; j++) {
+                lane.enemyUnits[j].healthBar.x = lane.enemyUnits[j].gameObject.x - (healthBarWidth / 2);
+                lane.enemyUnits[j].healthBarBackground.x = lane.enemyUnits[j].gameObject.x;
             }
-        });
+            // Update queued units indicators
+            if (lane.playerQueuedUnits.length > 0) {
+                updateTooltip(this.playerLaneQueueIndicators[i], "+" + lane.playerQueuedUnits.length);
+                setTooltipVisible(this.playerLaneQueueIndicators[i], true);
+            } else {
+                setTooltipVisible(this.playerLaneQueueIndicators[i], false);
+            }
+            if (lane.enemyQueuedUnits.length > 0) {
+                updateTooltip(this.enemyLaneQueueIndicators[i], "+" + lane.enemyQueuedUnits.length);
+                setTooltipVisible(this.enemyLaneQueueIndicators[i], true);
+            } else {
+                setTooltipVisible(this.enemyLaneQueueIndicators[i], false);
+            }
+        }
     }
 }
