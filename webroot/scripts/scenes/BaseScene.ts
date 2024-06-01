@@ -128,7 +128,6 @@ export class BaseScene extends Phaser.Scene {
                 let tooltip = createTooltip(this, this.getTooltipText(i, j), x, y, tooltipOriginX, tooltipOriginY);
                 this.gridBuildings[i][j].mainSprite.setInteractive();
                 this.gridBuildings[i][j].mainSprite.on('pointerover', () => {
-                    console.log("over")
                     setTooltipVisible(tooltip, true);
                 });
                 this.gridBuildings[i][j].mainSprite.on('pointerout', () => {
@@ -364,8 +363,10 @@ export class BaseScene extends Phaser.Scene {
                     this.updatePreviewText("Build " + this.uiState.selectedBuilding);
                     anyPreview = true;
                 }
-                if (isRemove && (this.activeGame.base.grid[gridPos.x][gridPos.y] == Building.Empty)) {
-
+                if (isRemove && this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Empty &&
+                        this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Townhall) {
+                    this.updatePreviewText("Remove " + this.activeGame.base.grid[gridPos.x][gridPos.y]);
+                    anyPreview = true;
                 }
             }
         } 

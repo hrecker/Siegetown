@@ -7,7 +7,7 @@ import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
 import { createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
-import { createAnimation } from "../util/Utils";
+import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
 import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
@@ -40,6 +40,9 @@ export class LaneScene extends Phaser.Scene {
 
     playerLaneQueueIndicators: Tooltip[];
     enemyLaneQueueIndicators: Tooltip[];
+
+    previewBackground: Phaser.GameObjects.Rectangle;
+    previewText: Phaser.GameObjects.Text;
 
     constructor() {
         super({
@@ -90,6 +93,13 @@ export class LaneScene extends Phaser.Scene {
             this.enemyLaneQueueIndicators[i].text.alpha = 0.7;
         }
 
+        this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth - 6, 10, 100, 10).
+            setFillStyle(0x43436A).setOrigin(1, 0).setStrokeStyle(1, 0xF2F0E5).setVisible(false);
+        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 7, 10, "asdf").setOrigin(1, 0).setVisible(false);
+        // Send to front
+        this.previewBackground.setDepth(1);
+        this.previewText.setDepth(2);
+
         // Handle mouse clicks
         this.input.on("pointerup", () => {
             this.handleLaneClick();
@@ -117,15 +127,9 @@ export class LaneScene extends Phaser.Scene {
     }
 
     handleLaneClick() {
-        let lane = Math.floor((this.input.activePointer.y - laneSceneTopY - laneMargin) / this.laneHeight);
+        let lane = this.getLaneMousePosition();
 
-        if (lane < 0 || lane >= config()["numLanes"]) {
-            return;
-        }
-
-        // Check to be sure the click wasn't on the overlayed UI bar
-        let maxX = this.game.renderer.width - uiBarWidth;
-        if (this.input.activePointer.x >= maxX) {
+        if (! this.isValidLane(lane)) {
             return;
         }
 
@@ -209,6 +213,37 @@ export class LaneScene extends Phaser.Scene {
         return createUnit(type, buffs, unit, healthBarBackground, healthBar);
     }
 
+    updatePreviewText(text: string, lane: number) {
+        let newY = laneMargin + (lane * this.laneHeight) + 8;
+        if (text == this.previewText.text && this.previewText.y == newY) {
+            return;
+        }
+        this.previewText.text = text;
+        if (text == "") {
+            this.previewBackground.setVisible(false);
+            this.previewText.setVisible(false);
+        } else {
+            this.previewText.setVisible(true);
+            this.previewBackground.setVisible(true);
+            this.previewBackground.setSize(this.previewText.width + 2, this.previewText.height + 2);
+            this.previewText.y = newY;
+            this.previewBackground.y = newY;
+        }
+    }
+    
+    getLaneMousePosition(): number {
+        // Check to be sure the mouse wasn't on the overlayed UI bar
+        let maxX = this.game.renderer.width - uiBarWidth;
+        if (this.input.activePointer.x >= maxX) {
+            return -1;
+        }
+        return Math.floor((this.input.activePointer.y - laneSceneTopY - laneMargin) / this.laneHeight)
+    }
+
+    isValidLane(lane: number): boolean {
+        return lane >= 0 && lane < config()["numLanes"];
+    }
+
     update(time, delta) {
         updateGame(this.activeGame, time, delta, this.game.renderer.width - uiBarWidth, this);
 
@@ -244,6 +279,26 @@ export class LaneScene extends Phaser.Scene {
             } else {
                 setTooltipVisible(this.enemyLaneQueueIndicators[i], false);
             }
+        }
+
+        // If mousing over an open tile with a selected building, show preview text
+        let anyPreview = false;
+        if (this.uiState.selectedUnit != UnitType.None || this.uiState.selectedAction != ActionType.None) {
+            let laneIndex = this.getLaneMousePosition();
+            if (this.isValidLane(laneIndex)) {
+                let text: string;
+                if (this.uiState.selectedAction != ActionType.None) {
+                    text = capitalizeFirstLetter(this.uiState.selectedAction);
+                } else {
+                    text = "Create " + this.uiState.selectedUnit;
+                }
+                //console.log(laneIndex)
+                this.updatePreviewText(text, laneIndex);
+                anyPreview = true;
+            }
+        } 
+        if (! anyPreview) {
+            this.updatePreviewText("", 0);
         }
     }
 }
