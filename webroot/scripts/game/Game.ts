@@ -226,8 +226,9 @@ export function canAfford(game: ActiveGame, costs: Resources) {
 
 function selectRandomEnemyType(game: ActiveGame): UnitType {
     let possibleUnits = [];
+    let enemyWaves = config()["enemyWaves"];
     allUnits().forEach(unit => {
-        if (config()["enemyUnitsInitialWave"][unit] <= game.currentWave) {
+        if (game.currentWave >= enemyWaves.length || unit in enemyWaves[game.currentWave]) {
             possibleUnits.push(unit);
         }
     });
@@ -336,22 +337,42 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
 
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
-        // Spawn 1 random enemy per lane, plus one extra for each previous completed wave (up to a maximum)
-        let totalEnemiesToSpawn = Math.min(config()["numLanes"] + game.currentWave, config()["maxEnemiesPerWave"]);
+        // Get the appropriate defined wave if it exists. If not, just add clubmen to the final defined wave to reach the desired enemy count.
+        let definedWaves = config()["enemyWaves"];
+        let wave: { [name: string] : number } 
+        if (game.currentWave < definedWaves.length) {
+            wave = definedWaves[game.currentWave];
+        } else {
+            wave = definedWaves[definedWaves.length - 1];
+            wave["clubman"] += (game.currentWave - definedWaves.length) + 1;
+        }
+
+        // Build up a list of all the enemies to spawn and shuffle it
+        let toSpawn = [];
+        allUnits().forEach(unit => {
+            if (unit in wave) {
+                for (let i = 0; i < wave[unit]; i++) {
+                    toSpawn.push(unit);
+                }
+            }
+        });
+        shuffleArray(toSpawn);
+
+        // Shuffle the order of lanes
         let laneOrder = [];
         for (let i = 0; i < config()["numLanes"]; i++) {
             laneOrder.push(i);
         }
-        game.currentWave++;
-        // Randomize the lanes to spawn in
         shuffleArray(laneOrder);
-        for (let i = 0; i < totalEnemiesToSpawn; i++) {
+
+        // Spawn enemies
+        for (let i = 0; i < toSpawn.length; i++) {
             let lane = laneOrder[i % config()["numLanes"]];
-            game.lanes[lane].enemyQueuedUnits.push(scene.createUnit(selectRandomEnemyType(game), lane, true, false));
+            game.lanes[lane].enemyQueuedUnits.push(scene.createUnit(toSpawn[i], lane, true, false));
         }
 
+        game.currentWave++;
         game.lastEnemySpawn = time;
-        //TODO some randomization here?
         game.secondsUntilWave = config()["secondsBetweenWaves"];
         waveCountdownUpdatedEvent(game.secondsUntilWave);
     } else if (game.lastEnemySpawn == -1) {

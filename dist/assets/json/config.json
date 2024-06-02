@@ -6,18 +6,34 @@
     "baseMaxHealth": 10,
     "enemyBaseMaxHealth": 20,
 
-    "enemyUnitsInitialWave": {
-        "warrior": 0,
-        "slingshotter": 1,
-        "clubman": 4
-    },
+    "enemyWaves": [
+        {
+            "warrior": 3
+        },
+        {
+            "warrior": 3,
+            "slingshotter": 1
+        },
+        {
+            "warrior": 2,
+            "slingshotter": 3
+        },
+        {
+            "warrior": 3,
+            "slingshotter": 3
+        },
+        {
+            "warrior": 2,
+            "slingshotter": 4,
+            "clubman": 1
+        }
+    ],
 
     "secondsBetweenWaves": 60,
 
     "baseEnemySpawnRate": 11000,
     "enemySpawnRateAcceleration": 100,
     "maxEnemySpawnRate": 5000,
-    "maxEnemiesPerWave": 6,
 
     "removeBuildingCost": 500,
     "removeBuildingTooltip": "💣Remove existing building",
