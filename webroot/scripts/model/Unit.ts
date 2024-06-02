@@ -62,10 +62,6 @@ export function destroyUnit(unit: Unit) {
     unit.healthBar.destroy();
 }
 
-export function unitSpeed(type: UnitType): number {
-    return config()["units"][type]["speed"] / 4.0;
-}
-
 export function idleAnimation(type: UnitType): string {
     return type + "_idle";
 }

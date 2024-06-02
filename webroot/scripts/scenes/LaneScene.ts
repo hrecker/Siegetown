@@ -11,6 +11,7 @@ import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
 import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
+export const defaultGameWidth = 800;
 const healthBarWidth = 64;
 const healthBarHeight = 6;
 export const healthBarYPos = 36;
@@ -60,7 +61,8 @@ export class LaneScene extends Phaser.Scene {
         if (! this.scene.isActive() && force !== true) {
             return;
         }
-        //TODO
+
+        this.activeGame.laneSceneWidth = this.game.renderer.width - uiBarWidth;
     }
 
     create() {

@@ -4,8 +4,9 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
-import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, unitSpeed, UnitType, updateHealth, walkAnimation } from "../model/Unit";
-import { LaneScene } from "../scenes/LaneScene";
+import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, UnitType, updateHealth, walkAnimation } from "../model/Unit";
+import { LaneScene, defaultGameWidth } from "../scenes/LaneScene";
+import { uiBarWidth } from "../scenes/ResourceUIScene";
 import { shuffleArray } from "../util/Utils";
 
 export type Lane = {
@@ -28,6 +29,7 @@ export type ActiveGame = {
     enemySpawnRate: number;
     unitSpawnDelaysRemaining: { [type: string] : number }
     usedActions: ActionType[];
+    laneSceneWidth: number;
 }
 
 function townhallCoordinate(): number {
@@ -106,6 +108,7 @@ export function createGame(): ActiveGame {
         enemySpawnRate: config()["baseEnemySpawnRate"],
         unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
         usedActions: [],
+        laneSceneWidth: -1,
     };
 }
 
@@ -304,6 +307,10 @@ export function queuePlayerUnit(game: ActiveGame, lane: number, unit: Unit) {
     game.lanes[lane].playerQueuedUnits.push(unit);
 }
 
+function unitSpeed(game: ActiveGame, unitType: UnitType): number {
+    return config()["units"][unitType]["speed"] / 4.0 * (game.laneSceneWidth / (defaultGameWidth - uiBarWidth));
+}
+
 const rangePixels = 70;
 
 export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
@@ -481,7 +488,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             }
 
             let originalX = player.gameObject.x;
-            player.gameObject.x += unitSpeed(player.type);
+            player.gameObject.x += unitSpeed(game, player.type);
 
             // Don't pass other units that are in front
             if (xLimit != -1) {
@@ -538,7 +545,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             }
 
             let originalX = enemy.gameObject.x;
-            enemy.gameObject.x -= unitSpeed(enemy.type);
+            enemy.gameObject.x -= unitSpeed(game, enemy.type);
             
             // Don't pass other units
             if (xLimit != -1) {
