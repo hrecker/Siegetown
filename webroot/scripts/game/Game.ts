@@ -311,8 +311,6 @@ function unitSpeed(game: ActiveGame, unitType: UnitType): number {
     return config()["units"][unitType]["speed"] / 4.0 * (game.laneSceneWidth / (defaultGameWidth - uiBarWidth));
 }
 
-const rangePixels = 70;
-
 export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game)) {
         return;
@@ -405,6 +403,8 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         // Accelerate enemy spawns
         game.enemySpawnRate = Math.max(game.enemySpawnRate - config()["enemySpawnRateAcceleration"], config()["maxEnemySpawnRate"]);
     }
+
+    let rangePixels = scene.unitRangePixels();
 
     // Add units from player unit queue if there is space
     game.lanes.forEach(lane => {

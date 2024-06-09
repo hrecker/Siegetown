@@ -52,7 +52,7 @@ export function updateHealth(unit: Unit, diff: number): number {
     unit.health += diff;
     let healthFraction = unit.health / unit.maxHealth;
     let barWidth = (unit.healthBarBackground.width - 4) * healthFraction;
-    unit.healthBar.setSize(barWidth, 6);
+    unit.healthBar.setSize(barWidth, unit.healthBar.height);
     return unit.health;
 }
 

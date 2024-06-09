@@ -3,6 +3,7 @@ import { ActiveGame } from "../game/Game";
 import { config } from "../model/Config";
 import { whiteColor } from "./BaseScene";
 
+//TODO tighter ui bar when detected that the game is running in a mobile-y resolution
 export const uiBarWidth = 300;
 export const statusBarHeight = 180;
 

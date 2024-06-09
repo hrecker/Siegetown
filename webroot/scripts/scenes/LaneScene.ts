@@ -12,11 +12,12 @@ import { uiBarWidth } from "./ResourceUIScene";
 import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
 export const defaultGameWidth = 800;
-const healthBarWidth = 64;
-const healthBarHeight = 6;
-export const healthBarYPos = 36;
+export const defaultGameHeight = 600;
+const defaultHealthBarWidth = 64;
+const defaultHealthBarHeight = 6;
+const defaultHealthBarYPos = 36;
 const healthBarFillColor = 0x8AB060;
-export const laneSceneTopY = 350;
+const laneSceneFraction = 0.4;
 const laneMargin = 2;
 const numberKeyCodes = [
     Phaser.Input.Keyboard.KeyCodes.ONE,
@@ -29,6 +30,28 @@ const numberKeyCodes = [
     Phaser.Input.Keyboard.KeyCodes.EIGHT,
     Phaser.Input.Keyboard.KeyCodes.NINE,
 ]
+const unitScaleFactor = 0.15;
+const unitDefaultRangePixels = 70;
+
+export function laneSceneTopY(game: Phaser.Game): number {
+    return (1 - laneSceneFraction) * game.renderer.height;
+}
+
+function unitScale(game: Phaser.Game): number {
+    return (game.renderer.height / defaultGameHeight) * unitScaleFactor;
+}
+
+function healthBarWidth(game: Phaser.Game): number {
+    return (unitScale(game) / unitScaleFactor) * defaultHealthBarWidth;
+}
+
+function healthBarHeight(game: Phaser.Game): number {
+    return (unitScale(game) / unitScaleFactor) * defaultHealthBarHeight;
+}
+
+export function healthBarYPos(game: Phaser.Game): number {
+    return (unitScale(game) / unitScaleFactor) * defaultHealthBarYPos;
+}
 
 export class LaneScene extends Phaser.Scene {
     sceneCreated: boolean;
@@ -56,6 +79,10 @@ export class LaneScene extends Phaser.Scene {
         this.uiState = data.uiState;
     }
 
+    unitRangePixels() {
+        return (unitScale(this.game) / unitScaleFactor) * unitDefaultRangePixels;
+    }
+
     /** Adjust any UI elements that need to change position based on the canvas size */
     resize(force?: boolean) {
         if (! this.scene.isActive() && force !== true) {
@@ -63,6 +90,10 @@ export class LaneScene extends Phaser.Scene {
         }
 
         this.activeGame.laneSceneWidth = this.game.renderer.width - uiBarWidth;
+
+        //TODO adjust positioning of preview
+
+        //TODO scale units(?) and unit health bars
     }
 
     create() {
@@ -72,15 +103,15 @@ export class LaneScene extends Phaser.Scene {
         }
 
         // Position the scene
-        this.cameras.main.setPosition(0, laneSceneTopY);
+        this.cameras.main.setPosition(0, laneSceneTopY(this.game));
         
         // Add background rectangle to make lanes more visible
-        this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height - laneSceneTopY, 0, 0.75).setOrigin(0, 0);
+        this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height - laneSceneTopY(this.game), 0, 0.75).setOrigin(0, 0);
         
         let graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xF2F0E5 } });
 
         // Draw the lanes
-        this.laneHeight = (this.game.renderer.height - laneSceneTopY) / config()["numLanes"];
+        this.laneHeight = (this.game.renderer.height - laneSceneTopY(this.game)) / config()["numLanes"];
         this.playerLaneQueueIndicators = [];
         this.enemyLaneQueueIndicators = [];
         for (let i = 0; i < config()["numLanes"]; i++) {
@@ -96,8 +127,8 @@ export class LaneScene extends Phaser.Scene {
         }
 
         this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth - 6, 10, 100, 10).
-            setFillStyle(0x43436A).setOrigin(1, 0).setStrokeStyle(1, 0xF2F0E5).setVisible(false);
-        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 7, 10, "asdf").setOrigin(1, 0).setVisible(false);
+            setFillStyle(0x43436A).setOrigin(1, 0).setStrokeStyle(1, 0xF2F0E5).setAlpha(0.75).setVisible(false);
+        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 7, 10, "asdf").setOrigin(1, 0).setAlpha(0.75).setVisible(false);
         // Send to front
         this.previewBackground.setDepth(1);
         this.previewText.setDepth(2);
@@ -192,12 +223,12 @@ export class LaneScene extends Phaser.Scene {
 
     createUnit(type: UnitType, lane: number, isEnemy: boolean, ignoreDelays: boolean): Unit {
         let unit = this.add.sprite(-2000,
-            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), walkAnimation(type)).setScale(0.15).play(walkAnimation(type));
+            laneMargin + (this.laneHeight / 2) + (this.laneHeight * lane), walkAnimation(type)).setScale(unitScale(this.game)).play(walkAnimation(type));
         // Create the Unit's health bar
         let healthBarBackground = this.add.rectangle(unit.x, unit.y,
-            healthBarWidth + 2, healthBarHeight + 2, 0, 0.85).setDisplayOrigin(healthBarWidth / 2 + 1, healthBarYPos + 1);
-        let healthBar = this.add.rectangle(unit.x - (healthBarWidth / 2), unit.y,
-            healthBarWidth, healthBarHeight, healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos);
+            healthBarWidth(this.game) + 2, healthBarHeight(this.game) + 2, 0, 0.85).setDisplayOrigin(healthBarWidth(this.game) / 2 + 1, healthBarYPos(this.game) + 1);
+        let healthBar = this.add.rectangle(unit.x - (healthBarWidth(this.game) / 2), unit.y,
+            healthBarWidth(this.game), healthBarHeight(this.game), healthBarFillColor, 0.85).setDisplayOrigin(0, healthBarYPos(this.game));
         // Get any buffs to health or damage
         let buffs: Buffs;
         if (isEnemy) {
@@ -239,7 +270,7 @@ export class LaneScene extends Phaser.Scene {
         if (this.input.activePointer.x >= maxX) {
             return -1;
         }
-        return Math.floor((this.input.activePointer.y - laneSceneTopY - laneMargin) / this.laneHeight)
+        return Math.floor((this.input.activePointer.y - laneSceneTopY(this.game) - laneMargin) / this.laneHeight)
     }
 
     isValidLane(lane: number): boolean {
@@ -261,11 +292,11 @@ export class LaneScene extends Phaser.Scene {
             let lane = this.activeGame.lanes[i]
             // Keep unit health bars and labels in sync with the units
             for (let j = 0; j < lane.playerUnits.length; j++) {
-                lane.playerUnits[j].healthBar.x = lane.playerUnits[j].gameObject.x - (healthBarWidth / 2);
+                lane.playerUnits[j].healthBar.x = lane.playerUnits[j].gameObject.x - (healthBarWidth(this.game) / 2);
                 lane.playerUnits[j].healthBarBackground.x = lane.playerUnits[j].gameObject.x;
             }
             for (let j = 0; j < lane.enemyUnits.length; j++) {
-                lane.enemyUnits[j].healthBar.x = lane.enemyUnits[j].gameObject.x - (healthBarWidth / 2);
+                lane.enemyUnits[j].healthBar.x = lane.enemyUnits[j].gameObject.x - (healthBarWidth(this.game) / 2);
                 lane.enemyUnits[j].healthBarBackground.x = lane.enemyUnits[j].gameObject.x;
             }
             // Update queued units indicators

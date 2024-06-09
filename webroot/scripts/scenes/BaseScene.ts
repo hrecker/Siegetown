@@ -11,14 +11,17 @@ import { laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
 import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
-const boardWidth = 300;
-const boardMargin = 10;
+const boardMargin = 12;
 const cooldownMargin = 10;
 export const whiteColor = "#F2F0E5";
 
 type GridBuilding = {
     mainSprite: Phaser.GameObjects.Sprite;
     tooltip: Tooltip;
+}
+
+function boardWidth(game: Phaser.Game): number {
+    return Math.min(laneSceneTopY(game), game.renderer.width - uiBarWidth) - (2 * boardMargin);
 }
 
 export class BaseScene extends Phaser.Scene {
@@ -78,23 +81,23 @@ export class BaseScene extends Phaser.Scene {
         createAnimation(this, "trainingground", 4);
 
         // Draw the board
-        this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth / 2);
-        this.boardTopLeftY = (this.game.renderer.height / 2) - boardWidth + boardMargin;
+        this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth(this.game) / 2);
+        this.boardTopLeftY = (laneSceneTopY(this.game) / 2) - (boardWidth(this.game) / 2);
 
         let boardLineWidth = 4;
         // Add background rectangle to make board more visible
-        this.add.rectangle(this.boardTopLeftX, this.boardTopLeftY, boardWidth, boardWidth, 0, 0.75).setOrigin(0, 0);
+        this.add.rectangle(this.boardTopLeftX, this.boardTopLeftY, boardWidth(this.game), boardWidth(this.game), 0, 0.75).setOrigin(0, 0);
         let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth, color: 0xF2F0E5 } });
 
         for (let i = 0; i <= config()["baseWidth"]; i++) {
-            let diff = (boardWidth * i / config()["baseWidth"]);
-            graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX, this.boardTopLeftY + diff, this.boardTopLeftX + boardWidth, this.boardTopLeftY + diff));
-            graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX + diff, this.boardTopLeftY, this.boardTopLeftX + diff, this.boardTopLeftY + boardWidth));
+            let diff = (boardWidth(this.game) * i / config()["baseWidth"]);
+            graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX, this.boardTopLeftY + diff, this.boardTopLeftX + boardWidth(this.game), this.boardTopLeftY + diff));
+            graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX + diff, this.boardTopLeftY, this.boardTopLeftX + diff, this.boardTopLeftY + boardWidth(this.game)));
         }
 
         // Draw the buildings
         this.gridBuildings = [];
-        let tileWidth = boardWidth / config()["baseWidth"];
+        let tileWidth = boardWidth(this.game) / config()["baseWidth"];
         for (let i = 0; i < config()["baseWidth"]; i++) {
             this.gridBuildings[i] = [];
             for (let j = 0; j < config()["baseWidth"]; j++) {
@@ -144,7 +147,7 @@ export class BaseScene extends Phaser.Scene {
 
         // Create icons and cooldown bars
         let x = cooldownMargin;
-        let y = laneSceneTopY - cooldownMargin;
+        let y = laneSceneTopY(this.game) - cooldownMargin;
         this.unitCooldownIcons = [];
         this.unitCooldownIconBackgrounds = [];
         this.unitCooldownAnimations = [];
@@ -167,9 +170,9 @@ export class BaseScene extends Phaser.Scene {
         });
 
         // Create preview text
-        this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth, laneSceneTopY, 100, 10).
+        this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth, laneSceneTopY(this.game), 100, 10).
             setFillStyle(0x43436A).setOrigin(1, 1).setStrokeStyle(1, 0xF2F0E5).setVisible(false);
-        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY - 1, "asdf").setOrigin(1, 1).setVisible(false);
+        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY(this.game) - 1, "asdf").setOrigin(1, 1).setVisible(false);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
@@ -189,8 +192,8 @@ export class BaseScene extends Phaser.Scene {
 
     getGridMousePosition(): Phaser.Types.Math.Vector2Like {
         return {
-            x: Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth / config()["baseWidth"])),
-            y: Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth / config()["baseWidth"]))
+            x: Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth(this.game) / config()["baseWidth"])),
+            y: Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth(this.game) / config()["baseWidth"]))
         }
     }
 
