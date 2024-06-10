@@ -2,10 +2,24 @@ import { addBaseDamagedListener, addEnemyBaseDamagedListener, addGameRestartedLi
 import { ActiveGame } from "../game/Game";
 import { config } from "../model/Config";
 import { whiteColor } from "./BaseScene";
+import { defaultGameHeight } from "./LaneScene";
 
 //TODO tighter ui bar when detected that the game is running in a mobile-y resolution
-export const uiBarWidth = 300;
-export const statusBarHeight = 180;
+export const uiBarWidth = 285;
+const defaultStatusBarHeight = 180;
+const minimalStatusBarHeight = 150;
+export const defaultFontSize = 16;
+export const minimalFontSize = 14;
+const waveDefaultFontSize = 24;
+const waveMinimalFontSize = 20;
+
+export function isMinimal(game: Phaser.Game) {
+    return game.renderer.height < defaultGameHeight;
+}
+
+export function statusBarHeight(game: Phaser.Game) {
+    return isMinimal(game) ? minimalStatusBarHeight : defaultStatusBarHeight;
+}
 
 export class ResourceUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
@@ -39,26 +53,34 @@ export class ResourceUIScene extends Phaser.Scene {
     create() {
         this.resize(true);
 
+        let fontSize = defaultFontSize;
+        let barHeight = statusBarHeight(this.game);
+        let waveFontSize = waveDefaultFontSize;
+        if (isMinimal(this.game)) {
+            fontSize = minimalFontSize;
+            waveFontSize = waveMinimalFontSize;
+        }
+
         this.cameras.main.setPosition(this.game.renderer.width - uiBarWidth, 0);
         this.cameras.main.setBackgroundColor(0x3A3858);
 
-        this.goldText = this.add.text(10, 10, "Gold : 0", {color: whiteColor}).setPadding(0, 3);
-        this.woodText = this.add.text(10, 30, "Wood: 0", {color: whiteColor}).setPadding(0, 3);;
-        this.foodText = this.add.text(10, 50, "Food: 0", {color: whiteColor}).setPadding(0, 3);;
+        this.goldText = this.add.text(10, 10, "Gold : 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
+        this.woodText = this.add.text(10, 30, "Wood: 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
+        this.foodText = this.add.text(10, 50, "Food: 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
         this.updateResourceText();
-        this.baseHealthText = this.add.text(10, 70, "", {color: whiteColor});
+        this.baseHealthText = this.add.text(10, 70, "", {color: whiteColor}).setFontSize(fontSize);
         this.baseDamagedListener(this, this.activeGame.baseHealth);
-        this.enemyBaseHealthText = this.add.text(10, 90, "", {color: whiteColor});
+        this.enemyBaseHealthText = this.add.text(10, 90, "", {color: whiteColor}).setFontSize(fontSize);
         this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
         
         let statusRectangleHeight = this.enemyBaseHealthText.getBottomRight().y + 10;
         let statusRectangle = this.add.rectangle(1, 1, uiBarWidth - 2, statusRectangleHeight).setOrigin(0, 0);
         statusRectangle.isStroked = true;
-        let waveRectangle = this.add.rectangle(1, statusRectangleHeight + 1, uiBarWidth - 2, statusBarHeight - statusRectangleHeight - 4).setOrigin(0, 0);
+        let waveRectangle = this.add.rectangle(1, statusRectangleHeight + 1, uiBarWidth - 2, barHeight - statusRectangleHeight - 4).setOrigin(0, 0);
         waveRectangle.isStroked = true;
 
         this.waveCountdown = this.add.text(uiBarWidth / 2, waveRectangle.getLeftCenter().y,
-            "⚠️ Next wave: " + this.minutesText(this.activeGame.secondsUntilWave), {color: whiteColor, fontSize: "24px"}).setOrigin(0.5, 0.5).setPadding(0, 3);
+            "⚠️ Next wave: " + this.minutesText(this.activeGame.secondsUntilWave), {color: whiteColor, fontSize: waveFontSize + "px"}).setOrigin(0.5, 0.5).setPadding(0, 3);
 
         addResourceUpdateListener(this.resourceUpdateListener, this);
         addBaseDamagedListener(this.baseDamagedListener, this);

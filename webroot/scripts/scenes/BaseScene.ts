@@ -69,8 +69,8 @@ export class BaseScene extends Phaser.Scene {
         }
         this.cameras.main.setBackgroundColor(0x212123);
 
-        let background = this.add.image(-250, 0, "background").setOrigin(0, 0);
-        background.setScale(this.game.renderer.height / background.displayHeight, this.game.renderer.height / background.displayHeight);
+        let background = this.add.image(-100, 0, "background").setOrigin(0, 0);
+        background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
 
         // Create animations
         createAnimation(this, "townhall", 4);
