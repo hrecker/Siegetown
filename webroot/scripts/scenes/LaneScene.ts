@@ -80,7 +80,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     unitRangePixels() {
-        return (unitScale(this.game) / unitScaleFactor) * unitDefaultRangePixels;
+        return (this.activeGame.laneSceneWidth / (defaultGameWidth - uiBarWidth)) * unitDefaultRangePixels;
     }
 
     /** Adjust any UI elements that need to change position based on the canvas size */
