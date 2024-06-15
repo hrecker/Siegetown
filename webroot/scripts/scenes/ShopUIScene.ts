@@ -5,7 +5,7 @@ import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
-import { Unit, UnitType, allUnits } from "../model/Unit";
+import { UnitType, allUnits } from "../model/Unit";
 import { capitalizeFirstLetter } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
 import { defaultFontSize, isMinimal, minimalFontSize, statusBarHeight, uiBarWidth } from "./ResourceUIScene";
@@ -26,6 +26,23 @@ enum ShopButtonType {
 export type Tooltip = {
     background: Phaser.GameObjects.Rectangle;
     text: Phaser.GameObjects.Text;
+}
+
+type ScrollConfig = {
+    scrollZone: Phaser.GameObjects.Zone;
+    bottomBuildIcon: Phaser.GameObjects.Sprite;
+    scrollIndicator: Phaser.GameObjects.Rectangle;
+    topLabel: Phaser.GameObjects.Text;
+    canScroll: boolean;
+    maxTopY: number;
+    minBottomY: number;
+    scrollIndicatorYRange: number;
+    iconMoveRange: number;
+    isScrolling: boolean;
+    lastTopIconY: number;
+    scrollSpeed: number;
+    scrollMaskY: number;
+    isUnitConfig: boolean;
 }
 
 const tooltipPadding = 3;
@@ -86,11 +103,11 @@ export class ShopUIScene extends Phaser.Scene {
     buildButtonBorders: { [type: string] : Phaser.GameObjects.Sprite }
     buildButtonIcons: { [type: string] : Phaser.GameObjects.Sprite }
     buildButtonCostTexts: { [type: string] : Phaser.GameObjects.Text }
-    bottomActionBuildIcon: Phaser.GameObjects.Sprite;
     tooltips: { [type: string] : Tooltip }
     costTooltips: { [type: string] : Tooltip }
     removeButtonOutline: Phaser.GameObjects.Rectangle;
 
+    buildingLabel: Phaser.GameObjects.Text;
     unitLabel: Phaser.GameObjects.Text;
     powerLabel: Phaser.GameObjects.Text;
 
@@ -101,17 +118,8 @@ export class ShopUIScene extends Phaser.Scene {
     lastSelectedType: ShopButtonType;
     selectedIndex: number;
     
-    scrollZone: Phaser.GameObjects.Zone;
-    scrollIndicator: Phaser.GameObjects.Rectangle;
-    canScroll: boolean;
-    maxTopY: number;
-    minBottomY: number;
-    scrollIndicatorYRange: number;
-    iconMoveRange: number;
-    isScrolling: boolean;
-    lastTopIconY: number;
-    scrollSpeed: number;
-    scrollMaskY: number;
+    unitScroll: ScrollConfig;
+    buildingScroll: ScrollConfig;
 
     constructor() {
         super({
@@ -132,54 +140,67 @@ export class ShopUIScene extends Phaser.Scene {
         //TODO
     }
 
-    updateScrollIndicatorPosition() {
-        if (! this.canScroll) {
+    updateScrollIndicatorPosition(scrollConfig: ScrollConfig) {
+        if (! scrollConfig.canScroll) {
             return;
         }
 
-        let totalYDiff = this.maxTopY - this.unitLabel.y;
-        let percentage = totalYDiff / this.iconMoveRange;
-        this.scrollIndicator.setPosition(this.game.renderer.width - scrollIndicatorWidth,
-            this.getY(1) + (this.scrollIndicatorYRange * percentage));
+        let totalYDiff = scrollConfig.maxTopY - scrollConfig.topLabel.y;
+        let percentage = totalYDiff / scrollConfig.iconMoveRange;
+        scrollConfig.scrollIndicator.setPosition(scrollConfig.scrollZone.x + (uiBarWidth / 2) - scrollIndicatorWidth,
+            this.getY(1) + (scrollConfig.scrollIndicatorYRange * percentage));
     }
 
-    scrollTools(yDiff: number) {
-        if (yDiff == 0 || ! this.canScroll) {
+    scrollShopIcons(scrollConfig: ScrollConfig, yDiff: number) {
+        if (yDiff == 0 || ! scrollConfig.canScroll) {
             return;
         }
 
-        let finalTopY = this.unitLabel.y + yDiff;
-        let finalBottomY = this.bottomActionBuildIcon.y + yDiff;
-        if (yDiff < 0 && finalBottomY < this.minBottomY) {
-            yDiff = this.minBottomY - this.bottomActionBuildIcon.y;
-        } else if (yDiff > 0 && finalTopY > this.maxTopY) {
-            yDiff = this.maxTopY - this.unitLabel.y;
+        let finalTopY = scrollConfig.topLabel.y + yDiff;
+        let finalBottomY = scrollConfig.bottomBuildIcon.y + yDiff;
+        if (yDiff < 0 && finalBottomY < scrollConfig.minBottomY) {
+            yDiff = scrollConfig.minBottomY - scrollConfig.bottomBuildIcon.y;
+        } else if (yDiff > 0 && finalTopY > scrollConfig.maxTopY) {
+            yDiff = scrollConfig.maxTopY - scrollConfig.topLabel.y;
         }
 
         // Move the icons and boxes
-        allUnits().forEach(unit => {
-            this.buildButtonBorders[unit].y += yDiff;
-            this.buildButtonIcons[unit].y += yDiff;
-            this.buildButtonCostTexts[unit].y += yDiff;
-            moveTooltip(this.tooltips[unit], yDiff);
-            moveTooltip(this.costTooltips[unit], yDiff);
-        });
-        allActions().forEach(action => {
-            this.buildButtonBorders[action].y += yDiff;
-            this.buildButtonIcons[action].y += yDiff;
-            this.buildButtonCostTexts[action].y += yDiff;
-            moveTooltip(this.tooltips[action], yDiff);
-            moveTooltip(this.costTooltips[action], yDiff);
-        });
+        if (scrollConfig.isUnitConfig) {
+            allUnits().forEach(unit => {
+                this.buildButtonBorders[unit].y += yDiff;
+                this.buildButtonIcons[unit].y += yDiff;
+                this.buildButtonCostTexts[unit].y += yDiff;
+                moveTooltip(this.tooltips[unit], yDiff);
+                moveTooltip(this.costTooltips[unit], yDiff);
+            });
+            allActions().forEach(action => {
+                this.buildButtonBorders[action].y += yDiff;
+                this.buildButtonIcons[action].y += yDiff;
+                this.buildButtonCostTexts[action].y += yDiff;
+                moveTooltip(this.tooltips[action], yDiff);
+                moveTooltip(this.costTooltips[action], yDiff);
+            });
 
-        // Move the labels
-        this.unitLabel.y += yDiff;
-        this.powerLabel.y += yDiff;
+            // Move the labels
+            this.unitLabel.y += yDiff;
+            this.powerLabel.y += yDiff;
+        } else {
+            this.allBuildings().forEach(building => {
+                this.buildButtonBorders[building].y += yDiff;
+                this.buildButtonIcons[building].y += yDiff;
+                this.buildButtonCostTexts[building].y += yDiff;
+                moveTooltip(this.tooltips[building], yDiff);
+                moveTooltip(this.costTooltips[building], yDiff);
+            });
+
+            // Move the labels
+            this.buildingLabel.y += yDiff;
+        }
 
         //TODO move tooltips
 
         // Move the indicator
-        this.updateScrollIndicatorPosition();
+        this.updateScrollIndicatorPosition(scrollConfig);
     }
 
     shopIconScale() {
@@ -331,6 +352,103 @@ export class ShopUIScene extends Phaser.Scene {
         }
     }
 
+    initScrollConfig(): ScrollConfig {
+        return {
+            scrollZone: null,
+            bottomBuildIcon: null,
+            scrollIndicator: null,
+            topLabel: null,
+            canScroll: true,
+            maxTopY: 0,
+            minBottomY: 0,
+            scrollIndicatorYRange: 0,
+            iconMoveRange: 0,
+            isScrolling: false,
+            lastTopIconY: 0,
+            scrollSpeed: 0,
+            scrollMaskY: 0,
+            isUnitConfig: false,
+        };
+    }
+
+    createScrollZone(x: number, parent: ScrollConfig) {
+        parent.scrollZone = this.add.zone(x, 52,
+            uiBarWidth / 2, this.game.renderer.height).setOrigin(0).setInteractive();
+            parent.scrollZone.on('pointermove', pointer => {
+            if (pointer.isDown) {
+                // Scroll
+                this.scrollShopIcons(parent, pointer.position.y - pointer.prevPosition.y);
+                parent.isScrolling = true;
+            }
+        });
+        parent.scrollZone.on('pointerup', () => {
+            parent.isScrolling = false;
+        });
+        parent.scrollZone.on('pointerout', () => {
+            parent.isScrolling = false;
+        });
+    }
+
+    configureScroll(scrollConfig: ScrollConfig, lastShopIcon: Phaser.GameObjects.Sprite) {
+        scrollConfig.scrollIndicator = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0.5, 0);
+        scrollConfig.scrollSpeed = 0;
+        scrollConfig.bottomBuildIcon = lastShopIcon;
+        scrollConfig.maxTopY = scrollConfig.topLabel.y;
+        scrollConfig.lastTopIconY = scrollConfig.topLabel.y;
+        scrollConfig.minBottomY = this.game.renderer.height - yScrollMargin;
+
+        let viewableRange = scrollConfig.minBottomY - scrollConfig.maxTopY;
+        scrollConfig.iconMoveRange = lastShopIcon.y - scrollConfig.minBottomY;
+        let percentage = viewableRange / (lastShopIcon.y - scrollConfig.maxTopY);
+        if (percentage >= 1) {
+            scrollConfig.scrollIndicator.setVisible(false);
+            scrollConfig.canScroll = false;
+        } else {
+            scrollConfig.scrollIndicator.setVisible(true);
+            scrollConfig.canScroll = true;
+            let scrollIndicatorMaxHeight = this.game.renderer.height - this.getY(1);
+            let indicatorHeight = percentage * scrollIndicatorMaxHeight;
+            scrollConfig.scrollIndicatorYRange = scrollIndicatorMaxHeight - indicatorHeight - scrollIndicatorMargin;
+
+            scrollConfig.scrollIndicator.setPosition(scrollConfig.scrollZone.x + (uiBarWidth / 2) - scrollIndicatorWidth, scrollConfig.scrollMaskY);
+            scrollConfig.scrollIndicator.setSize(scrollIndicatorWidth, indicatorHeight);
+            this.updateScrollIndicatorPosition(scrollConfig);
+        }
+
+        let shopIconMask = this.add.graphics().setAlpha(0);
+        shopIconMask.fillRect(scrollConfig.scrollZone.x, this.getY(1),
+            uiBarWidth / 2, this.game.renderer.height);
+        let mask = new Phaser.Display.Masks.GeometryMask(this, shopIconMask);
+        // Set the masks
+        if (scrollConfig.isUnitConfig) {
+            allUnits().forEach(unit => {
+                this.buildButtonBorders[unit].setMask(mask);
+                this.buildButtonIcons[unit].setMask(mask);
+                this.buildButtonCostTexts[unit].setMask(mask);
+            });
+            allActions().forEach(action => {
+                this.buildButtonBorders[action].setMask(mask);
+                this.buildButtonIcons[action].setMask(mask);
+                this.buildButtonCostTexts[action].setMask(mask);
+            });
+            this.unitLabel.setMask(mask);
+            this.powerLabel.setMask(mask);
+        } else {
+            this.allBuildings().forEach(unit => {
+                this.buildButtonBorders[unit].setMask(mask);
+                this.buildButtonIcons[unit].setMask(mask);
+                this.buildButtonCostTexts[unit].setMask(mask);
+            });
+            this.buildingLabel.setMask(mask);            
+        }
+    }
+
+    inZone(x: number, y: number, zone: Phaser.GameObjects.Zone): boolean {
+        let topLeft = zone.getTopLeft();
+        let bottomRight = zone.getBottomRight();
+        return x >= topLeft.x && x <= bottomRight.x && y >= topLeft.y && y <= bottomRight.y;
+    }
+
     create() {
         this.resize(true);
         this.fontSize = defaultFontSize;
@@ -340,30 +458,29 @@ export class ShopUIScene extends Phaser.Scene {
 
         this.uiState.selectedBuilding = UIBuilding.Empty;
 
-        this.scrollZone = this.add.zone(this.game.renderer.width - uiBarWidth, 52,
-            uiBarWidth, this.game.renderer.height).setOrigin(0).setInteractive();
-        this.scrollZone.on('pointermove', pointer => {
-            if (pointer.isDown) {
-                // Scroll
-                this.scrollTools(pointer.position.y - pointer.prevPosition.y);
-                this.isScrolling = true;
-            }
-        });
-        this.scrollZone.on('pointerup', () => {
-            this.isScrolling = false;
-        });
-        this.scrollZone.on('pointerout', () => {
-            this.isScrolling = false;
-        });
+        this.buildingScroll = this.initScrollConfig();
+        this.unitScroll = this.initScrollConfig();
+        this.unitScroll.isUnitConfig = true;
+        let buildingScrollX = this.game.renderer.width - uiBarWidth;
+        let unitScrollX = this.game.renderer.width - (uiBarWidth / 2);
+        this.createScrollZone(buildingScrollX, this.buildingScroll);
+        this.createScrollZone(unitScrollX, this.unitScroll);
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-            //TODO check for which side of the ui bar
-            this.scrollTools(-deltaY * scrollWheelSpeed);
+            // Check for which side of the ui bar
+            if (this.inZone(pointer.x, pointer.y, this.buildingScroll.scrollZone)) {
+                this.scrollShopIcons(this.buildingScroll, -deltaY * scrollWheelSpeed);
+            } else if (this.inZone(pointer.x, pointer.y, this.unitScroll.scrollZone)) {
+                this.scrollShopIcons(this.unitScroll, -deltaY * scrollWheelSpeed);
+            }
         });
 
-        let buildingLabel = this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "🏠 Buildings", {color: whiteColor}).setOrigin(0.5, 0).setPadding(0, 3).setFontSize(this.fontSize);
+        this.buildingLabel = this.add.text(this.getX(uiBarWidth / 4), this.getY(5), "🏠 Buildings", {color: whiteColor}).setOrigin(0.5, 0).setPadding(0, 3).setFontSize(this.fontSize);
         this.unitLabel = this.add.text(this.getX(3 * uiBarWidth  / 4), this.getY(5), "⚔️ Units", {color: whiteColor}).setAlign("right").setOrigin(0.5, 0).setPadding(0, 3).setFontSize(this.fontSize);
-        this.scrollMaskY = this.unitLabel.y + 30;
+        this.buildingScroll.scrollMaskY = this.buildingLabel.y + 30;
+        this.buildingScroll.topLabel = this.buildingLabel;
+        this.unitScroll.scrollMaskY = this.unitLabel.y + 30;
+        this.unitScroll.topLabel = this.unitLabel;
 
         this.buildButtonBorders = {};
         this.buildButtonIcons = {};
@@ -375,7 +492,7 @@ export class ShopUIScene extends Phaser.Scene {
         this.allBuildings().forEach(building => {
             y += this.createShopButton(ShopButtonType.Building, building, y);
         });
-        let buildRectangleTopY = buildingLabel.getTopLeft().y - 8;
+        let buildRectangleTopY = this.buildingLabel.getTopLeft().y - 8;
         let buildRectangle = this.add.rectangle(this.getX(1), buildRectangleTopY, uiBarWidth / 2, this.game.renderer.height - buildRectangleTopY - 1).setOrigin(0, 0);
         buildRectangle.isStroked = true;
 
@@ -393,48 +510,8 @@ export class ShopUIScene extends Phaser.Scene {
             y += this.createShopButton(ShopButtonType.Action, action, y);
         });
 
-        this.scrollIndicator = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0.5, 0);
-        this.scrollSpeed = 0;
-        this.bottomActionBuildIcon = this.buildButtonIcons[allActions()[allActions().length - 1]];
-        this.maxTopY = this.unitLabel.y;
-        this.lastTopIconY = this.unitLabel.y;
-        this.minBottomY = this.game.renderer.height - yScrollMargin;
-
-        let viewableRange = this.minBottomY - this.maxTopY;
-        this.iconMoveRange = this.bottomActionBuildIcon.y - this.minBottomY;
-        let percentage = viewableRange / (this.bottomActionBuildIcon.y - this.maxTopY);
-        if (percentage >= 1) {
-            this.scrollIndicator.setVisible(false);
-            this.canScroll = false;
-        } else {
-            this.scrollIndicator.setVisible(true);
-            this.canScroll = true;
-            let scrollIndicatorMaxHeight = this.game.renderer.height - this.getY(1);
-            let indicatorHeight = percentage * scrollIndicatorMaxHeight;
-            this.scrollIndicatorYRange = scrollIndicatorMaxHeight - indicatorHeight - scrollIndicatorMargin;
-
-            this.scrollIndicator.setPosition(this.game.renderer.width - scrollIndicatorWidth, this.scrollMaskY);
-            this.scrollIndicator.setSize(scrollIndicatorWidth, indicatorHeight);
-            this.updateScrollIndicatorPosition();
-        }
-
-        let shopIconMask = this.add.graphics().setAlpha(0);
-        shopIconMask.fillRect(this.game.renderer.width - (uiBarWidth / 2), this.getY(1),
-            uiBarWidth, this.game.renderer.height);
-        let mask = new Phaser.Display.Masks.GeometryMask(this, shopIconMask);
-        // Set the masks
-        allUnits().forEach(unit => {
-            this.buildButtonBorders[unit].setMask(mask);
-            this.buildButtonIcons[unit].setMask(mask);
-            this.buildButtonCostTexts[unit].setMask(mask);
-        });
-        allActions().forEach(action => {
-            this.buildButtonBorders[action].setMask(mask);
-            this.buildButtonIcons[action].setMask(mask);
-            this.buildButtonCostTexts[action].setMask(mask);
-        });
-        this.unitLabel.setMask(mask);
-        this.powerLabel.setMask(mask);
+        this.configureScroll(this.buildingScroll, this.buildButtonIcons[UIBuilding.Remove]);
+        this.configureScroll(this.unitScroll, this.buildButtonIcons[allActions()[allActions().length - 1]]);
 
         this.navigationUpButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.navigationDownButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
@@ -724,6 +801,22 @@ export class ShopUIScene extends Phaser.Scene {
         scene.selectUnitBuild(UnitType.None);
     }
 
+    updateScroll(scrollConfig: ScrollConfig) {
+        if (scrollConfig.canScroll) {
+            if (scrollConfig.isScrolling) {
+                scrollConfig.scrollSpeed = scrollConfig.topLabel.y - scrollConfig.lastTopIconY;
+            } else if (scrollConfig.scrollSpeed != 0) {
+                this.scrollShopIcons(scrollConfig, scrollConfig.scrollSpeed);
+                if (scrollConfig.scrollSpeed > 0) {
+                    scrollConfig.scrollSpeed = Math.max(scrollConfig.scrollSpeed - scrollSpeedDecay, 0);
+                } else if (scrollConfig.scrollSpeed < 0) {
+                    scrollConfig.scrollSpeed = Math.min(scrollConfig.scrollSpeed + scrollSpeedDecay, 0);
+                }
+            }
+            scrollConfig.lastTopIconY = scrollConfig.topLabel.y;
+        }
+    }
+
     update(time, delta) {
         // Check for navigation hotkeys
         if (this.navigationUpButton.isDown && ! this.navigationUpButtonWasDown) {
@@ -735,19 +828,8 @@ export class ShopUIScene extends Phaser.Scene {
         this.navigationUpButtonWasDown = this.navigationUpButton.isDown;
         this.navigationDownButtonWasDown = this.navigationDownButton.isDown;
         
-        // Handle unit/power scrolling
-        if (this.canScroll) {
-            if (this.isScrolling) {
-                this.scrollSpeed = this.unitLabel.y - this.lastTopIconY;
-            } else if (this.scrollSpeed != 0) {
-                this.scrollTools(this.scrollSpeed);
-                if (this.scrollSpeed > 0) {
-                    this.scrollSpeed = Math.max(this.scrollSpeed - scrollSpeedDecay, 0);
-                } else if (this.scrollSpeed < 0) {
-                    this.scrollSpeed = Math.min(this.scrollSpeed + scrollSpeedDecay, 0);
-                }
-            }
-            this.lastTopIconY = this.unitLabel.y;
-        }
+        // Handle scrolling
+        this.updateScroll(this.buildingScroll);
+        this.updateScroll(this.unitScroll);
     }
 }
