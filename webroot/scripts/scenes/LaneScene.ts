@@ -53,6 +53,10 @@ export function healthBarYPos(game: Phaser.Game): number {
     return (unitScale(game) / unitScaleFactor) * defaultHealthBarYPos;
 }
 
+export function isDesktop(sys: Phaser.Scenes.Systems): boolean {
+    return sys.game.device.os.desktop
+}
+
 export class LaneScene extends Phaser.Scene {
     sceneCreated: boolean;
     activeGame: ActiveGame;
@@ -77,6 +81,7 @@ export class LaneScene extends Phaser.Scene {
     init(data) {
         this.activeGame = data.activeGame;
         this.uiState = data.uiState;
+        this.sys
     }
 
     unitRangePixels() {
@@ -119,11 +124,11 @@ export class LaneScene extends Phaser.Scene {
             graphics.strokeLineShape(new Phaser.Geom.Line(0, y, this.game.renderer.width, y));
             // Prepare the lane queue indicators
             this.playerLaneQueueIndicators.push(createTooltip(this, "+0", 8, y + 8, 0, 0));
-            this.playerLaneQueueIndicators[i].background.alpha = 0.7;
-            this.playerLaneQueueIndicators[i].text.alpha = 0.7
+            this.playerLaneQueueIndicators[i].background.alpha = 0.75;
+            this.playerLaneQueueIndicators[i].text.alpha = 0.75;
             this.enemyLaneQueueIndicators.push(createTooltip(this, "+0", this.game.renderer.width - uiBarWidth - 8, y + 8, 1, 0));
-            this.enemyLaneQueueIndicators[i].background.alpha = 0.7;
-            this.enemyLaneQueueIndicators[i].text.alpha = 0.7;
+            this.enemyLaneQueueIndicators[i].background.alpha = 0.75;
+            this.enemyLaneQueueIndicators[i].text.alpha = 0.75;
         }
 
         this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth - 6, 10, 100, 10).
@@ -315,23 +320,25 @@ export class LaneScene extends Phaser.Scene {
         }
 
         // If mousing over an open tile with a selected building, show preview text
-        let anyPreview = false;
-        if (this.uiState.selectedUnit != UnitType.None || this.uiState.selectedAction != ActionType.None) {
-            let laneIndex = this.getLaneMousePosition();
-            if (this.isValidLane(laneIndex)) {
-                let text: string;
-                if (this.uiState.selectedAction != ActionType.None) {
-                    text = capitalizeFirstLetter(this.uiState.selectedAction);
-                } else {
-                    text = "Create " + this.uiState.selectedUnit;
+        // Skip this on mobile because you can't really hover the mouse
+        if (isDesktop(this.sys)) {
+            let anyPreview = false;
+            if (this.uiState.selectedUnit != UnitType.None || this.uiState.selectedAction != ActionType.None) {
+                let laneIndex = this.getLaneMousePosition();
+                if (this.isValidLane(laneIndex)) {
+                    let text: string;
+                    if (this.uiState.selectedAction != ActionType.None) {
+                        text = capitalizeFirstLetter(this.uiState.selectedAction);
+                    } else {
+                        text = "Create " + this.uiState.selectedUnit;
+                    }
+                    this.updatePreviewText(text, laneIndex);
+                    anyPreview = true;
                 }
-                //console.log(laneIndex)
-                this.updatePreviewText(text, laneIndex);
-                anyPreview = true;
+            } 
+            if (! anyPreview) {
+                this.updatePreviewText("", 0);
             }
-        } 
-        if (! anyPreview) {
-            this.updatePreviewText("", 0);
         }
     }
 }

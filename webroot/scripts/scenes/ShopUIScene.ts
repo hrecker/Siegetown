@@ -390,7 +390,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     configureScroll(scrollConfig: ScrollConfig, lastShopIcon: Phaser.GameObjects.Sprite) {
-        scrollConfig.scrollIndicator = this.add.rectangle(0, 0, 0, 0, 0x000000).setOrigin(0.5, 0);
+        scrollConfig.scrollIndicator = this.add.rectangle(0, 0, 0, 0, 0xF2F0E5).setOrigin(0.5, 0);
         scrollConfig.scrollSpeed = 0;
         scrollConfig.bottomBuildIcon = lastShopIcon;
         scrollConfig.maxTopY = scrollConfig.topLabel.y;

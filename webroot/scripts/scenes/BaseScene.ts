@@ -7,7 +7,7 @@ import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
 import { UnitType, allUnits } from "../model/Unit";
 import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
-import { laneSceneTopY } from "./LaneScene";
+import { isDesktop, laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
 import { Tooltip, createTooltip, setTooltipVisible, updateTooltip } from "./ShopUIScene";
 
@@ -171,8 +171,8 @@ export class BaseScene extends Phaser.Scene {
 
         // Create preview text
         this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth, laneSceneTopY(this.game), 100, 10).
-            setFillStyle(0x43436A).setOrigin(1, 1).setStrokeStyle(1, 0xF2F0E5).setVisible(false);
-        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY(this.game) - 1, "asdf").setOrigin(1, 1).setVisible(false);
+            setFillStyle(0x43436A).setOrigin(1, 1).setStrokeStyle(1, 0xF2F0E5).setVisible(false).setAlpha(0.8);
+        this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY(this.game) - 1, "asdf").setOrigin(1, 1).setVisible(false).setAlpha(0.8);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);
@@ -356,25 +356,28 @@ export class BaseScene extends Phaser.Scene {
         }
 
         // If mousing over an open tile with a selected building, show preview text
-        let anyPreview = false;
-        if (this.uiState.selectedBuilding != UIBuilding.Empty) {
-            let gridPos = this.getGridMousePosition();
-            if (this.isOnGrid(gridPos)) {
-                let isRemove = this.uiState.selectedBuilding == UIBuilding.Remove;
-                let currentBuilding = this.activeGame.base.grid[gridPos.x][gridPos.y];
-                if (currentBuilding == Building.Empty && !isRemove) {
-                    this.updatePreviewText("Build " + this.uiState.selectedBuilding);
-                    anyPreview = true;
+        // Skip this on mobile because you can't really hover the mouse
+        if (isDesktop(this.sys)) {
+            let anyPreview = false;
+            if (this.uiState.selectedBuilding != UIBuilding.Empty) {
+                let gridPos = this.getGridMousePosition();
+                if (this.isOnGrid(gridPos)) {
+                    let isRemove = this.uiState.selectedBuilding == UIBuilding.Remove;
+                    let currentBuilding = this.activeGame.base.grid[gridPos.x][gridPos.y];
+                    if (currentBuilding == Building.Empty && !isRemove) {
+                        this.updatePreviewText("Build " + this.uiState.selectedBuilding);
+                        anyPreview = true;
+                    }
+                    if (isRemove && this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Empty &&
+                            this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Townhall) {
+                        this.updatePreviewText("Remove " + this.activeGame.base.grid[gridPos.x][gridPos.y]);
+                        anyPreview = true;
+                    }
                 }
-                if (isRemove && this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Empty &&
-                        this.activeGame.base.grid[gridPos.x][gridPos.y] != Building.Townhall) {
-                    this.updatePreviewText("Remove " + this.activeGame.base.grid[gridPos.x][gridPos.y]);
-                    anyPreview = true;
-                }
+            } 
+            if (! anyPreview) {
+                this.updatePreviewText("");
             }
-        } 
-        if (! anyPreview) {
-            this.updatePreviewText("");
         }
     }
 }
