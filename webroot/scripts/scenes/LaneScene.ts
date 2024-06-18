@@ -175,7 +175,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     handleLaneActivate(lane: number) {
-        if (gameEnded(this.activeGame)) {
+        if (gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
 

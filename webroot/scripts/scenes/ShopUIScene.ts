@@ -658,7 +658,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     selectBuild(selection: UIBuilding) {
-        if (gameEnded(this.activeGame)) {
+        if (gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
         // If we are reselecting empty, then no need to do anything here
@@ -684,7 +684,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     selectUnitBuild(unit: UnitType) {
-        if (gameEnded(this.activeGame)) {
+        if (gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
         // If we are reselecting empty, then no need to do anything here
@@ -713,7 +713,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     selectActionBuild(action: ActionType) {
-        if (gameEnded(this.activeGame)) {
+        if (gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
         // If we are reselecting empty, then no need to do anything here
@@ -742,7 +742,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     navigateBuildButtons(up: boolean) {
-        if (this.selectedIndex == -1 || gameEnded(this.activeGame)) {
+        if (this.selectedIndex == -1 || gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
         let options;

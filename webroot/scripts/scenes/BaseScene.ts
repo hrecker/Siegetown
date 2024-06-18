@@ -202,7 +202,7 @@ export class BaseScene extends Phaser.Scene {
     }
 
     handleGridClick() {
-        if (this.uiState.selectedBuilding == UIBuilding.Empty || gameEnded(this.activeGame)) {
+        if (this.uiState.selectedBuilding == UIBuilding.Empty || gameEnded(this.activeGame) || this.activeGame.isPaused) {
             return;
         }
 

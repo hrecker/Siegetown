@@ -32,6 +32,9 @@ export class OverlayUIScene extends Phaser.Scene {
     resumeButton: OverlayButton;
     mainMenuButton: OverlayButton;
 
+    pauseButtons: Phaser.Input.Keyboard.Key[];
+    pauseButtonHeld: boolean;
+
     constructor() {
         super({
             key: "OverlayUIScene"
@@ -113,6 +116,15 @@ export class OverlayUIScene extends Phaser.Scene {
         button.outline.visible = visible;
     }
 
+    pauseButtonDown(): boolean {
+        for (let button of this.pauseButtons) {
+            if (button.isDown) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     create() {
         this.resize(true);
 
@@ -135,7 +147,8 @@ export class OverlayUIScene extends Phaser.Scene {
         this.pauseText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 75, "Paused",
             {color: whiteColor}).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
         this.resumeButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 25, "Resume", () => {
-            //TODO
+            this.activeGame.isPaused = false;
+            this.hideOverlay();
         });
         this.mainMenuButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 85, "Main Menu", () => {
             //TODO
@@ -146,7 +159,11 @@ export class OverlayUIScene extends Phaser.Scene {
             setFillStyle(0x43436A).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5).setDepth(1);
 
         this.hideOverlay();
-        this.setOverlayVisible(Overlay.GameEnd)
+
+        // Pause button
+        this.pauseButtons = [];
+        this.pauseButtons.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P));
+        this.pauseButtons.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC));
 
         addBaseDamagedListener(this.baseDamagedListener, this);
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
@@ -166,5 +183,19 @@ export class OverlayUIScene extends Phaser.Scene {
             scene.gameResultText.text = "Victory!";
             scene.setOverlayVisible(Overlay.GameEnd);
         }
+    }
+
+    update() {
+        let pauseDown = this.pauseButtonDown();
+        if (pauseDown && ! this.pauseButtonHeld) {
+            if (this.activeGame.isPaused) {
+                this.activeGame.isPaused = false;
+                this.hideOverlay();
+            } else {
+                this.activeGame.isPaused = true;
+                this.setOverlayVisible(Overlay.Pause);
+            }
+        }
+        this.pauseButtonHeld = pauseDown;
     }
 }

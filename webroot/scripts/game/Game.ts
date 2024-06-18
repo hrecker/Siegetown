@@ -30,6 +30,8 @@ export type ActiveGame = {
     unitSpawnDelaysRemaining: { [type: string] : number }
     usedActions: ActionType[];
     laneSceneWidth: number;
+    isPaused: boolean;
+    timePaused: number;
 }
 
 function townhallCoordinate(): number {
@@ -109,6 +111,8 @@ export function createGame(): ActiveGame {
         unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
         usedActions: [],
         laneSceneWidth: -1,
+        isPaused: false,
+        timePaused: 0,
     };
 }
 
@@ -143,6 +147,8 @@ export function resetGame(game: ActiveGame) {
     game.currentWave = 0;
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
     game.usedActions = [];
+    game.isPaused = false;
+    game.timePaused = 0;
 }
 
 function startingResources(): Resources {
@@ -312,10 +318,15 @@ function unitSpeed(game: ActiveGame, unitType: UnitType): number {
 }
 
 export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
-    if (gameEnded(game)) {
+    if (gameEnded(game) || game.isPaused) {
+        // Don't count paused time between updates, keep adding the delta in the meantime
+        if (game.isPaused) {
+            game.timePaused += delta;
+        }
         return;
     }
 
+    game.lastUpdate += game.timePaused;
     if (game.lastUpdate == -1 || time - game.lastUpdate >= 1000) {
         game.lastUpdate = time;
         
@@ -341,6 +352,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
     });
 
     // Start wave of enemies if necessary
+    game.lastEnemySpawn += game.timePaused;
     if (game.secondsUntilWave == 0) {
         // Get the appropriate defined wave if it exists. If not, just add clubmen to the final defined wave to reach the desired enemy count.
         let definedWaves = config()["enemyWaves"];
@@ -476,6 +488,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (unitInteractable(player.gameObject.x, laneWidth) &&
                 firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"] * rangePixels) {
                 // Attack the enemy
+                player.lastAttackTime += game.timePaused;
                 if (player.lastAttackTime == -1 || time - player.lastAttackTime >= player.attackRate) {
                     player.lastAttackTime = time;
                     if (updateHealth(lane.enemyUnits[0], -player.damage) <= 0) {
@@ -533,6 +546,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (unitInteractable(enemy.gameObject.x, laneWidth) &&
                 firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"] * rangePixels) {
                 // Attack the player unit
+                enemy.lastAttackTime += game.timePaused;
                 if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= enemy.attackRate) {
                     enemy.lastAttackTime = time;
                     if (updateHealth(lane.playerUnits[0], -enemy.damage) <= 0) {
@@ -582,4 +596,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             lane.enemyUnits.splice(i, 1);
         }
     })
+
+    // Game is not paused, so reset counter
+    game.timePaused = 0;
 }
