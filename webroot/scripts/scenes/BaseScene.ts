@@ -18,6 +18,7 @@ export const whiteColor = "#F2F0E5";
 type GridBuilding = {
     mainSprite: Phaser.GameObjects.Sprite;
     tooltip: Tooltip;
+    resourceAnimationTimer: Phaser.Time.TimerEvent;
 }
 
 function boardWidth(game: Phaser.Game): number {
@@ -111,8 +112,10 @@ export class BaseScene extends Phaser.Scene {
                 this.setBuildingSprite(buildingSprite, this.activeGame.base.grid[i][j]);
                 this.gridBuildings[i][j] = {
                     mainSprite: buildingSprite,
-                    tooltip: null
+                    tooltip: null,
+                    resourceAnimationTimer: null,
                 };
+                this.updateResourceAnimationTimer(i, j);
             }
         }
 
@@ -181,6 +184,45 @@ export class BaseScene extends Phaser.Scene {
         addUnitBuiltListener(this.unitBuiltListener, this);
     }
 
+    updateResourceAnimationTimer(i: number, j: number) {
+        let growth = this.activeGame.base.growthByTile[i][j];
+        let growthText = "";
+        if (growth.gold > 0) {
+            growthText += "🪙"
+        }
+        if (growth.wood > 0) {
+            growthText += "🪵"
+        }
+        if (growth.food > 0) {
+            growthText += "🍞"
+        }
+
+        let gridBuilding = this.gridBuildings[i][j];
+        if (gridBuilding.resourceAnimationTimer != null) {
+            gridBuilding.resourceAnimationTimer.destroy();
+        }
+        if (growthText.length == 0) {
+            return;
+        }
+
+        let timer = this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                let text = this.add.text(gridBuilding.mainSprite.x, gridBuilding.mainSprite.y - (gridBuilding.mainSprite.displayHeight / 2), growthText).setOrigin(0.5, 0.5).setPadding(2);
+                this.tweens.add({
+                    targets: text,
+                    y: text.y - 30,
+                    alpha: 0,
+                    duration: 500,
+                    ease: 'Sine.easeInOut',
+                    onComplete: () => { text.destroy() },
+                })
+            },
+            loop: true,
+        });
+        gridBuilding.resourceAnimationTimer = timer;
+    }
+
     setBuildingSprite(sprite: Phaser.GameObjects.Sprite, buildingType: Building) {
         if (buildingType == Building.Empty) {
             sprite.setVisible(false);
@@ -237,10 +279,12 @@ export class BaseScene extends Phaser.Scene {
         if (isRemove) {
             this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, Building.Empty);
             removeBuilding(this.activeGame, gridPos.x, gridPos.y);
+            this.updateResourceAnimationTimer(gridPos.x, gridPos.y);
         } else {
             // Build the building
             this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
             buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridPos.x, gridPos.y);
+            this.updateResourceAnimationTimer(gridPos.x, gridPos.y);
         }
         // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {
@@ -280,6 +324,7 @@ export class BaseScene extends Phaser.Scene {
             for (let j = 0; j < config()["baseWidth"]; j++) {
                 scene.setBuildingSprite(scene.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
                 scene.gridBuildings[i][j].tooltip.text.text = scene.getTooltipText(i, j);
+                scene.updateResourceAnimationTimer(i, j);
             }
         }
     }
