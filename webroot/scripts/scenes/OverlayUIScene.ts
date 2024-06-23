@@ -27,13 +27,14 @@ export class OverlayUIScene extends Phaser.Scene {
     restartButton: OverlayButton;
 
     // Pause UI
+    pauseButton: Phaser.GameObjects.Text;
     pauseBackground: Phaser.GameObjects.Rectangle;
     pauseText: Phaser.GameObjects.Text;
     resumeButton: OverlayButton;
     mainMenuButton: OverlayButton;
 
-    pauseButtons: Phaser.Input.Keyboard.Key[];
-    pauseButtonHeld: boolean;
+    pauseKeys: Phaser.Input.Keyboard.Key[];
+    pauseKeyHeld: boolean;
 
     constructor() {
         super({
@@ -117,7 +118,7 @@ export class OverlayUIScene extends Phaser.Scene {
     }
 
     pauseButtonDown(): boolean {
-        for (let button of this.pauseButtons) {
+        for (let button of this.pauseKeys) {
             if (button.isDown) {
                 return true;
             }
@@ -127,6 +128,14 @@ export class OverlayUIScene extends Phaser.Scene {
 
     create() {
         this.resize(true);
+
+        // Corner pause button
+        this.pauseButton = this.add.text(this.game.renderer.width + 5, 8, "⏸️").setOrigin(1, 0).setPadding(8).setFontSize(48);
+        this.pauseButton.setInteractive();
+        this.pauseButton.on('pointerdown', () => {
+            this.activeGame.isPaused = true;
+            this.setOverlayVisible(Overlay.Pause);
+        });
 
         // Background
         this.shadowBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
@@ -161,9 +170,9 @@ export class OverlayUIScene extends Phaser.Scene {
         this.hideOverlay();
 
         // Pause button
-        this.pauseButtons = [];
-        this.pauseButtons.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P));
-        this.pauseButtons.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC));
+        this.pauseKeys = [];
+        this.pauseKeys.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P));
+        this.pauseKeys.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC));
 
         addBaseDamagedListener(this.baseDamagedListener, this);
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
@@ -187,7 +196,7 @@ export class OverlayUIScene extends Phaser.Scene {
 
     update() {
         let pauseDown = this.pauseButtonDown();
-        if (pauseDown && ! this.pauseButtonHeld) {
+        if (pauseDown && ! this.pauseKeyHeld) {
             if (this.activeGame.isPaused) {
                 this.activeGame.isPaused = false;
                 this.hideOverlay();
@@ -196,6 +205,6 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.setOverlayVisible(Overlay.Pause);
             }
         }
-        this.pauseButtonHeld = pauseDown;
+        this.pauseKeyHeld = pauseDown;
     }
 }
