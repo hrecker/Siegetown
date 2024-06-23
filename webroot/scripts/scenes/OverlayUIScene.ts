@@ -1,6 +1,7 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, clearListeners, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 import { whiteColor } from "./BaseScene";
+import { fadeIn, setButtonInteractive } from "./MainMenuScene";
 
 type OverlayButton = {
     button: Phaser.GameObjects.Text;
@@ -12,8 +13,9 @@ enum Overlay {
     GameEnd
 }
 
-const outlinePadding = 3;
+const outlinePadding = 4;
 const textBackgroundPadding = 15;
+const textFormat = { font: "bold 40px Verdana", color: whiteColor }
 
 /** UI displayed over MainScene */
 export class OverlayUIScene extends Phaser.Scene {
@@ -81,6 +83,9 @@ export class OverlayUIScene extends Phaser.Scene {
                 topLeft = this.pauseText.getTopLeft();
                 height = this.mainMenuButton.outline.getBottomCenter().y - this.pauseText.getTopCenter().y;
                 width = this.pauseText.displayWidth;
+                fadeIn(this, [this.pauseText, this.pauseBackground,
+                    this.resumeButton.button, this.resumeButton.outline,
+                    this.mainMenuButton.button, this.mainMenuButton.outline], false)
                 break;
             case Overlay.GameEnd:
                 this.gameResultText.visible = true;
@@ -89,21 +94,23 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.pauseBackground.visible = false;
                 this.setButtonVisible(this.restartButton, true);
                 this.setButtonVisible(this.resumeButton, false);
-                this.setButtonVisible(this.mainMenuButton, false);
+                this.setButtonVisible(this.mainMenuButton, true);
                 topLeft = this.gameResultText.getTopLeft();
                 height = this.restartButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y;
                 width = this.gameResultText.displayWidth;
+                fadeIn(this, [this.gameResultText, this.gameResultBackground,
+                    this.restartButton.button, this.restartButton.outline,
+                    this.mainMenuButton.button, this.mainMenuButton.outline], false)
                 break;
         }
     }
 
     createButton(x: number, y: number, text: string, pointerDownFunction: Function): OverlayButton {
-        let buttonText = this.add.text(x, y, text, {color: whiteColor}).setFontSize(48).setOrigin(0.5, 0.5);
+        let buttonText = this.add.text(x, y, text, textFormat).setFontSize(48).setOrigin(0.5, 0.5);
         let outline = this.add.rectangle(buttonText.getTopLeft().x - outlinePadding, buttonText.getTopLeft().y - outlinePadding,
-            buttonText.width + outlinePadding, buttonText.height + outlinePadding).setOrigin(0, 0).setFillStyle(0x5F556A).setStrokeStyle(1, 0xF2F0E5);
+            buttonText.width + (outlinePadding * 2), buttonText.height + (outlinePadding * 2)).setOrigin(0, 0).setFillStyle(0x5F556A).setStrokeStyle(1, 0xF2F0E5);
         
-        buttonText.setInteractive();
-        buttonText.on('pointerdown', pointerDownFunction);
+        setButtonInteractive(this, outline, pointerDownFunction);
         outline.setDepth(2);
         buttonText.setDepth(3);
         return {
@@ -141,32 +148,32 @@ export class OverlayUIScene extends Phaser.Scene {
         this.shadowBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
 
         // Game result ui
-        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 50, "Victory!",
-            {color: whiteColor}).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
-        this.restartButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Restart", () => {
+        this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 125, "Victory!",
+            textFormat).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
+        this.restartButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 - 25, "Restart", (scene) => {
             gameRestartedEvent();
-            this.hideOverlay();
+            scene.hideOverlay();
         });
-        let gameResultHeight = this.restartButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y;
+        this.mainMenuButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "Main Menu", (scene) => {
+            clearListeners();
+            scene.scene.stop();
+            scene.scene.stop("BaseScene");
+            scene.scene.stop("LaneScene");
+            scene.scene.stop("ResourceUIScene");
+            scene.scene.stop("ShopUIScene");
+            scene.scene.start("MainMenuScene");
+        });
+        let gameResultHeight = this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y;
         this.gameResultBackground = this.add.rectangle(this.gameResultText.getTopLeft().x - textBackgroundPadding, this.gameResultText.getTopLeft().y,
             this.gameResultText.displayWidth + (2 * textBackgroundPadding), gameResultHeight + (2 * textBackgroundPadding)).
             setFillStyle(0x43436A).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5).setDepth(1);
 
         // Pause ui
-        this.pauseText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 75, "Paused",
-            {color: whiteColor}).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
-        this.resumeButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 25, "Resume", () => {
-            this.activeGame.isPaused = false;
-            this.hideOverlay();
-        });
-        this.mainMenuButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 85, "Main Menu", () => {
-            clearListeners();
-            this.scene.stop();
-            this.scene.stop("BaseScene");
-            this.scene.stop("LaneScene");
-            this.scene.stop("ResourceUIScene");
-            this.scene.stop("ShopUIScene");
-            this.scene.start("MainMenuScene");
+        this.pauseText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 125, "Paused",
+            textFormat).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
+        this.resumeButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 - 25, "Resume", (scene) => {
+            scene.activeGame.isPaused = false;
+            scene.hideOverlay();
         });
         let pauseHeight = this.mainMenuButton.outline.getBottomCenter().y - this.pauseText.getTopCenter().y;
         this.pauseBackground = this.add.rectangle(this.mainMenuButton.outline.getTopLeft().x - textBackgroundPadding, this.pauseText.getTopLeft().y,

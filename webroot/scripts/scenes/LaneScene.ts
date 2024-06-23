@@ -37,7 +37,7 @@ export function laneSceneTopY(game: Phaser.Game): number {
     return (1 - laneSceneFraction) * game.renderer.height;
 }
 
-function unitScale(game: Phaser.Game): number {
+export function unitScale(game: Phaser.Game): number {
     return (game.renderer.height / defaultGameHeight) * unitScaleFactor;
 }
 
