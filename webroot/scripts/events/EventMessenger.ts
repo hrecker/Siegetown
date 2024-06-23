@@ -35,6 +35,18 @@ let unitBuiltCallbacks: UnitCallback[] = [];
 let unitUnlockedCallbacks: UnitCallback[] = [];
 let actionRunCallbacks: ActionCallback[] = [];
 
+export function clearListeners() {
+    resourceUpdateCallbacks = [];
+    baseDamagedCallbacks = [];
+    enemyBaseDamagedCallbacks = [];
+    gameRestartedCallbacks = [];
+    buildCallbacks = [];
+    waveCountdownUpdatedCallbacks = [];
+    unitBuiltCallbacks = [];
+    unitUnlockedCallbacks = [];
+    actionRunCallbacks = [];
+}
+
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
     resourceUpdateCallbacks.push({ 
         callback: callback,

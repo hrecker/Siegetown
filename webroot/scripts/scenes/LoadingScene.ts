@@ -1,5 +1,3 @@
-import { createGame } from "../game/Game";
-import { createUIState } from "../game/UIState";
 import { loadConfig } from "../model/Config";
 import { whiteColor } from "./BaseScene";
 
@@ -99,14 +97,7 @@ export class LoadingScene extends Phaser.Scene {
         this.load.on('complete', () => {
             // Start the main menu scene
             loadConfig(this.cache.json.get("config"));
-            let activeGame = createGame();
-            let uiState = createUIState();
-            this.scene.start("BaseScene", { activeGame: activeGame, uiState: uiState })
-                      .start("LaneScene", { activeGame: activeGame, uiState: uiState })
-                      .start("ResourceUIScene", { activeGame: activeGame, uiState: uiState })
-                      .start("ShopUIScene", { activeGame: activeGame, uiState: uiState })
-                      .start("OverlayUIScene", { activeGame: activeGame, uiState: uiState })
-                      .stop();
+            this.scene.start("MainMenuScene").stop();
         })
     }
 

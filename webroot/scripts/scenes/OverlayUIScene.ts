@@ -1,4 +1,4 @@
-import { addBaseDamagedListener, addEnemyBaseDamagedListener, gameRestartedEvent } from "../events/EventMessenger";
+import { addBaseDamagedListener, addEnemyBaseDamagedListener, clearListeners, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 import { whiteColor } from "./BaseScene";
 
@@ -160,7 +160,13 @@ export class OverlayUIScene extends Phaser.Scene {
             this.hideOverlay();
         });
         this.mainMenuButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 + 85, "Main Menu", () => {
-            //TODO
+            clearListeners();
+            this.scene.stop();
+            this.scene.stop("BaseScene");
+            this.scene.stop("LaneScene");
+            this.scene.stop("ResourceUIScene");
+            this.scene.stop("ShopUIScene");
+            this.scene.start("MainMenuScene");
         });
         let pauseHeight = this.mainMenuButton.outline.getBottomCenter().y - this.pauseText.getTopCenter().y;
         this.pauseBackground = this.add.rectangle(this.mainMenuButton.outline.getTopLeft().x - textBackgroundPadding, this.pauseText.getTopLeft().y,

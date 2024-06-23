@@ -6,6 +6,7 @@ import { OverlayUIScene } from './scenes/OverlayUIScene';
 import { LaneScene } from './scenes/LaneScene';
 import { ResourceUIScene } from './scenes/ResourceUIScene';
 import { ShopUIScene } from './scenes/ShopUIScene';
+import { MainMenuScene } from './scenes/MainMenuScene';
 
 var config: Phaser.Types.Core.GameConfig = {
     scale: {
@@ -23,6 +24,7 @@ var config: Phaser.Types.Core.GameConfig = {
     },
     scene: [
         LoadingScene,
+        MainMenuScene,
         BaseScene,
         LaneScene,
         ResourceUIScene,
