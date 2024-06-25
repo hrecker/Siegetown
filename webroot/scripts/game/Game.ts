@@ -105,7 +105,7 @@ export function createGame(): ActiveGame {
         lanes: startingLanes(),
         secondsUntilWave: config()["secondsBetweenWaves"],
         currentWave: 0,
-        lastEnemySpawn: -1,
+        lastEnemySpawn: -1 * config()["baseEnemySpawnRate"],
         lastUpdate: -1,
         enemySpawnRate: config()["baseEnemySpawnRate"],
         unitSpawnDelaysRemaining: startingUnitSpawnDelays(),
@@ -132,7 +132,7 @@ export function resetGame(game: ActiveGame) {
         }
     }
     game.lastUpdate = -1;
-    game.lastEnemySpawn = -1;
+    game.lastEnemySpawn = -1 * config()["baseEnemySpawnRate"];
     game.enemySpawnRate = config()["baseEnemySpawnRate"];
     game.base = {
         grid: startingGrid(),
@@ -392,9 +392,6 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         game.lastEnemySpawn = time;
         game.secondsUntilWave = config()["secondsBetweenWaves"];
         waveCountdownUpdatedEvent(game.secondsUntilWave);
-    } else if (game.lastEnemySpawn == -1) {
-        // Wait the full spawn time for the first spawn
-        game.lastEnemySpawn = time;
     } else if (time - game.lastEnemySpawn >= game.enemySpawnRate) {
         // Spawn enemy units
         game.lastEnemySpawn = time;
