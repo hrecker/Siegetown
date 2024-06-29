@@ -1,6 +1,7 @@
 import { ActionType } from "../model/Action";
 import { Building } from "../model/Base";
 import { UnitType } from "../model/Unit";
+import { Settings } from "../state/Settings";
 
 // Callback types
 type EmptyCallback = {
@@ -23,6 +24,10 @@ type ActionCallback = {
     callback: (scene: Phaser.Scene, action: ActionType) => void;
     scene: Phaser.Scene;
 }
+type SettingsCallback = {
+    callback: (scene: Phaser.Scene, settings: Settings) => void;
+    scene: Phaser.Scene;
+}
 
 // Callback lists
 let resourceUpdateCallbacks: EmptyCallback[] = [];
@@ -34,6 +39,7 @@ let waveCountdownUpdatedCallbacks: NumberCallback[] = [];
 let unitBuiltCallbacks: UnitCallback[] = [];
 let unitUnlockedCallbacks: UnitCallback[] = [];
 let actionRunCallbacks: ActionCallback[] = [];
+let settingsCallbacks: SettingsCallback[] = [];
 
 export function clearListeners() {
     resourceUpdateCallbacks = [];
@@ -45,6 +51,7 @@ export function clearListeners() {
     unitBuiltCallbacks = [];
     unitUnlockedCallbacks = [];
     actionRunCallbacks = [];
+    settingsCallbacks = [];
 }
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
@@ -153,4 +160,16 @@ export function addActionRunListener(callback: (scene: Phaser.Scene, unit: Actio
 export function actionRunEvent(action: ActionType) {
     actionRunCallbacks.forEach(callback =>
         callback.callback(callback.scene, action));
+}
+
+export function addSettingsListener(callback: (scene: Phaser.Scene, setting: Settings) => void, scene: Phaser.Scene) {
+    settingsCallbacks.push({ 
+        callback: callback,
+        scene: scene
+    });
+}
+
+export function settingsEvent(settings: Settings) {
+    settingsCallbacks.forEach(callback =>
+        callback.callback(callback.scene, settings));
 }

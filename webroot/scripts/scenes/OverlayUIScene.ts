@@ -1,5 +1,6 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, clearListeners, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
+import { SoundEffect, playSound } from "../model/Sound";
 import { whiteColor } from "./BaseScene";
 import { fadeIn, setButtonInteractive } from "./MainMenuScene";
 
@@ -142,6 +143,7 @@ export class OverlayUIScene extends Phaser.Scene {
         this.pauseButton.on('pointerdown', () => {
             this.activeGame.isPaused = true;
             this.setOverlayVisible(Overlay.Pause);
+            playSound(this, SoundEffect.ButtonClick);
         });
 
         // Background

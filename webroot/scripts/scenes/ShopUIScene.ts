@@ -5,6 +5,7 @@ import { ActionType, allActions } from "../model/Action";
 import { Building } from "../model/Base";
 import { config } from "../model/Config";
 import { Resources, actionCosts, buildingCosts, unitCosts, zeroResources } from "../model/Resources";
+import { SoundEffect, playSound } from "../model/Sound";
 import { UnitType, allUnits } from "../model/Unit";
 import { capitalizeFirstLetter } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
@@ -666,6 +667,7 @@ export class ShopUIScene extends Phaser.Scene {
             return;
         }
 
+        playSound(this, SoundEffect.ButtonClick);
         if (this.uiState.selectedBuilding == selection) {
             this.uiState.selectedBuilding = UIBuilding.Empty;
             this.selectedIndex = -1;
@@ -707,6 +709,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
         // Deselect actions when selecting units
         if (this.uiState.selectedUnit != UnitType.None) {
+            playSound(this, SoundEffect.ButtonClick);
             this.selectActionBuild(ActionType.None);
             this.lastSelectedType = ShopButtonType.Unit;
         }
@@ -736,6 +739,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
         // Deselect units when selecting actions
         if (this.uiState.selectedAction != ActionType.None) {
+            playSound(this, SoundEffect.ButtonClick);
             this.selectUnitBuild(UnitType.None);
             this.lastSelectedType = ShopButtonType.Action;
         }

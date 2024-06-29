@@ -90,6 +90,23 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("remove_icon", "assets/sprites/ui/remove_icon.png");
         this.load.image("remove_gray", "assets/sprites/ui/remove_gray.png");
         
+        // SFX
+        //this.load.audio("Build", "assets/sfx/Build.mp3");
+        this.load.audio("ButtonClick", "assets/sfx/ButtonClick.mp3");
+        //this.load.audio("Bulldoze", "assets/sfx/Bulldoze.mp3");
+        //this.load.audio("NewUnit", "assets/sfx/NewUnit.mp3");
+        //this.load.audio("Punch", "assets/sfx/Punch.mp3");
+        //this.load.audio("Slingshot", "assets/sfx/Slingshot.mp3");
+        //this.load.audio("Club", "assets/sfx/Club.mp3");
+        //this.load.audio("Death", "assets/sfx/Death.mp3");
+        //this.load.audio("PlayerBaseDamaged", "assets/sfx/PlayerBaseDamaged.mp3");
+        //this.load.audio("EnemyBaseDamaged", "assets/sfx/EnemyBaseDamaged.mp3");
+        //this.load.audio("Victory", "assets/sfx/Victory.mp3");
+        //this.load.audio("ShopUnlock", "assets/sfx/ShopUnlock.mp3");
+        //this.load.audio("Freeze", "assets/sfx/Freeze.mp3");
+        //this.load.audio("BombLane", "assets/sfx/BombLane.mp3");
+        //this.load.audio("Reinforcements", "assets/sfx/Reinforcements.mp3");
+        
         // Load json
         this.load.json("config", "assets/json/config.json");
 

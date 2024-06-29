@@ -1,5 +1,6 @@
 import { createGame } from "../game/Game";
 import { createUIState } from "../game/UIState";
+import { SoundEffect, playSound } from "../model/Sound";
 import { allUnits, walkAnimation } from "../model/Unit";
 import { createAnimation, shuffleArray } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
@@ -45,6 +46,7 @@ export function setButtonInteractive(scene: Phaser.Scene, background: Phaser.Gam
     background.on('pointerup', () => {
         if (background.getData("isDown")) {
             pointerDownFunction(scene);
+            playSound(scene, SoundEffect.ButtonClick);
         }
         background.fillColor = defaultButtonColor;
         background.setData("isDown", false);

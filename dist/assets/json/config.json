@@ -6,6 +6,8 @@
     "baseMaxHealth": 10,
     "enemyBaseMaxHealth": 20,
 
+    "maxGamesStored": 100,
+
     "enemyWaves": [
         {
             "warrior": 3
@@ -194,5 +196,24 @@
             },
             "tooltipText": "💥Destroy all units in one lane"
         }
+    },
+    
+    "defaultMusicVolume": 1,
+    "defaultSfxVolume": {
+        "Build": 1,
+        "ButtonClick": 1,
+        "Bulldoze": 1,
+        "NewUnit": 1,
+        "Punch": 1,
+        "Slingshot": 1,
+        "Club": 1,
+        "Death": 1,
+        "PlayerBaseDamaged": 1,
+        "EnemyBaseDamaged": 1,
+        "Victory": 1,
+        "ShopUnlock": 1,
+        "Freeze": 1,
+        "BombLane": 1,
+        "Reinforcements": 1
     }
 }
