@@ -2,6 +2,7 @@ import { getSettings } from "../state/Settings";
 import { config } from "./Config";
 
 export enum SoundEffect {
+    None = "None",
     Build = "Build",
     ButtonClick = "ButtonClick",
     Bulldoze = "Bulldoze",
@@ -47,7 +48,7 @@ export function getSound(sound: SoundEffect): Phaser.Sound.BaseSound {
 
 /** Get a given sound */
 export function playSound(scene: Phaser.Scene, sound: SoundEffect) {
-    if (! getSettings().sfxEnabled) {
+    if (! getSettings().sfxEnabled || sound == SoundEffect.None) {
         return;
     }
 

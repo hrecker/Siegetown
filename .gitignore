@@ -6,3 +6,6 @@ node_modules/*
 
 # Keep the assets folder under dist
 !dist/assets
+
+# Directory for other stuff
+scratch/

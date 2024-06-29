@@ -5,6 +5,7 @@ import { Building } from "../model/Base";
 import { buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
+import { SoundEffect, playSound } from "../model/Sound";
 import { UnitType, allUnits } from "../model/Unit";
 import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { isDesktop, laneSceneTopY } from "./LaneScene";
@@ -280,11 +281,13 @@ export class BaseScene extends Phaser.Scene {
             this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, Building.Empty);
             removeBuilding(this.activeGame, gridPos.x, gridPos.y);
             this.updateResourceAnimationTimer(gridPos.x, gridPos.y);
+            playSound(this, SoundEffect.Bulldoze);
         } else {
             // Build the building
             this.setBuildingSprite(this.gridBuildings[gridPos.x][gridPos.y].mainSprite, BuildingFrom(this.uiState.selectedBuilding));
             buildBuilding(this.activeGame, BuildingFrom(this.uiState.selectedBuilding), gridPos.x, gridPos.y);
             this.updateResourceAnimationTimer(gridPos.x, gridPos.y);
+            playSound(this, SoundEffect.Build);
         }
         // Update all tooltip texts as necessary
         for (let i = 0; i < config()["baseWidth"]; i++) {

@@ -1,6 +1,7 @@
 import { getNewId } from "../state/IdState"
 import { Buffs } from "./Buffs";
 import { config } from "./Config"
+import { SoundEffect } from "./Sound";
 
 export enum UnitType {
     None = "none",
@@ -72,4 +73,17 @@ export function walkAnimation(type: UnitType): string {
 
 export function attackAnimation(type: UnitType): string {
     return type + "_attack";
+}
+
+export function unitAttackSound(type: UnitType): SoundEffect {
+    switch(type) {
+        case UnitType.None:
+            return SoundEffect.None;
+        case UnitType.Warrior:
+            return SoundEffect.Punch;
+        case UnitType.Slingshotter:
+            return SoundEffect.Slingshot;
+        case UnitType.Clubman:
+            return SoundEffect.Club;
+    }
 }

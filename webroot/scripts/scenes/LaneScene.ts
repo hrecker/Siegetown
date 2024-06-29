@@ -6,6 +6,7 @@ import { Building } from "../model/Base";
 import { Buffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { actionCosts, unitCosts } from "../model/Resources";
+import { SoundEffect, playSound } from "../model/Sound";
 import { createUnit, Unit, UnitType, walkAnimation } from "../model/Unit";
 import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { uiBarWidth } from "./ResourceUIScene";
@@ -248,6 +249,7 @@ export class LaneScene extends Phaser.Scene {
                 this.activeGame.unitSpawnDelaysRemaining[type] = config()["units"][type]["spawnDelay"];
             }
         }
+        playSound(this, SoundEffect.NewUnit);
         return createUnit(type, buffs, unit, healthBarBackground, healthBar);
     }
 

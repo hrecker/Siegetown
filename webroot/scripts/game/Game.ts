@@ -4,7 +4,8 @@ import { Base, Building } from "../model/Base";
 import { Buffs, buildingBuffs } from "../model/Buffs";
 import { config } from "../model/Config";
 import { Resources, addResources, adjacentBuffProduction, buildingCosts, buildingProduction, configResources, subtractResources, zeroResources } from "../model/Resources";
-import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, UnitType, updateHealth, walkAnimation } from "../model/Unit";
+import { SoundEffect, playSound } from "../model/Sound";
+import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, unitAttackSound, UnitType, updateHealth, walkAnimation } from "../model/Unit";
 import { LaneScene, defaultGameWidth } from "../scenes/LaneScene";
 import { uiBarWidth } from "../scenes/ResourceUIScene";
 import { shuffleArray } from "../util/Utils";
@@ -448,6 +449,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
     });
 
     // Always move units
+    let soundEffectsToPlay = {};
     game.lanes.forEach(lane => {
         // Move player units
         let playerUnitsToRemove = new Set<number>();
@@ -490,7 +492,9 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     player.lastAttackTime = time;
                     if (updateHealth(lane.enemyUnits[0], -player.damage) <= 0) {
                         enemyUnitsToRemove.add(0);
+                        soundEffectsToPlay[SoundEffect.Death] = true;
                     }
+                    soundEffectsToPlay[unitAttackSound(player.type)] = true;
                 }
                 player.gameObject.play(attackAnimation(player.type), true);
                 xLimit = topLeftX;
@@ -548,7 +552,9 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
                     enemy.lastAttackTime = time;
                     if (updateHealth(lane.playerUnits[0], -enemy.damage) <= 0) {
                         playerUnitsToRemove.add(0);
+                        soundEffectsToPlay[SoundEffect.Death] = true;
                     }
+                    soundEffectsToPlay[unitAttackSound(enemy.type)] = true;
                 }
                 xLimit = topRightX;
                 enemy.gameObject.play(attackAnimation(enemy.type), true);
@@ -592,7 +598,12 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             destroyUnit(lane.enemyUnits[i]);
             lane.enemyUnits.splice(i, 1);
         }
-    })
+    });
+
+    // Play any sounds
+    for (const sound in soundEffectsToPlay) {
+        playSound(scene, sound as SoundEffect);
+    }
 
     // Game is not paused, so reset counter
     game.timePaused = 0;
