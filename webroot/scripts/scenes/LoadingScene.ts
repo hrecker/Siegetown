@@ -89,6 +89,14 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("reinforcements_gray", "assets/sprites/ui/reinforcements_gray.png");
         this.load.image("remove_icon", "assets/sprites/ui/remove_icon.png");
         this.load.image("remove_gray", "assets/sprites/ui/remove_gray.png");
+        this.load.image('musicOffButton', 'assets/sprites/ui/music_off_button.png');
+        this.load.image('musicOffButtonDown', 'assets/sprites/ui/music_off_button_down.png');
+        this.load.image('musicOnButton', 'assets/sprites/ui/music_on_button.png');
+        this.load.image('musicOnButtonDown', 'assets/sprites/ui/music_on_button_down.png');
+        this.load.image('soundOffButton', 'assets/sprites/ui/sound_off_button.png');
+        this.load.image('soundOffButtonDown', 'assets/sprites/ui/sound_off_button_down.png');
+        this.load.image('soundOnButton', 'assets/sprites/ui/sound_on_button.png');
+        this.load.image('soundOnButtonDown', 'assets/sprites/ui/sound_on_button_down.png');
         
         // SFX
         this.load.audio("Build", "assets/sfx/Build.mp3");

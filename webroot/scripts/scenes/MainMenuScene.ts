@@ -2,6 +2,7 @@ import { createGame } from "../game/Game";
 import { createUIState } from "../game/UIState";
 import { SoundEffect, playSound } from "../model/Sound";
 import { allUnits, walkAnimation } from "../model/Unit";
+import { getSettings, setMusicEnabled, setSfxEnabled } from "../state/Settings";
 import { createAnimation, shuffleArray } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
 import { unitScale } from "./LaneScene";
@@ -45,11 +46,31 @@ export function setButtonInteractive(scene: Phaser.Scene, background: Phaser.Gam
     });
     background.on('pointerup', () => {
         if (background.getData("isDown")) {
-            pointerDownFunction(scene);
             playSound(scene, SoundEffect.ButtonClick);
+            pointerDownFunction(scene);
         }
         background.fillColor = defaultButtonColor;
         background.setData("isDown", false);
+    });
+}
+
+function setToggleButtonInteractive(scene: Phaser.Scene, button: Phaser.GameObjects.Image, textureNameFunction: Function, pointerDownFunction: Function) {
+    button.setInteractive();
+    button.on('pointerout', () => {
+        button.setTexture(textureNameFunction());
+        button.setData("isDown", false);
+    });
+    button.on('pointerdown', () => {
+        button.setTexture(textureNameFunction() + "Down"); 
+        button.setData("isDown", true);
+    });
+    button.on('pointerup', () => {
+        if (button.getData("isDown")) {
+            playSound(scene, SoundEffect.ButtonClick);
+            pointerDownFunction(scene);
+        }
+        button.setTexture(textureNameFunction());
+        button.setData("isDown", false);
     });
 }
 
@@ -67,6 +88,14 @@ export class MainMenuScene extends Phaser.Scene {
         });
     }
 
+    getMusicButtonTexture() {
+        return getSettings().musicEnabled ? "musicOnButton" : "musicOffButton";
+    }
+
+    getSfxButtonTexture() {
+        return getSettings().sfxEnabled ? "soundOnButton" : "soundOffButton";
+    }
+
     create() {
         let background = this.add.image(0, 0, "background").setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
@@ -80,9 +109,19 @@ export class MainMenuScene extends Phaser.Scene {
         setButtonInteractive(this, buttonOutline, this.startGame)
         buttonOutline.setDepth(2);
         buttonText.setDepth(3);
+        
+        // Audio control buttons
+        let musicControlButton = this.add.image(5, 5, this.getMusicButtonTexture()).setOrigin(0, 0);
+        setToggleButtonInteractive(this, musicControlButton, this.getMusicButtonTexture, () => {
+            setMusicEnabled(!getSettings().musicEnabled);
+        });
+        let sfxControlButton = this.add.image(5, musicControlButton.getBottomCenter().y + 5, this.getSfxButtonTexture()).setOrigin(0, 0);
+        setToggleButtonInteractive(this, sfxControlButton, this.getSfxButtonTexture, () => {
+            setSfxEnabled(!getSettings().sfxEnabled);
+        });
 
         // Fade in main menu
-        fadeIn(this, [title, buttonText, buttonOutline], true);
+        fadeIn(this, [title, buttonText, buttonOutline, musicControlButton, sfxControlButton], true);
 
         // Add some units walking in the background
         this.units = [];
