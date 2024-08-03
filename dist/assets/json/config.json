@@ -200,19 +200,18 @@
     
     "defaultMusicVolume": 1,
     "defaultSfxVolume": {
-        "Build": 1,
+        "Build": 0.75,
         "ButtonClick": 1,
         "Bulldoze": 1,
-        "NewUnit": 1,
-        "Punch": 1,
-        "Slingshot": 1,
-        "Club": 1,
-        "Death": 1,
-        "PlayerBaseDamaged": 1,
-        "EnemyBaseDamaged": 1,
+        "NewUnit": 0.85,
+        "Punch": 0.8,
+        "Slingshot": 0.9,
+        "Club": 0.9,
+        "Death": 0.85,
+        "BaseDamaged": 1,
         "Victory": 1,
-        "ShopUnlock": 1,
-        "Freeze": 1,
+        "Loss": 0.8,
+        "Freeze": 0.8,
         "BombLane": 1,
         "Reinforcements": 1
     }

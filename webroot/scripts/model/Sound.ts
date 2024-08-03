@@ -11,10 +11,9 @@ export enum SoundEffect {
     Slingshot = "Slingshot",
     Club = "Club",
     Death = "Death",
-    PlayerBaseDamaged = "PlayerBaseDamaged",
-    EnemyBaseDamaged = "EnemyBaseDamaged",
+    BaseDamaged = "BaseDamaged",
     Victory = "Victory",
-    ShopUnlock = "ShopUnlock",
+    Loss = "Loss",
     Freeze = "Freeze",
     BombLane = "BombLane",
     Reinforcements = "Reinforcements"
@@ -32,10 +31,9 @@ export function loadSounds(scene: Phaser.Scene) {
     sounds[SoundEffect.Slingshot] = scene.sound.add("Slingshot");
     sounds[SoundEffect.Club] = scene.sound.add("Club");
     sounds[SoundEffect.Death] = scene.sound.add("Death");
-    sounds[SoundEffect.PlayerBaseDamaged] = scene.sound.add("PlayerBaseDamaged");
-    sounds[SoundEffect.EnemyBaseDamaged] = scene.sound.add("EnemyBaseDamaged");
+    sounds[SoundEffect.BaseDamaged] = scene.sound.add("BaseDamaged");
     sounds[SoundEffect.Victory] = scene.sound.add("Victory");
-    sounds[SoundEffect.ShopUnlock] = scene.sound.add("ShopUnlock");
+    sounds[SoundEffect.Loss] = scene.sound.add("Loss");
     sounds[SoundEffect.Freeze] = scene.sound.add("Freeze");
     sounds[SoundEffect.BombLane] = scene.sound.add("BombLane");
     sounds[SoundEffect.Reinforcements] = scene.sound.add("Reinforcements");

@@ -289,12 +289,14 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
             });
             game.lanes[lane].playerUnits = [];
             game.lanes[lane].enemyUnits = [];
+            playSound(scene, SoundEffect.BombLane);
             break;
         case ActionType.Reinforcements:
             // Spawn three clubmen
             for (let i = 0; i < config()["numLanes"]; i++) {
                 game.lanes[i].playerQueuedUnits.push(scene.createUnit(UnitType.Clubman, i, false, true));
             }
+            playSound(scene, SoundEffect.Reinforcements);
             break;
         case ActionType.Freeze:
             // Freeze enemies in this lane for a time
@@ -304,6 +306,7 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
             game.lanes[lane].enemyUnits.forEach(unit => {
                 unit.frozenTimeRemaining = config()["freezeDuration"]
             });
+            playSound(scene, SoundEffect.Freeze);
             break;
     }
     game.usedActions.push(action);
@@ -582,6 +585,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (topRightX < 0) {
                 game.baseHealth = Math.max(0, game.baseHealth - 1);
                 baseDamagedEvent(game.baseHealth);
+                soundEffectsToPlay[SoundEffect.BaseDamaged] = true;
                 enemyUnitsToRemove.add(i);
                 xLimit = -1;
             } else {

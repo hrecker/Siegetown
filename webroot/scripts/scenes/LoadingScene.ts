@@ -99,13 +99,12 @@ export class LoadingScene extends Phaser.Scene {
         this.load.audio("Slingshot", "assets/sfx/Slingshot.mp3");
         this.load.audio("Club", "assets/sfx/Club.mp3");
         this.load.audio("Death", "assets/sfx/Death.mp3");
-        //this.load.audio("PlayerBaseDamaged", "assets/sfx/PlayerBaseDamaged.mp3");
-        //this.load.audio("EnemyBaseDamaged", "assets/sfx/EnemyBaseDamaged.mp3");
+        this.load.audio("BaseDamaged", "assets/sfx/BaseDamaged.mp3");
         this.load.audio("Victory", "assets/sfx/Victory.mp3");
-        //this.load.audio("ShopUnlock", "assets/sfx/ShopUnlock.mp3");
-        //this.load.audio("Freeze", "assets/sfx/Freeze.mp3");
-        //this.load.audio("BombLane", "assets/sfx/BombLane.mp3");
-        //this.load.audio("Reinforcements", "assets/sfx/Reinforcements.mp3");
+        this.load.audio("Loss", "assets/sfx/Loss.mp3");
+        this.load.audio("Freeze", "assets/sfx/Freeze.mp3");
+        this.load.audio("BombLane", "assets/sfx/BombLane.mp3");
+        this.load.audio("Reinforcements", "assets/sfx/Reinforcements.mp3");
         
         // Load json
         this.load.json("config", "assets/json/config.json");

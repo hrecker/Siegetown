@@ -199,6 +199,7 @@ export class OverlayUIScene extends Phaser.Scene {
         if (health <= 0) {
             scene.gameResultText.text = "Defeat!";
             scene.setOverlayVisible(Overlay.GameEnd);
+            playSound(scene, SoundEffect.Loss);
         }
     }
 
