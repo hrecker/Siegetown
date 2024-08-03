@@ -99,8 +99,9 @@ export class MainMenuScene extends Phaser.Scene {
     create() {
         let background = this.add.image(0, 0, "background").setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
-        let title = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 150, "SIEGETOWN", { font: "bold 100px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
-        let buttonText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 50, "PLAY", { font: "bold 60px Verdana", color: whiteColor }).setFontSize(100).setOrigin(0.5, 0.5).setAlpha(0);
+        
+        let title = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - this.game.renderer.height / 4, "SIEGETOWN", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
+        let buttonText = this.add.text(this.game.renderer.width / 2, title.getBottomCenter().y + 20, "PLAY", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0).setAlpha(0);
         let outlinePadding = 8;
         let buttonOutline = this.add.rectangle(buttonText.getTopLeft().x - outlinePadding, buttonText.getTopLeft().y - outlinePadding,
             buttonText.width + (outlinePadding * 2), buttonText.height + (outlinePadding * 2)).setOrigin(0, 0).setFillStyle(defaultButtonColor).setStrokeStyle(1, 0xF2F0E5).setAlpha(0);
