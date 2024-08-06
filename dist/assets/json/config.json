@@ -176,13 +176,13 @@
         }
     },
 
-    "freezeDuration": 3000,
+    "freezeDuration": 5000,
     "actions": {
         "freeze": {
             "cost": {
                 "gold": 200
             },
-            "tooltipText": "🧊Freeze all units in one lane for 3 seconds"
+            "tooltipText": "🧊Freeze all units in one lane for 5 seconds"
         },
         "reinforcements": {
             "cost": {

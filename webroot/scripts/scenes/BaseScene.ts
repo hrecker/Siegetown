@@ -209,15 +209,17 @@ export class BaseScene extends Phaser.Scene {
         let timer = this.time.addEvent({
             delay: 1000,
             callback: () => {
-                let text = this.add.text(gridBuilding.mainSprite.x, gridBuilding.mainSprite.y - (gridBuilding.mainSprite.displayHeight / 2), growthText).setOrigin(0.5, 0.5).setPadding(2);
-                this.tweens.add({
-                    targets: text,
-                    y: text.y - 30,
-                    alpha: 0,
-                    duration: 500,
-                    ease: 'Sine.easeInOut',
-                    onComplete: () => { text.destroy() },
-                })
+                if (! this.activeGame.isPaused) {
+                    let text = this.add.text(gridBuilding.mainSprite.x, gridBuilding.mainSprite.y - (gridBuilding.mainSprite.displayHeight / 2), growthText).setOrigin(0.5, 0.5).setPadding(2);
+                    this.tweens.add({
+                        targets: text,
+                        y: text.y - 30,
+                        alpha: 0,
+                        duration: 500,
+                        ease: 'Sine.easeInOut',
+                        onComplete: () => { text.destroy() },
+                    })
+                }
             },
             loop: true,
         });
