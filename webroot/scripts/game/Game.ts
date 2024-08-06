@@ -525,6 +525,7 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (topLeftX > laneWidth) {
                 game.enemyBaseHealth = Math.max(0, game.enemyBaseHealth - 1);
                 enemyBaseDamagedEvent(game.enemyBaseHealth);
+                soundEffectsToPlay[SoundEffect.BaseDamaged] = true;
                 playerUnitsToRemove.add(i);
                 xLimit = -1;
             } else {
