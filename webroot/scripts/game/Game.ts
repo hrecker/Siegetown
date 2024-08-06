@@ -282,11 +282,14 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
         case ActionType.Clear:
             // Clear all units from the given lane
             game.lanes[lane].playerUnits.forEach(unit => {
-                destroyUnit(unit);
+                destroyUnit(unit, scene, false);
             });
             game.lanes[lane].enemyUnits.forEach(unit => {
-                destroyUnit(unit);
+                destroyUnit(unit, scene, true);
             });
+            if (game.lanes[lane].playerUnits.length > 0 || game.lanes[lane].enemyUnits.length > 0) {
+                playSound(scene, SoundEffect.Death);
+            }
             game.lanes[lane].playerUnits = [];
             game.lanes[lane].enemyUnits = [];
             playSound(scene, SoundEffect.BombLane);
@@ -596,11 +599,11 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
 
         // Remove units that should be removed
         for (const i of playerUnitsToRemove) {
-            destroyUnit(lane.playerUnits[i]);
+            destroyUnit(lane.playerUnits[i], scene, false);
             lane.playerUnits.splice(i, 1);
         }
         for (const i of enemyUnitsToRemove) {
-            destroyUnit(lane.enemyUnits[i]);
+            destroyUnit(lane.enemyUnits[i], scene, true);
             lane.enemyUnits.splice(i, 1);
         }
     });

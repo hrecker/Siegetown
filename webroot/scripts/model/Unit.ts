@@ -57,8 +57,24 @@ export function updateHealth(unit: Unit, diff: number): number {
     return unit.health;
 }
 
-export function destroyUnit(unit: Unit) {
-    unit.gameObject.destroy();
+export function destroyUnit(unit: Unit, scene?: Phaser.Scene, isEnemy?: boolean) {
+    if (scene) {
+        let targetAngle = -180;
+        if (isEnemy) {
+            targetAngle *= -1;
+        }
+        scene.tweens.add({
+            targets: unit.gameObject,
+            scale: 0,
+            alpha: 0,
+            angle: targetAngle,
+            duration: 1000,
+            ease: 'Sine.easeInOut',
+            onComplete: () => { unit.gameObject.destroy() },
+        })
+    } else {
+        unit.gameObject.destroy();
+    }
     unit.healthBarBackground.destroy();
     unit.healthBar.destroy();
 }
