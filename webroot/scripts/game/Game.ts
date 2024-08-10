@@ -8,6 +8,7 @@ import { SoundEffect, playSound } from "../model/Sound";
 import { allUnits, attackAnimation, destroyUnit, idleAnimation, Unit, unitAttackSound, UnitType, updateHealth, walkAnimation } from "../model/Unit";
 import { LaneScene, defaultGameWidth } from "../scenes/LaneScene";
 import { uiBarWidth } from "../scenes/ResourceUIScene";
+import { saveGameResult } from "../state/GameResultState";
 import { shuffleArray } from "../util/Utils";
 
 export type Lane = {
@@ -32,7 +33,7 @@ export type ActiveGame = {
     usedActions: ActionType[];
     laneSceneWidth: number;
     isPaused: boolean;
-    timePaused: number;
+    time: number;
 }
 
 function townhallCoordinate(): number {
@@ -113,7 +114,7 @@ export function createGame(): ActiveGame {
         usedActions: [],
         laneSceneWidth: -1,
         isPaused: false,
-        timePaused: 0,
+        time: 0,
     };
 }
 
@@ -149,7 +150,7 @@ export function resetGame(game: ActiveGame) {
     game.unitSpawnDelaysRemaining = startingUnitSpawnDelays();
     game.usedActions = [];
     game.isPaused = false;
-    game.timePaused = 0;
+    game.time = 0;
 }
 
 function startingResources(): Resources {
@@ -324,18 +325,14 @@ function unitSpeed(game: ActiveGame, unitType: UnitType): number {
     return config()["units"][unitType]["speed"] / 4.0 * (game.laneSceneWidth / (defaultGameWidth - uiBarWidth));
 }
 
-export function updateGame(game: ActiveGame, time: number, delta: number, laneWidth: number, scene: LaneScene) {
+export function updateGame(game: ActiveGame, delta: number, laneWidth: number, scene: LaneScene) {
     if (gameEnded(game) || game.isPaused) {
-        // Don't count paused time between updates, keep adding the delta in the meantime
-        if (game.isPaused) {
-            game.timePaused += delta;
-        }
         return;
     }
+    game.time += delta;
 
-    game.lastUpdate += game.timePaused;
-    if (game.lastUpdate == -1 || time - game.lastUpdate >= 1000) {
-        game.lastUpdate = time;
+    if (game.lastUpdate == -1 || game.time - game.lastUpdate >= 1000) {
+        game.lastUpdate = game.time;
         
         game.resources = addResources(game.resources, game.base.totalGrowth);
         
@@ -359,7 +356,6 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
     });
 
     // Start wave of enemies if necessary
-    game.lastEnemySpawn += game.timePaused;
     if (game.secondsUntilWave == 0) {
         // Get the appropriate defined wave if it exists. If not, just add clubmen to the final defined wave to reach the desired enemy count.
         let definedWaves = config()["enemyWaves"];
@@ -396,12 +392,12 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         }
 
         game.currentWave++;
-        game.lastEnemySpawn = time;
+        game.lastEnemySpawn = game.time;
         game.secondsUntilWave = config()["secondsBetweenWaves"];
         waveCountdownUpdatedEvent(game.secondsUntilWave);
-    } else if (time - game.lastEnemySpawn >= game.enemySpawnRate) {
+    } else if (game.time - game.lastEnemySpawn >= game.enemySpawnRate) {
         // Spawn enemy units
-        game.lastEnemySpawn = time;
+        game.lastEnemySpawn = game.time;
         // Pick lane with most or tied for the most player units
         let possibleLanes = [];
         let maxUnits = 0;
@@ -493,9 +489,8 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (unitInteractable(player.gameObject.x, laneWidth) &&
                 firstEnemyX != -1 && firstEnemyX - player.gameObject.x <= config()["units"][player.type]["range"] * rangePixels) {
                 // Attack the enemy
-                player.lastAttackTime += game.timePaused;
-                if (player.lastAttackTime == -1 || time - player.lastAttackTime >= player.attackRate) {
-                    player.lastAttackTime = time;
+                if (player.lastAttackTime == -1 || game.time - player.lastAttackTime >= player.attackRate) {
+                    player.lastAttackTime = game.time;
                     if (updateHealth(lane.enemyUnits[0], -player.damage) <= 0) {
                         enemyUnitsToRemove.add(0);
                         soundEffectsToPlay[SoundEffect.Death] = true;
@@ -554,9 +549,8 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
             if (unitInteractable(enemy.gameObject.x, laneWidth) &&
                 firstPlayerX != -1 && enemy.gameObject.x - firstPlayerX <= config()["units"][enemy.type]["range"] * rangePixels) {
                 // Attack the player unit
-                enemy.lastAttackTime += game.timePaused;
-                if (enemy.lastAttackTime == -1 || time - enemy.lastAttackTime >= enemy.attackRate) {
-                    enemy.lastAttackTime = time;
+                if (enemy.lastAttackTime == -1 || game.time - enemy.lastAttackTime >= enemy.attackRate) {
+                    enemy.lastAttackTime = game.time;
                     if (updateHealth(lane.playerUnits[0], -enemy.damage) <= 0) {
                         playerUnitsToRemove.add(0);
                         soundEffectsToPlay[SoundEffect.Death] = true;
@@ -613,6 +607,12 @@ export function updateGame(game: ActiveGame, time: number, delta: number, laneWi
         playSound(scene, sound as SoundEffect);
     }
 
-    // Game is not paused, so reset counter
-    game.timePaused = 0;
+    // If game is over, save game result
+    if (gameEnded(game)) {
+        let isWin = game.baseHealth > 0;
+        saveGameResult({
+            win: isWin,
+            time: game.time,
+        });
+    }
 }

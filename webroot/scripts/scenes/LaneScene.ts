@@ -285,7 +285,7 @@ export class LaneScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        updateGame(this.activeGame, time, delta, this.game.renderer.width - uiBarWidth, this);
+        updateGame(this.activeGame, delta, this.game.renderer.width - uiBarWidth, this);
 
         // Check for lane hotkeys
         for (let i = 0; i < this.laneButtons.length; i++) {
