@@ -224,7 +224,7 @@ export class OverlayUIScene extends Phaser.Scene {
             let time = scene.activeGame.time;
             let stats = getStats();
             let bestTime = time;
-            if (stats && stats.stats && stats.stats[getCurrentEra()] && stats.stats[getCurrentEra()].recordTime < time) {
+            if (stats && stats.stats && stats.stats[getCurrentEra()] && stats.stats[getCurrentEra()].recordTime > 0 && stats.stats[getCurrentEra()].recordTime < time) {
                 bestTime = stats.stats[getCurrentEra()].recordTime;
             }
             let timeText = (Math.floor(time) / 1000.0).toFixed(3) + "s";
