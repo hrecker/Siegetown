@@ -29,3 +29,16 @@ export function createAnimation(scene: Phaser.Scene, key: string, numFrames: num
 export function capitalizeFirstLetter(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+// Just round down the time
+export function timeString(timeMs: number): string {
+    let totalSeconds = Math.floor(timeMs / 1000.0);
+    let minutes = 0;
+    let seconds = totalSeconds;
+    if (totalSeconds >= 60) {
+        minutes = Math.floor(totalSeconds / 60);
+        seconds = totalSeconds - (minutes * 60);
+        return minutes + "m" + seconds + "s";
+    }
+    return seconds + "s";
+}

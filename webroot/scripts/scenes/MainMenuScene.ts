@@ -2,10 +2,13 @@ import { createGame } from "../game/Game";
 import { createUIState } from "../game/UIState";
 import { SoundEffect, playSound } from "../model/Sound";
 import { allUnits, walkAnimation } from "../model/Unit";
+import { Era, getSortedEras } from "../state/EraState";
+import { GameStats, getStats } from "../state/GameResultState";
 import { getSettings, setMusicEnabled, setSfxEnabled } from "../state/Settings";
-import { createAnimation, shuffleArray } from "../util/Utils";
+import { createAnimation, shuffleArray, timeString } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
 import { unitScale } from "./LaneScene";
+import { OverlayButton } from "./OverlayUIScene";
 
 export function fadeIn(scene: Phaser.Scene, targets, fadeY: boolean) {
     targets.forEach(target => {
@@ -30,6 +33,10 @@ export function fadeIn(scene: Phaser.Scene, targets, fadeY: boolean) {
             });
         }
     });
+}
+
+export function fadeInGroup(scene: Phaser.Scene, group: Phaser.GameObjects.Group, fadeY: boolean) {
+    fadeIn(scene, group.children.getArray(), fadeY);
 }
 
 export function setButtonInteractive(scene: Phaser.Scene, background: Phaser.GameObjects.Rectangle, pointerDownFunction: Function) {
@@ -77,10 +84,23 @@ function setToggleButtonInteractive(scene: Phaser.Scene, button: Phaser.GameObje
 const timePerUnit = 2000;
 const defaultButtonColor = 0x5F556A;
 const buttonDownColor = 0x45444F;
+const outlinePadding = 8;
+const statsTitleFormat = { font: "bold 35px Verdana", color: whiteColor };
+const statsEntryFormat = { font: "bold 30px Verdana", color: whiteColor };
 export class MainMenuScene extends Phaser.Scene {
     timeSinceLastUnit: number;
     units: Phaser.GameObjects.Sprite[];
     playSelected: boolean;
+
+    mainMenuGroup: Phaser.GameObjects.Group;
+    /*playButton: Phaser.GameObjects.Text;
+    playButtonOutline: Phaser.GameObjects.Rectangle;
+    viewStatsButtonText: Phaser.GameObjects.Text;
+    viewStatsButtonOutline: Phaser.GameObjects.Rectangle;*/
+
+    statsGroup: Phaser.GameObjects.Group;
+    /*backButtonText: Phaser.GameObjects.Text;
+    backButtonOutline: Phaser.GameObjects.Rectangle;*/
 
     constructor() {
         super({
@@ -96,20 +116,29 @@ export class MainMenuScene extends Phaser.Scene {
         return getSettings().sfxEnabled ? "soundOnButton" : "soundOffButton";
     }
 
+    createButton(x: number, y: number, text: string, pointerDownFunction: Function): OverlayButton {
+        let buttonText = this.add.text(x, y, text, { font: "bold 60px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
+        let outline = this.add.rectangle(buttonText.getTopLeft().x - outlinePadding, buttonText.getTopLeft().y - outlinePadding,
+            buttonText.width + (outlinePadding * 2), buttonText.height + (outlinePadding * 2)).setOrigin(0, 0).setFillStyle(0x5F556A).setStrokeStyle(1, 0xF2F0E5).setAlpha(0);
+        
+        setButtonInteractive(this, outline, pointerDownFunction);
+        outline.setDepth(2);
+        buttonText.setDepth(3);
+        return {
+            button: buttonText,
+            outline: outline
+        }
+    }
+
     create() {
         let background = this.add.image(0, 0, "background").setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
         
+        // Main menu group
         let title = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - this.game.renderer.height / 4, "SIEGETOWN", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
-        let buttonText = this.add.text(this.game.renderer.width / 2, title.getBottomCenter().y + 20, "PLAY", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0).setAlpha(0);
-        let outlinePadding = 8;
-        let buttonOutline = this.add.rectangle(buttonText.getTopLeft().x - outlinePadding, buttonText.getTopLeft().y - outlinePadding,
-            buttonText.width + (outlinePadding * 2), buttonText.height + (outlinePadding * 2)).setOrigin(0, 0).setFillStyle(defaultButtonColor).setStrokeStyle(1, 0xF2F0E5).setAlpha(0);
-        
+        let playButton = this.createButton(this.game.renderer.width / 2, title.getBottomCenter().y + 35, "PLAY", this.startGame);
+        let statsButton = this.createButton(this.game.renderer.width / 2, playButton.outline.getBottomCenter().y + 52, "STATS", this.viewStats);
         this.playSelected = false;
-        setButtonInteractive(this, buttonOutline, this.startGame)
-        buttonOutline.setDepth(2);
-        buttonText.setDepth(3);
         
         // Audio control buttons
         let musicControlButton = this.add.image(5, 5, this.getMusicButtonTexture()).setOrigin(0, 0);
@@ -121,8 +150,61 @@ export class MainMenuScene extends Phaser.Scene {
             setSfxEnabled(!getSettings().sfxEnabled);
         });
 
+        this.mainMenuGroup = this.add.group();
+        this.mainMenuGroup.add(title);
+        this.mainMenuGroup.add(playButton.button);
+        this.mainMenuGroup.add(playButton.outline);
+        this.mainMenuGroup.add(statsButton.button);
+        this.mainMenuGroup.add(statsButton.outline);
+
+        // Stats page group
+        let eraTitle = this.add.text(this.game.renderer.width / 2 - 250, 80, "ERA", statsTitleFormat).setOrigin(0.5, 0.5).setAlpha(0);
+        let winsTitle = this.add.text(this.game.renderer.width / 2 - 85, 80, "WINS", statsTitleFormat).setOrigin(0.5, 0.5).setAlpha(0);
+        let lossesTitle = this.add.text(this.game.renderer.width / 2 + 85, 80, "LOSSES", statsTitleFormat).setOrigin(0.5, 0.5).setAlpha(0);
+        let bestTitle = this.add.text(this.game.renderer.width / 2 + 250, 80, "BEST", statsTitleFormat).setOrigin(0.5, 0.5).setAlpha(0);
+        
+        this.statsGroup = this.add.group();
+        this.statsGroup.add(eraTitle);
+        this.statsGroup.add(winsTitle);
+        this.statsGroup.add(lossesTitle);
+        this.statsGroup.add(bestTitle);
+
+        // Stats values
+        let stats = getStats();
+        let y = 125;
+        for (let era of getSortedEras()) {
+            console.log(era);
+            let eraText = this.add.text(eraTitle.x, y, era, statsEntryFormat).setOrigin(0.5, 0.5).setAlpha(0);
+            let eraStats: GameStats = {
+                wins: 0,
+                losses: 0,
+                recordTime: -1
+            }
+            console.log(stats)
+            if (stats && stats.stats && era in stats.stats) {
+                eraStats = stats.stats[era];
+            }
+            let winsText = this.add.text(winsTitle.x, y, eraStats.wins.toString(), statsEntryFormat).setOrigin(0.5, 0.5).setAlpha(0);
+            let lossesText = this.add.text(lossesTitle.x, y, eraStats.losses.toString(), statsEntryFormat).setOrigin(0.5, 0.5).setAlpha(0);
+            let time = "none"
+            if (eraStats.recordTime > 0) {
+                time = timeString(eraStats.recordTime);
+            }
+            let timeText = this.add.text(bestTitle.x, y, time, statsEntryFormat).setOrigin(0.5, 0.5).setAlpha(0);
+            this.statsGroup.add(eraText);
+            this.statsGroup.add(winsText);
+            this.statsGroup.add(lossesText);
+            this.statsGroup.add(timeText);
+            y += 40;
+        }
+
+        let backButton = this.createButton(this.game.renderer.width / 2, y + 40, "BACK", this.backToMainMenu);
+        this.statsGroup.add(backButton.button);
+        this.statsGroup.add(backButton.outline);
+
         // Fade in main menu
-        fadeIn(this, [title, buttonText, buttonOutline, musicControlButton, sfxControlButton], true);
+        this.statsGroup.setVisible(false);
+        fadeInGroup(this, this.mainMenuGroup, true);
 
         // Add some units walking in the background
         this.units = [];
@@ -141,6 +223,20 @@ export class MainMenuScene extends Phaser.Scene {
                   .start("ShopUIScene", { activeGame: activeGame, uiState: uiState })
                   .start("OverlayUIScene", { activeGame: activeGame, uiState: uiState })
                   .stop();
+    }
+
+    viewStats(scene: MainMenuScene) {
+        scene.statsGroup.setVisible(true);
+        scene.statsGroup.setAlpha(0);
+        scene.mainMenuGroup.setVisible(false);
+        fadeInGroup(scene, scene.statsGroup, true);
+    }
+
+    backToMainMenu(scene: MainMenuScene) {
+        scene.mainMenuGroup.setVisible(true);
+        scene.mainMenuGroup.setAlpha(0);
+        scene.statsGroup.setVisible(false);
+        fadeInGroup(scene, scene.mainMenuGroup, true);
     }
 
     createRandomUnit() {

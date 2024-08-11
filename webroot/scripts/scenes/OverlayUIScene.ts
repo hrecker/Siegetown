@@ -3,10 +3,11 @@ import { ActiveGame, gameEnded } from "../game/Game";
 import { SoundEffect, playSound } from "../model/Sound";
 import { getCurrentEra } from "../state/EraState";
 import { getStats } from "../state/GameResultState";
+import { timeString } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
 import { fadeIn, setButtonInteractive } from "./MainMenuScene";
 
-type OverlayButton = {
+export type OverlayButton = {
     button: Phaser.GameObjects.Text;
     outline: Phaser.GameObjects.Rectangle;
 }
@@ -229,8 +230,8 @@ export class OverlayUIScene extends Phaser.Scene {
             if (stats && stats.stats && stats.stats[getCurrentEra()] && stats.stats[getCurrentEra()].recordTime > 0 && stats.stats[getCurrentEra()].recordTime < time) {
                 bestTime = stats.stats[getCurrentEra()].recordTime;
             }
-            let timeText = (Math.floor(time) / 1000.0).toFixed(3) + "s";
-            let bestTimeText = (Math.floor(bestTime) / 1000.0).toFixed(3) + "s";
+            let timeText = timeString(time);
+            let bestTimeText = timeString(bestTime);
             scene.gameResultTimeText.text = "Time: " + timeText + "\nBest: " + bestTimeText;
             scene.setButtonY(scene.restartButton, scene.gameResultTimeText.getBottomCenter().y + 35);
             scene.setButtonY(scene.mainMenuButton, scene.restartButton.outline.getBottomCenter().y + 40);
