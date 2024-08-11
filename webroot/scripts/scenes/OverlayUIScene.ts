@@ -1,5 +1,5 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, clearListeners, gameRestartedEvent } from "../events/EventMessenger";
-import { ActiveGame } from "../game/Game";
+import { ActiveGame, gameEnded } from "../game/Game";
 import { SoundEffect, playSound } from "../model/Sound";
 import { getCurrentEra } from "../state/EraState";
 import { getStats } from "../state/GameResultState";
@@ -86,8 +86,8 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.setButtonVisible(this.restartButton, false);
                 this.setButtonVisible(this.resumeButton, true);
                 this.setButtonVisible(this.mainMenuButton, true);
-                topLeft = this.pauseText.getTopLeft();
-                height = this.mainMenuButton.outline.getBottomCenter().y - this.pauseText.getTopCenter().y;
+                this.pauseBackground.setSize(this.pauseBackground.width,
+                    this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y + (2 * textBackgroundPadding));
                 fadeIn(this, [this.pauseText, this.pauseBackground,
                     this.resumeButton.button, this.resumeButton.outline,
                     this.mainMenuButton.button, this.mainMenuButton.outline], false)
@@ -101,14 +101,13 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.setButtonVisible(this.restartButton, true);
                 this.setButtonVisible(this.resumeButton, false);
                 this.setButtonVisible(this.mainMenuButton, true);
-                topLeft = this.gameResultText.getTopLeft();
-                height = this.restartButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y;
+                this.gameResultBackground.setSize(this.gameResultBackground.width,
+                    this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y + (2 * textBackgroundPadding));
                 fadeIn(this, [this.gameResultText, this.gameResultTimeText, this.gameResultBackground,
                     this.restartButton.button, this.restartButton.outline,
                     this.mainMenuButton.button, this.mainMenuButton.outline], false)
                 break;
         }
-        this.gameResultBackground.setSize(this.gameResultBackground.width,  this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y + (2 * textBackgroundPadding));
     }
 
     createButton(x: number, y: number, text: string, pointerDownFunction: Function): OverlayButton {
@@ -151,9 +150,12 @@ export class OverlayUIScene extends Phaser.Scene {
         this.pauseButton = this.add.text(this.game.renderer.width + 5, 8, "⏸️").setOrigin(1, 0).setPadding(8).setFontSize(48);
         this.pauseButton.setInteractive();
         this.pauseButton.on('pointerdown', () => {
-            this.activeGame.isPaused = true;
-            this.setOverlayVisible(Overlay.Pause);
-            playSound(this, SoundEffect.ButtonClick);
+            if (!gameEnded(this.activeGame) && !this.activeGame.isPaused) {
+                this.activeGame.isPaused = true;
+                this.setButtonY(this.mainMenuButton, this.resumeButton.outline.getBottomCenter().y + 40);
+                this.setOverlayVisible(Overlay.Pause);
+                playSound(this, SoundEffect.ButtonClick);
+            }
         });
 
         // Background
@@ -185,7 +187,7 @@ export class OverlayUIScene extends Phaser.Scene {
         // Pause ui
         this.pauseText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 125, "Paused",
             textFormat).setFontSize(64).setOrigin(0.5, 0.5).setDepth(2);
-        this.resumeButton = this.createButton(this.game.renderer.width / 2, this.game.renderer.height / 2 - 25, "Resume", (scene) => {
+        this.resumeButton = this.createButton(this.game.renderer.width / 2, this.pauseText.getBottomCenter().y + 35, "Resume", (scene) => {
             scene.activeGame.isPaused = false;
             scene.hideOverlay();
         });
