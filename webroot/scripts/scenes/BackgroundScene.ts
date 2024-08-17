@@ -14,18 +14,10 @@ export class BackgroundScene extends Phaser.Scene {
     
     bgMusic: Phaser.Sound.BaseSound;
 
-    getMusicVolume() {
-        if (getSettings().musicEnabled) {
-            return config()["defaultMusicVolume"];
-        } else {
-            return 0;
-        }
-    }
-
     create() {
         this.bgMusic = this.sound.add('backgroundMusic', {
             loop: true,
-            volume: this.getMusicVolume()
+            volume: config()["defaultMusicVolume"]
         });
         this.bgMusic.play();
         addSettingsListener(this.settingsListener, this);
