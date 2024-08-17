@@ -1,13 +1,13 @@
 {
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hrecker/Prototype.git"
+    "url": "git+https://github.com/hrecker/Siegetown.git"
   },
   "author": "Henry Recker",
   "license": "MIT",
   "scripts": {
     "start": "del dist\\*index.html && del dist\\*index.*.js* && set BROWSERSLIST_IGNORE_OLD_DATA=1&& parcel webroot/desktop-index.html",
-    "build": "del dist\\*index.html && del dist\\*index.*.js* && parcel build webroot/index.html && del C:\\Users\\henry\\ItchioBuilds\\Prototype\\dist\\*index.*.js* && robocopy dist C:\\Users\\henry\\ItchioBuilds\\Prototype\\dist /s /e || powershell -Command \"(Get-Content C:\\Users\\henry\\ItchioBuilds\\Prototype\\dist\\index.html) -replace 'src=\\\"/', 'src=\\\"./' | Out-File -encoding ASCII C:\\Users\\henry\\ItchioBuilds\\Prototype\\dist\\index.html\""
+    "build": "del dist\\*index.html && del dist\\*index.*.js* && parcel build webroot/index.html && del C:\\Users\\henry\\ItchioBuilds\\Siegetown\\dist\\*index.*.js* && robocopy dist C:\\Users\\henry\\ItchioBuilds\\Siegetown\\dist /s /e || powershell -Command \"(Get-Content C:\\Users\\henry\\ItchioBuilds\\Siegetown\\dist\\index.html) -replace 'src=\\\"/', 'src=\\\"./' | Out-File -encoding ASCII C:\\Users\\henry\\ItchioBuilds\\Siegetown\\dist\\index.html\""
   },
   "devDependencies": {
     "cssnano": "^5.1.13",
