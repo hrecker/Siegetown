@@ -20,6 +20,9 @@ export class BackgroundScene extends Phaser.Scene {
             volume: config()["defaultMusicVolume"]
         });
         this.bgMusic.play();
+        if (! getSettings().musicEnabled) {
+            this.bgMusic.pause();
+        }
         addSettingsListener(this.settingsListener, this);
     }
 
