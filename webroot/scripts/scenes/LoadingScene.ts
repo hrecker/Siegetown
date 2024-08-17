@@ -97,6 +97,9 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image('soundOffButtonDown', 'assets/sprites/ui/sound_off_button_down.png');
         this.load.image('soundOnButton', 'assets/sprites/ui/sound_on_button.png');
         this.load.image('soundOnButtonDown', 'assets/sprites/ui/sound_on_button_down.png');
+
+        // Music
+        this.load.audio('backgroundMusic', 'assets/music/Fantasy-Forest-Battle.mp3');
         
         // SFX
         this.load.audio("Build", "assets/sfx/Build.mp3");
@@ -121,7 +124,9 @@ export class LoadingScene extends Phaser.Scene {
         this.load.on('complete', () => {
             // Start the main menu scene
             loadConfig(this.cache.json.get("config"));
-            this.scene.start("MainMenuScene").stop();
+            this.scene.start("BackgroundScene")
+                      .start("MainMenuScene")
+                      .stop();
         })
     }
 

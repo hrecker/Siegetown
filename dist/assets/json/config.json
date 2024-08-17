@@ -198,7 +198,7 @@
         }
     },
     
-    "defaultMusicVolume": 1,
+    "defaultMusicVolume": 0.45,
     "defaultSfxVolume": {
         "Build": 0.75,
         "ButtonClick": 1,
@@ -207,7 +207,7 @@
         "Punch": 0.6,
         "Slingshot": 0.9,
         "Club": 0.9,
-        "Death": 0.85,
+        "Death": 0.8,
         "BaseDamaged": 0.9,
         "Victory": 1,
         "Loss": 0.8,

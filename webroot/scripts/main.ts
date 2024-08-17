@@ -1,6 +1,7 @@
 import 'phaser';
 
 import { LoadingScene } from "./scenes/LoadingScene";
+import { BackgroundScene } from './scenes/BackgroundScene';
 import { BaseScene } from './scenes/BaseScene';
 import { OverlayUIScene } from './scenes/OverlayUIScene';
 import { LaneScene } from './scenes/LaneScene';
@@ -24,6 +25,7 @@ var config: Phaser.Types.Core.GameConfig = {
     },
     scene: [
         LoadingScene,
+        BackgroundScene,
         MainMenuScene,
         BaseScene,
         LaneScene,

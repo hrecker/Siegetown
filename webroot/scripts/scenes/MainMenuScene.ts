@@ -139,16 +139,6 @@ export class MainMenuScene extends Phaser.Scene {
         let playButton = this.createButton(this.game.renderer.width / 2, title.getBottomCenter().y + 35, "PLAY", this.startGame);
         let statsButton = this.createButton(this.game.renderer.width / 2, playButton.outline.getBottomCenter().y + 52, "STATS", this.viewStats);
         this.playSelected = false;
-        
-        // Audio control buttons
-        let musicControlButton = this.add.image(5, 5, this.getMusicButtonTexture()).setOrigin(0, 0);
-        setToggleButtonInteractive(this, musicControlButton, this.getMusicButtonTexture, () => {
-            setMusicEnabled(!getSettings().musicEnabled);
-        });
-        let sfxControlButton = this.add.image(5, musicControlButton.getBottomCenter().y + 5, this.getSfxButtonTexture()).setOrigin(0, 0);
-        setToggleButtonInteractive(this, sfxControlButton, this.getSfxButtonTexture, () => {
-            setSfxEnabled(!getSettings().sfxEnabled);
-        });
 
         this.mainMenuGroup = this.add.group();
         this.mainMenuGroup.add(title);
@@ -201,6 +191,19 @@ export class MainMenuScene extends Phaser.Scene {
         let backButton = this.createButton(this.game.renderer.width / 2, y + 40, "BACK", this.backToMainMenu);
         this.statsGroup.add(backButton.button);
         this.statsGroup.add(backButton.outline);
+        
+        // Audio control buttons
+        let musicControlButton = this.add.image(5, 5, this.getMusicButtonTexture()).setOrigin(0, 0);
+        setToggleButtonInteractive(this, musicControlButton, this.getMusicButtonTexture, () => {
+            setMusicEnabled(!getSettings().musicEnabled);
+        });
+        let sfxControlButton = this.add.image(5, musicControlButton.getBottomCenter().y + 5, this.getSfxButtonTexture()).setOrigin(0, 0);
+        setToggleButtonInteractive(this, sfxControlButton, this.getSfxButtonTexture, () => {
+            setSfxEnabled(!getSettings().sfxEnabled);
+        }); 
+
+        // Credits text
+        this.add.text(this.game.renderer.width - 5, this.game.renderer.height - 5, "Music by Eric Matyas:\nsoundimage.org", { font: "16px Verdana", color: whiteColor, align: "center" }).setOrigin(1, 1);
 
         // Fade in main menu
         this.statsGroup.setVisible(false);

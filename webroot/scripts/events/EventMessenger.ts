@@ -51,7 +51,7 @@ export function clearListeners() {
     unitBuiltCallbacks = [];
     unitUnlockedCallbacks = [];
     actionRunCallbacks = [];
-    settingsCallbacks = [];
+    // Don't clear settings callbacks since only the background scene listens to the settings
 }
 
 export function addResourceUpdateListener(callback: (scene: Phaser.Scene) => void, scene: Phaser.Scene) {
