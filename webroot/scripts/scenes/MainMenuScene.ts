@@ -163,14 +163,12 @@ export class MainMenuScene extends Phaser.Scene {
         let stats = getStats();
         let y = 125;
         for (let era of getSortedEras()) {
-            console.log(era);
             let eraText = this.add.text(eraTitle.x, y, era, statsEntryFormat).setOrigin(0.5, 0.5).setAlpha(0);
             let eraStats: GameStats = {
                 wins: 0,
                 losses: 0,
                 recordTime: -1
             }
-            console.log(stats)
             if (stats && stats.stats && era in stats.stats) {
                 eraStats = stats.stats[era];
             }
@@ -215,6 +213,10 @@ export class MainMenuScene extends Phaser.Scene {
         createAnimation(this, "warrior_walk", 4);
         createAnimation(this, "slingshotter_walk", 8);
         createAnimation(this, "clubman_walk", 8);
+        createAnimation(this, "infantry_walk", 8);
+        createAnimation(this, "archer_walk", 8);
+        createAnimation(this, "knight_walk", 8);
+        createAnimation(this, "catapult_walk", 2);
     }
 
     startGame(scene: Phaser.Scene) {

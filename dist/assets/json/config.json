@@ -86,6 +86,58 @@
             },
             "buildRequirement": "trainingground",
             "tooltipText": "Requires Training Ground\n🗡️Attack: 2\n❤️Health: 4\n🏹Range: 1\n🏃Speed: 4\n⏰Attack Delay: 14"
+        },
+        "infantry": {
+            "maxHealth": 3,
+            "damage": 1,
+            "range": 1,
+            "speed": 2,
+            "attackRate": 1200,
+            "spawnDelay": 3000,
+            "cost": {
+                "food": 150
+            },
+            "buildRequirement": "townhall",
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+        },
+        "archer": {
+            "maxHealth": 3,
+            "damage": 1,
+            "range": 1,
+            "speed": 2,
+            "attackRate": 1200,
+            "spawnDelay": 3000,
+            "cost": {
+                "food": 150
+            },
+            "buildRequirement": "townhall",
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+        },
+        "knight": {
+            "maxHealth": 3,
+            "damage": 1,
+            "range": 1,
+            "speed": 2,
+            "attackRate": 1200,
+            "spawnDelay": 3000,
+            "cost": {
+                "food": 150
+            },
+            "buildRequirement": "townhall",
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+        },
+        "catapult": {
+            "maxHealth": 3,
+            "damage": 1,
+            "range": 1,
+            "speed": 2,
+            "attackRate": 1200,
+            "spawnDelay": 3000,
+            "cost": {
+                "food": 150
+            },
+            "buildRequirement": "townhall",
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
         }
     },
 
@@ -97,7 +149,8 @@
             "cost": {
                 "gold": 0,
                 "food": 0,
-                "wood": 0
+                "wood": 0,
+                "ore": 0
             },
             "tooltipText": "Main town building\n+2 gold"
         },
@@ -112,7 +165,8 @@
             "cost": {
                 "gold": 200,
                 "food": 0,
-                "wood": 0
+                "wood": 0,
+                "ore": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -128,7 +182,8 @@
             "cost": {
                 "gold": 250,
                 "food": 0,
-                "wood": 0
+                "wood": 0,
+                "ore": 0
             },
             "adjacentBuff": {
                 "forest": {
@@ -144,7 +199,8 @@
             "cost": {
                 "gold": 750,
                 "food": 0,
-                "wood": 600
+                "wood": 600,
+                "ore": 0
             },
             "adjacentBuff": {
                 "townhall": {
@@ -160,7 +216,8 @@
             "cost": {
                 "gold": 1500,
                 "food": 750,
-                "wood": 2000
+                "wood": 2000,
+                "ore": 0
             },
             "tooltipText": "❤️+1 unit health"
         },
@@ -169,10 +226,131 @@
             "cost": {
                 "gold": 2000,
                 "food": 1000,
-                "wood": 3000
+                "wood": 3000,
+                "ore": 0
             },
             "displayName": "Training Ground",
             "tooltipText": "🔓Unlocks clubman unit"
+        },
+        "farm": {
+            "produce": {
+                "food": 10
+            },
+            "cost": {
+                "gold": 200,
+                "food": 0,
+                "wood": 0,
+                "ore": 0
+            },
+            "adjacentBuff": {
+                "field": {
+                    "food": 1
+                }
+            },
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+        },
+        "lumberyard": {
+            "produce": {
+                "food": 10
+            },
+            "cost": {
+                "gold": 200,
+                "food": 0,
+                "wood": 0,
+                "ore": 0
+            },
+            "adjacentBuff": {
+                "field": {
+                    "food": 1
+                }
+            },
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+        },
+        "bazaar": {
+            "produce": {
+                "food": 10
+            },
+            "cost": {
+                "gold": 200,
+                "food": 0,
+                "wood": 0,
+                "ore": 0
+            },
+            "adjacentBuff": {
+                "field": {
+                    "food": 1
+                }
+            },
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+        },
+        "blacksmith": {
+            "produce": {
+                "food": 10
+            },
+            "cost": {
+                "gold": 200,
+                "food": 0,
+                "wood": 0,
+                "ore": 0
+            },
+            "adjacentBuff": {
+                "field": {
+                    "food": 1
+                }
+            },
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+        },
+        "workshop": {
+            "produce": {
+                "food": 10
+            },
+            "cost": {
+                "gold": 200,
+                "food": 0,
+                "wood": 0,
+                "ore": 0
+            },
+            "adjacentBuff": {
+                "field": {
+                    "food": 1
+                }
+            },
+            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+        }
+    },
+
+    "eras": {
+        "caveman": {
+            "units": [
+                "warrior",
+                "slingshotter",
+                "clubman"
+            ],
+            "uiBuildings": [
+                "field",
+                "forest",
+                "market",
+                "barracks",
+                "trainingground",
+                "remove"
+            ]
+        },
+        "medieval": {
+            "units": [
+                "infantry",
+                "archer",
+                "knight",
+                "catapult"
+            ],
+            "uiBuildings": [
+                "farm",
+                "lumberyard",
+                "bazaar",
+                "barracks",
+                "blacksmith",
+                "workshop",
+                "remove"
+            ]
         }
     },
 

@@ -7,7 +7,12 @@ export enum Building {
     Forest = "forest",
     Market = "market",
     Barracks = "barracks",
-    TrainingGround = "trainingground"
+    TrainingGround = "trainingground",
+    Farm = "farm",
+    Lumberyard = "lumberyard",
+    Bazaar = "bazaar",
+    Blacksmith = "blacksmith",
+    Workshop = "workshop"
 }
 
 export type Base = {

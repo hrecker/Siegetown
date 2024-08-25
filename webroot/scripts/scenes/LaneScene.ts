@@ -151,6 +151,7 @@ export class LaneScene extends Phaser.Scene {
         }
         
         // Create animations
+        // caveman
         createAnimation(this, "warrior_idle", 2);
         createAnimation(this, "warrior_walk", 4);
         createAnimation(this, "warrior_attack", 5);
@@ -160,6 +161,19 @@ export class LaneScene extends Phaser.Scene {
         createAnimation(this, "clubman_idle", 2);
         createAnimation(this, "clubman_walk", 8);
         createAnimation(this, "clubman_attack", 4);
+        // medieval
+        createAnimation(this, "infantry_idle", 2);
+        createAnimation(this, "infantry_walk", 8);
+        createAnimation(this, "infantry_attack", 7);
+        createAnimation(this, "archer_idle", 2);
+        createAnimation(this, "archer_walk", 8);
+        createAnimation(this, "archer_attack", 4);
+        createAnimation(this, "knight_idle", 2);
+        createAnimation(this, "knight_walk", 8);
+        createAnimation(this, "knight_attack", 5);
+        createAnimation(this, "catapult_idle", 2);
+        createAnimation(this, "catapult_walk", 2);
+        createAnimation(this, "catapult_attack", 4);
 
         this.resize(true);
         this.scale.on("resize", this.resize, this);

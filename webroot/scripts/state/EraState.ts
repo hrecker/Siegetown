@@ -1,6 +1,7 @@
 /** Enum for available game eras */
 export enum Era {
-    Caveman = "Caveman"
+    Caveman = "Caveman",
+    Medieval = "Medieval"
 }
 
 let currentEra: Era = Era.Caveman;
@@ -10,11 +11,6 @@ export function setEra(era: Era) {
     currentEra = era;
 }
 
-/** Set the currently active era back to the default */
-export function resetEra() {
-    setEra(Era.Caveman);
-}
-
 /** Get the currently active era */
 export function getCurrentEra(): Era {
     return currentEra;
@@ -22,6 +18,7 @@ export function getCurrentEra(): Era {
 
 export function getSortedEras(): Era[] {
     return [
-        Era.Caveman
+        Era.Caveman,
+        Era.Medieval
     ];
 }

@@ -1,3 +1,4 @@
+import { Era } from "../state/EraState";
 import { getNewId } from "../state/IdState"
 import { Buffs } from "./Buffs";
 import { config } from "./Config"
@@ -7,7 +8,11 @@ export enum UnitType {
     None = "none",
     Warrior = "warrior",
     Slingshotter = "slingshotter",
-    Clubman = "clubman"
+    Clubman = "clubman",
+    Infantry = "infantry",
+    Archer = "archer",
+    Knight = "knight",
+    Catapult = "catapult"
 }
 
 export type Unit = {
@@ -24,12 +29,21 @@ export type Unit = {
     healthBar: Phaser.GameObjects.Rectangle;
 }
 
-export function allUnits(): UnitType[] {
-    return [
-        UnitType.Warrior,
-        UnitType.Slingshotter,
-        UnitType.Clubman
-    ]
+export function allUnits(era?: Era): UnitType[] {
+    if (era) {
+        return config()["eras"][era]["units"];
+    } else {
+        // Return all units
+        return [
+            UnitType.Warrior,
+            UnitType.Slingshotter,
+            UnitType.Clubman,
+            UnitType.Infantry,
+            UnitType.Archer,
+            UnitType.Knight,
+            UnitType.Catapult
+        ]
+    }
 }
 
 export function createUnit(type: UnitType, buffs: Buffs, gameObject: Phaser.GameObjects.Sprite, healthBarBackground: Phaser.GameObjects.Rectangle, healthBar: Phaser.GameObjects.Rectangle): Unit {

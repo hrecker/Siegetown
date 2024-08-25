@@ -18,12 +18,14 @@ export function createAnimation(scene: Phaser.Scene, key: string, numFrames: num
     for (let i = 1; i <= numFrames; i++) {
         frames.push({ key: key + i });
     }
-    scene.anims.create({
+    if (!scene.anims.create({
         key: key,
         frames: frames,
         frameRate: 8,
         repeat: -1
-    });
+    })) {
+        console.log("failed to create animation " + key);
+    }
 }
 
 export function capitalizeFirstLetter(str: string) {

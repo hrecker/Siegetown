@@ -167,7 +167,7 @@ export class ShopUIScene extends Phaser.Scene {
 
         // Move the icons and boxes
         if (scrollConfig.isUnitConfig) {
-            allUnits().forEach(unit => {
+            allUnits(this.activeGame.era).forEach(unit => {
                 this.buildButtonBorders[unit].y += yDiff;
                 this.buildButtonIcons[unit].y += yDiff;
                 this.buildButtonCostTexts[unit].y += yDiff;
@@ -209,14 +209,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     allBuildings() : UIBuilding[] {
-        return [
-            UIBuilding.Field,
-            UIBuilding.Forest,
-            UIBuilding.Market,
-            UIBuilding.Barracks,
-            UIBuilding.TrainingGround,
-            UIBuilding.Remove,
-        ]
+        return config()["eras"][this.activeGame.era]["uiBuildings"]
     }
 
     costsText(costs: Resources, useEmoji: boolean): string {
@@ -422,7 +415,7 @@ export class ShopUIScene extends Phaser.Scene {
         let mask = new Phaser.Display.Masks.GeometryMask(this, shopIconMask);
         // Set the masks
         if (scrollConfig.isUnitConfig) {
-            allUnits().forEach(unit => {
+            allUnits(this.activeGame.era).forEach(unit => {
                 this.buildButtonBorders[unit].setMask(mask);
                 this.buildButtonIcons[unit].setMask(mask);
                 this.buildButtonCostTexts[unit].setMask(mask);
@@ -498,7 +491,7 @@ export class ShopUIScene extends Phaser.Scene {
         buildRectangle.isStroked = true;
 
         y = 52;
-        allUnits().forEach(unit => {
+        allUnits(this.activeGame.era).forEach(unit => {
             y += this.createShopButton(ShopButtonType.Unit, unit, y);
         });
         let unitRectangleTopY = this.unitLabel.getTopLeft().y - 8;
@@ -569,7 +562,7 @@ export class ShopUIScene extends Phaser.Scene {
 
     buildingBuildListener(scene: ShopUIScene, building: Building) {
         // Check for any unit buttons that need to be enabled
-        allUnits().forEach(unit => {
+        allUnits(scene.activeGame.era).forEach(unit => {
             // Check for building requirements
             scene.updateUnitButtonState(unit);
         });
@@ -620,7 +613,7 @@ export class ShopUIScene extends Phaser.Scene {
                 this.setButtonState(building, ButtonState.Unavailable);
             }
         });
-        allUnits().forEach(unit => {
+        allUnits(this.activeGame.era).forEach(unit => {
             this.updateUnitButtonState(unit);
         });
         allActions().forEach(action => {
@@ -700,8 +693,8 @@ export class ShopUIScene extends Phaser.Scene {
         } else {
             this.uiState.selectedUnit = unit;
         }
-        for (let i = 0; i < allUnits().length; i++) {
-            let currentUnit = allUnits()[i];
+        for (let i = 0; i < allUnits(this.activeGame.era).length; i++) {
+            let currentUnit = allUnits(this.activeGame.era)[i];
             this.setSelectedBorder(this.buildButtonBorders[currentUnit], this.uiState.selectedUnit == currentUnit);
             if (this.uiState.selectedUnit == currentUnit) {
                 this.selectedIndex = i;
@@ -755,7 +748,7 @@ export class ShopUIScene extends Phaser.Scene {
                 options = this.allBuildings();
                 break;
             case ShopButtonType.Unit:
-                options = allUnits();
+                options = allUnits(this.activeGame.era);
                 break;
             case ShopButtonType.Action:
                 options = allActions();

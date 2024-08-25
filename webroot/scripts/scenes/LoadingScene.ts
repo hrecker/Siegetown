@@ -43,6 +43,7 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("background", "assets/sprites/background_blur.png");
 
         // units
+        // caveman
         this.loadSpriteSequence(2, "warrior_idle", "assets/sprites/units/warrior_idle");
         this.loadSpriteSequence(4, "warrior_walk", "assets/sprites/units/warrior_walk");
         this.loadSpriteSequence(5, "warrior_attack", "assets/sprites/units/warrior_attack");
@@ -52,9 +53,23 @@ export class LoadingScene extends Phaser.Scene {
         this.loadSpriteSequence(2, "clubman_idle", "assets/sprites/units/clubman_idle");
         this.loadSpriteSequence(8, "clubman_walk", "assets/sprites/units/clubman_walk");
         this.loadSpriteSequence(4, "clubman_attack", "assets/sprites/units/clubman_attack");
+        // medieval
+        this.loadSpriteSequence(2, "infantry_idle", "assets/sprites/units/infantry_idle");
+        this.loadSpriteSequence(8, "infantry_walk", "assets/sprites/units/infantry_walk");
+        this.loadSpriteSequence(7, "infantry_attack", "assets/sprites/units/infantry_attack");
+        this.loadSpriteSequence(2, "archer_idle", "assets/sprites/units/archer_idle");
+        this.loadSpriteSequence(8, "archer_walk", "assets/sprites/units/archer_walk");
+        this.loadSpriteSequence(4, "archer_attack", "assets/sprites/units/archer_attack");
+        this.loadSpriteSequence(2, "knight_idle", "assets/sprites/units/knight_idle");
+        this.loadSpriteSequence(8, "knight_walk", "assets/sprites/units/knight_walk");
+        this.loadSpriteSequence(5, "knight_attack", "assets/sprites/units/knight_attack");
+        this.loadSpriteSequence(2, "catapult_idle", "assets/sprites/units/catapult_idle");
+        this.loadSpriteSequence(2, "catapult_walk", "assets/sprites/units/catapult_walk");
+        this.loadSpriteSequence(4, "catapult_attack", "assets/sprites/units/catapult_attack");
 
         // buildings
         this.loadSpriteSequence(4, "townhall", "assets/sprites/buildings/townhall");
+        // caveman
         this.loadSpriteSequence(3, "field", "assets/sprites/buildings/field");
         this.load.image("field_gray", "assets/sprites/ui/field_gray.png");
         this.loadSpriteSequence(6, "forest", "assets/sprites/buildings/forest");
@@ -65,6 +80,17 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("barracks_gray", "assets/sprites/ui/barracks_gray.png");
         this.loadSpriteSequence(4, "trainingground", "assets/sprites/buildings/trainingground");
         this.load.image("trainingground_gray", "assets/sprites/ui/trainingground_gray.png");
+        // medieval
+        this.loadSpriteSequence(4, "farm", "assets/sprites/buildings/farm");
+        this.load.image("farm_gray", "assets/sprites/ui/farm_gray.png");
+        this.loadSpriteSequence(2, "lumberyard", "assets/sprites/buildings/lumberyard");
+        this.load.image("lumberyard_gray", "assets/sprites/ui/lumberyard_gray.png");
+        this.loadSpriteSequence(2, "bazaar", "assets/sprites/buildings/bazaar");
+        this.load.image("bazaar_gray", "assets/sprites/ui/bazaar_gray.png");
+        this.loadSpriteSequence(3, "blacksmith", "assets/sprites/buildings/blacksmith");
+        this.load.image("blacksmith_gray", "assets/sprites/ui/blacksmith_gray.png");
+        this.loadSpriteSequence(2, "workshop", "assets/sprites/buildings/workshop");
+        this.load.image("workshop_gray", "assets/sprites/ui/workshop_gray.png");
 
         // ui
         this.load.image("shop_icon_border", "assets/sprites/ui/shop_icon.png");
@@ -72,6 +98,7 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("shop_icon_border_selected", "assets/sprites/ui/shop_icon_selected.png");
         this.load.image("shop_icon_border_selected_unavailable", "assets/sprites/ui/shop_icon_selected_unavailable.png");
         this.load.image("shop_icon_border_locked", "assets/sprites/ui/shop_icon_locked.png");
+        // caveman
         this.load.image("warrior_icon", "assets/sprites/ui/warrior_icon.png");
         this.load.image("warrior_icon_small", "assets/sprites/ui/warrior_icon_small.png");
         this.load.image("warrior_gray", "assets/sprites/ui/warrior_gray.png");
@@ -81,6 +108,20 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("clubman_icon", "assets/sprites/ui/clubman_icon.png");
         this.load.image("clubman_icon_small", "assets/sprites/ui/clubman_icon_small.png");
         this.load.image("clubman_gray", "assets/sprites/ui/clubman_gray.png");
+        // medieval
+        this.load.image("infantry_icon", "assets/sprites/ui/infantry_icon.png");
+        this.load.image("infantry_icon_small", "assets/sprites/ui/infantry_icon_small.png");
+        this.load.image("infantry_gray", "assets/sprites/ui/infantry_gray.png");
+        this.load.image("archer_icon", "assets/sprites/ui/archer_icon.png");
+        this.load.image("archer_icon_small", "assets/sprites/ui/archer_icon_small.png");
+        this.load.image("archer_gray", "assets/sprites/ui/archer_gray.png");
+        this.load.image("knight_icon", "assets/sprites/ui/knight_icon.png");
+        this.load.image("knight_icon_small", "assets/sprites/ui/knight_icon_small.png");
+        this.load.image("knight_gray", "assets/sprites/ui/knight_gray.png");
+        this.load.image("catapult_icon", "assets/sprites/ui/catapult_icon.png");
+        this.load.image("catapult_icon_small", "assets/sprites/ui/catapult_icon_small.png");
+        this.load.image("catapult_gray", "assets/sprites/ui/catapult_gray.png");
+        // others
         this.load.image("freeze_icon", "assets/sprites/ui/freeze_icon.png");
         this.load.image("freeze_gray", "assets/sprites/ui/freeze_gray.png");
         this.load.image("clear_icon", "assets/sprites/ui/clear_icon.png");
