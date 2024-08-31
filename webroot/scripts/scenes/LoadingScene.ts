@@ -83,13 +83,13 @@ export class LoadingScene extends Phaser.Scene {
         // medieval
         this.loadSpriteSequence(4, "farm", "assets/sprites/buildings/farm");
         this.load.image("farm_gray", "assets/sprites/ui/farm_gray.png");
-        this.loadSpriteSequence(2, "lumberyard", "assets/sprites/buildings/lumberyard");
+        this.loadSpriteSequence(8, "lumberyard", "assets/sprites/buildings/lumberyard");
         this.load.image("lumberyard_gray", "assets/sprites/ui/lumberyard_gray.png");
-        this.loadSpriteSequence(2, "bazaar", "assets/sprites/buildings/bazaar");
+        this.loadSpriteSequence(4, "bazaar", "assets/sprites/buildings/bazaar");
         this.load.image("bazaar_gray", "assets/sprites/ui/bazaar_gray.png");
         this.loadSpriteSequence(3, "blacksmith", "assets/sprites/buildings/blacksmith");
         this.load.image("blacksmith_gray", "assets/sprites/ui/blacksmith_gray.png");
-        this.loadSpriteSequence(2, "workshop", "assets/sprites/buildings/workshop");
+        this.loadSpriteSequence(4, "workshop", "assets/sprites/buildings/workshop");
         this.load.image("workshop_gray", "assets/sprites/ui/workshop_gray.png");
 
         // ui

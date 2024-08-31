@@ -82,10 +82,10 @@ export class BaseScene extends Phaser.Scene {
         createAnimation(this, "barracks", 4);
         createAnimation(this, "trainingground", 4);
         createAnimation(this, "farm", 4);
-        createAnimation(this, "bazaar", 2);
+        createAnimation(this, "bazaar", 4);
         createAnimation(this, "blacksmith", 3);
-        createAnimation(this, "lumberyard", 2);
-        createAnimation(this, "workshop", 2);
+        createAnimation(this, "lumberyard", 8);
+        createAnimation(this, "workshop", 4);
 
         // Draw the board
         this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth(this.game) / 2);
