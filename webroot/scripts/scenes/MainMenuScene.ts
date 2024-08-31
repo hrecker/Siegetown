@@ -131,7 +131,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     create() {
-        let background = this.add.image(0, 0, "background").setOrigin(0, 0);
+        let background = this.add.image(0, 0, "background_caveman").setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
         
         // Main menu group

@@ -7,6 +7,7 @@ import { config } from "../model/Config";
 import { buildingCosts, zeroResources } from "../model/Resources";
 import { SoundEffect, playSound } from "../model/Sound";
 import { UnitType, allUnits } from "../model/Unit";
+import { Era } from "../state/EraState";
 import { capitalizeFirstLetter, createAnimation } from "../util/Utils";
 import { isDesktop, laneSceneTopY } from "./LaneScene";
 import { uiBarWidth } from "./ResourceUIScene";
@@ -71,7 +72,14 @@ export class BaseScene extends Phaser.Scene {
         }
         this.cameras.main.setBackgroundColor(0x212123);
 
-        let background = this.add.image(-100, 0, "background").setOrigin(0, 0);
+        let backgroundTexture;
+        switch (this.activeGame.era) {
+            case Era.Caveman:
+                backgroundTexture = "background_caveman";
+            case Era.Medieval:
+                backgroundTexture = "background_medieval";
+        }
+        let background = this.add.image(-100, 0, backgroundTexture).setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
 
         // Create animations

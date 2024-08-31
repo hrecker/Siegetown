@@ -40,7 +40,8 @@ export class LoadingScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // sprites
-        this.load.image("background", "assets/sprites/background_blur.png");
+        this.load.image("background_caveman", "assets/sprites/background_blur.png");
+        this.load.image("background_medieval", "assets/sprites/background_medieval_blur.png");
 
         // units
         // caveman
