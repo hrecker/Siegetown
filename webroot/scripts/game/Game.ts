@@ -38,14 +38,14 @@ export type ActiveGame = {
     era: Era;
 }
 
-function townhallCoordinate(): number {
-    return Math.floor((config()["baseWidth"] - 1) / 2);
+function townhallCoordinate(era: Era): number {
+    return Math.floor((config()["eras"][era]["baseWidth"] - 1) / 2);
 }
 
-function startingGrid(): Building[][] {
+function startingGrid(era: Era): Building[][] {
     let grid: Building[][] = [];
-    let baseWidth = config()["baseWidth"];
-    let townhallCoord = townhallCoordinate();
+    let baseWidth = config()["eras"][era]["baseWidth"];
+    let townhallCoord = townhallCoordinate(era);
     for (let i = 0; i < baseWidth; i++) {
         grid[i] = [];
         for (let j = 0; j < baseWidth; j++) {
@@ -59,12 +59,12 @@ function startingGrid(): Building[][] {
     return grid;
 }
 
-function startingGrowthByTile(): Resources[][] {
+function startingGrowthByTile(era: Era): Resources[][] {
     let grid: Resources[][] = [];
-    let townhallCoord = townhallCoordinate();
-    for (let i = 0; i < config()["baseWidth"]; i++) {
+    let townhallCoord = townhallCoordinate(era);
+    for (let i = 0; i < config()["eras"][era]["baseWidth"]; i++) {
         grid[i] = [];
-        for (let j = 0; j < config()["baseWidth"]; j++) {
+        for (let j = 0; j < config()["eras"][era]["baseWidth"]; j++) {
             if (i == townhallCoord && j == townhallCoord) {
                 grid[i][j] = buildingProduction(Building.Townhall);
             } else {
@@ -96,11 +96,11 @@ function startingUnitSpawnDelays(): { [type: string] : number } {
     return delays;
 }
 
-export function createGame(): ActiveGame {
+export function createGame(era: Era): ActiveGame {
     return {
         base: {
-            grid: startingGrid(),
-            growthByTile: startingGrowthByTile(),
+            grid: startingGrid(era),
+            growthByTile: startingGrowthByTile(era),
             totalGrowth: buildingProduction(Building.Townhall),
         },
         baseHealth: config()["baseMaxHealth"],
@@ -117,7 +117,7 @@ export function createGame(): ActiveGame {
         laneSceneWidth: -1,
         isPaused: false,
         time: 0,
-        era: Era.Caveman
+        era: era
     };
 }
 
@@ -140,8 +140,8 @@ export function resetGame(game: ActiveGame) {
     game.lastEnemySpawn = -1 * config()["baseEnemySpawnRate"];
     game.enemySpawnRate = config()["baseEnemySpawnRate"];
     game.base = {
-        grid: startingGrid(),
-        growthByTile: startingGrowthByTile(),
+        grid: startingGrid(game.era),
+        growthByTile: startingGrowthByTile(game.era),
         totalGrowth: buildingProduction(Building.Townhall),
     };
     game.baseHealth = config()["baseMaxHealth"];
@@ -240,7 +240,7 @@ export function canAfford(game: ActiveGame, costs: Resources) {
 
 function selectRandomEnemyType(game: ActiveGame): UnitType {
     let possibleUnits = [];
-    let enemyWaves = config()["enemyWaves"];
+    let enemyWaves = config()["eras"][game.era]["enemyWaves"];
     allUnits(game.era).forEach(unit => {
         if (game.currentWave >= enemyWaves.length || unit in enemyWaves[game.currentWave]) {
             possibleUnits.push(unit);
@@ -362,18 +362,18 @@ export function updateGame(game: ActiveGame, delta: number, laneWidth: number, s
     if (game.secondsUntilWave == 0) {
         // Get the appropriate defined wave if it exists. If not, just add clubmen to the final defined wave to reach the desired enemy count.
         //TODO
-        let definedWaves = config()["enemyWaves"];
+        let definedWaves = config()["eras"][game.era]["enemyWaves"];
         let wave: { [name: string] : number } 
         if (game.currentWave < definedWaves.length) {
             wave = definedWaves[game.currentWave];
         } else {
             wave = definedWaves[definedWaves.length - 1];
-            wave["clubman"] += (game.currentWave - definedWaves.length) + 1;
+            wave[config()["eras"][game.era]["finalWaveUnit"]] += (game.currentWave - definedWaves.length) + 1;
         }
 
         // Build up a list of all the enemies to spawn and shuffle it
         let toSpawn = [];
-        allUnits().forEach(unit => {
+        allUnits(game.era).forEach(unit => {
             if (unit in wave) {
                 for (let i = 0; i < wave[unit]; i++) {
                     toSpawn.push(unit);

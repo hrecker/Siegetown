@@ -115,5 +115,8 @@ export function unitAttackSound(type: UnitType): SoundEffect {
             return SoundEffect.Slingshot;
         case UnitType.Clubman:
             return SoundEffect.Club;
+        //TODO sound effect for others
+        default:
+            return SoundEffect.None;
     }
 }

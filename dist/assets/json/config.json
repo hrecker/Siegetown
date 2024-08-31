@@ -1,6 +1,4 @@
 {
-    "baseWidth": 4,
-
     "numLanes": 3,
 
     "baseMaxHealth": 10,
@@ -8,28 +6,6 @@
 
     "maxGamesStored": 100,
 
-    "enemyWaves": [
-        {
-            "warrior": 3
-        },
-        {
-            "warrior": 3,
-            "slingshotter": 1
-        },
-        {
-            "warrior": 2,
-            "slingshotter": 3
-        },
-        {
-            "warrior": 3,
-            "slingshotter": 3
-        },
-        {
-            "warrior": 2,
-            "slingshotter": 4,
-            "clubman": 1
-        }
-    ],
 
     "secondsBetweenWaves": 60,
 
@@ -320,7 +296,8 @@
     },
 
     "eras": {
-        "caveman": {
+        "Caveman": {
+            "baseWidth": 4,
             "units": [
                 "warrior",
                 "slingshotter",
@@ -333,9 +310,33 @@
                 "barracks",
                 "trainingground",
                 "remove"
-            ]
+            ],
+            "enemyWaves": [
+                {
+                    "warrior": 3
+                },
+                {
+                    "warrior": 3,
+                    "slingshotter": 1
+                },
+                {
+                    "warrior": 2,
+                    "slingshotter": 3
+                },
+                {
+                    "warrior": 3,
+                    "slingshotter": 3
+                },
+                {
+                    "warrior": 2,
+                    "slingshotter": 4,
+                    "clubman": 1
+                }
+            ],
+            "finalWaveUnit": "clubman"
         },
-        "medieval": {
+        "Medieval": {
+            "baseWidth": 5,
             "units": [
                 "infantry",
                 "archer",
@@ -350,7 +351,47 @@
                 "blacksmith",
                 "workshop",
                 "remove"
-            ]
+            ],
+            "enemyWaves": [
+                {
+                    "infantry": 3
+                },
+                {
+                    "infantry": 3,
+                    "archer": 1
+                },
+                {
+                    "infantry": 2,
+                    "archer": 3
+                },
+                {
+                    "infantry": 3,
+                    "archer": 3
+                },
+                {
+                    "infantry": 2,
+                    "archer": 3,
+                    "knight": 2
+                },
+                {
+                    "infantry": 2,
+                    "archer": 2,
+                    "knight": 4
+                },
+                {
+                    "infantry": 1,
+                    "archer": 3,
+                    "knight": 3,
+                    "catapult": 2
+                },
+                {
+                    "infantry": 2,
+                    "archer": 3,
+                    "knight": 4,
+                    "catapult": 2
+                }
+            ],
+            "finalWaveUnit": "catapult"
         }
     },
 

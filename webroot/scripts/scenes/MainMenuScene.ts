@@ -220,7 +220,9 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     startGame(scene: Phaser.Scene) {
-        let activeGame = createGame();
+        //TODO selectable era
+        //let activeGame = createGame(Era.Caveman);
+        let activeGame = createGame(Era.Medieval);
         let uiState = createUIState();
         scene.scene.start("BaseScene", { activeGame: activeGame, uiState: uiState })
                   .start("LaneScene", { activeGame: activeGame, uiState: uiState })

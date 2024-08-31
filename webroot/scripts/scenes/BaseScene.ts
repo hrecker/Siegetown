@@ -81,6 +81,11 @@ export class BaseScene extends Phaser.Scene {
         createAnimation(this, "market", 3);
         createAnimation(this, "barracks", 4);
         createAnimation(this, "trainingground", 4);
+        createAnimation(this, "farm", 4);
+        createAnimation(this, "bazaar", 2);
+        createAnimation(this, "blacksmith", 3);
+        createAnimation(this, "lumberyard", 2);
+        createAnimation(this, "workshop", 2);
 
         // Draw the board
         this.boardTopLeftX = ((this.game.renderer.width - uiBarWidth) / 2) - (boardWidth(this.game) / 2);
@@ -91,18 +96,18 @@ export class BaseScene extends Phaser.Scene {
         this.add.rectangle(this.boardTopLeftX, this.boardTopLeftY, boardWidth(this.game), boardWidth(this.game), 0, 0.75).setOrigin(0, 0);
         let graphics = this.add.graphics({ lineStyle: { width: boardLineWidth, color: 0xF2F0E5 } });
 
-        for (let i = 0; i <= config()["baseWidth"]; i++) {
-            let diff = (boardWidth(this.game) * i / config()["baseWidth"]);
+        for (let i = 0; i <= config()["eras"][this.activeGame.era]["baseWidth"]; i++) {
+            let diff = (boardWidth(this.game) * i / config()["eras"][this.activeGame.era]["baseWidth"]);
             graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX, this.boardTopLeftY + diff, this.boardTopLeftX + boardWidth(this.game), this.boardTopLeftY + diff));
             graphics.strokeLineShape(new Phaser.Geom.Line(this.boardTopLeftX + diff, this.boardTopLeftY, this.boardTopLeftX + diff, this.boardTopLeftY + boardWidth(this.game)));
         }
 
         // Draw the buildings
         this.gridBuildings = [];
-        let tileWidth = boardWidth(this.game) / config()["baseWidth"];
-        for (let i = 0; i < config()["baseWidth"]; i++) {
+        let tileWidth = boardWidth(this.game) / config()["eras"][this.activeGame.era]["baseWidth"];
+        for (let i = 0; i < config()["eras"][this.activeGame.era]["baseWidth"]; i++) {
             this.gridBuildings[i] = [];
-            for (let j = 0; j < config()["baseWidth"]; j++) {
+            for (let j = 0; j < config()["eras"][this.activeGame.era]["baseWidth"]; j++) {
                 let x = this.boardTopLeftX + (tileWidth * i) + (tileWidth / 2);
                 let y = this.boardTopLeftY + (tileWidth * j) + (tileWidth / 2);
                 // Just default to townhall to start, the actual sprite is set in the next call
@@ -121,15 +126,15 @@ export class BaseScene extends Phaser.Scene {
         }
 
         // Draw the tooltips second so that they appear above the buildings
-        for (let i = 0; i < config()["baseWidth"]; i++) {
-            for (let j = 0; j < config()["baseWidth"]; j++) {
+        for (let i = 0; i < config()["eras"][this.activeGame.era]["baseWidth"]; i++) {
+            for (let j = 0; j < config()["eras"][this.activeGame.era]["baseWidth"]; j++) {
                 let x = this.boardTopLeftX + (tileWidth * i) + (tileWidth / 2);
                 let y = this.boardTopLeftY + (tileWidth * j) + (tileWidth / 2);
                 let tooltipOriginX = 0, tooltipOriginY = 0;
-                if (i >= config()["baseWidth"] / 2) {
+                if (i >= config()["eras"][this.activeGame.era]["baseWidth"] / 2) {
                     tooltipOriginX = 1;
                 }
-                if (j >= config()["baseWidth"] / 2) {
+                if (j >= config()["eras"][this.activeGame.era]["baseWidth"] / 2) {
                     tooltipOriginY = 1;
                 }
                 let tooltip = createTooltip(this, this.getTooltipText(i, j), x, y, tooltipOriginX, tooltipOriginY);
@@ -237,13 +242,13 @@ export class BaseScene extends Phaser.Scene {
 
     getGridMousePosition(): Phaser.Types.Math.Vector2Like {
         return {
-            x: Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth(this.game) / config()["baseWidth"])),
-            y: Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth(this.game) / config()["baseWidth"]))
+            x: Math.floor((this.input.activePointer.worldX - this.boardTopLeftX) / (boardWidth(this.game) / config()["eras"][this.activeGame.era]["baseWidth"])),
+            y: Math.floor((this.input.activePointer.worldY - this.boardTopLeftY) / (boardWidth(this.game) / config()["eras"][this.activeGame.era]["baseWidth"]))
         }
     }
 
     isOnGrid(gridPos: Phaser.Types.Math.Vector2Like) {
-        return gridPos.x >= 0 && gridPos.x < config()["baseWidth"] && gridPos.y >= 0 && gridPos.y < config()["baseWidth"]
+        return gridPos.x >= 0 && gridPos.x < config()["eras"][this.activeGame.era]["baseWidth"] && gridPos.y >= 0 && gridPos.y < config()["eras"][this.activeGame.era]["baseWidth"]
     }
 
     handleGridClick() {
@@ -292,8 +297,8 @@ export class BaseScene extends Phaser.Scene {
             playSound(this, SoundEffect.Build);
         }
         // Update all tooltip texts as necessary
-        for (let i = 0; i < config()["baseWidth"]; i++) {
-            for (let j = 0; j < config()["baseWidth"]; j++) {
+        for (let i = 0; i < config()["eras"][this.activeGame.era]["baseWidth"]; i++) {
+            for (let j = 0; j < config()["eras"][this.activeGame.era]["baseWidth"]; j++) {
                 updateTooltip(this.gridBuildings[i][j].tooltip, this.getTooltipText(i, j));
             }
         }
@@ -325,8 +330,8 @@ export class BaseScene extends Phaser.Scene {
     gameRestartedListener(scene: BaseScene) {
         resetGame(scene.activeGame);
         // redraw the buildings
-        for (let i = 0; i < config()["baseWidth"]; i++) {
-            for (let j = 0; j < config()["baseWidth"]; j++) {
+        for (let i = 0; i < config()["eras"][scene.activeGame.era]["baseWidth"]; i++) {
+            for (let j = 0; j < config()["eras"][scene.activeGame.era]["baseWidth"]; j++) {
                 scene.setBuildingSprite(scene.gridBuildings[i][j].mainSprite, scene.activeGame.base.grid[i][j]);
                 scene.gridBuildings[i][j].tooltip.text.text = scene.getTooltipText(i, j);
                 scene.updateResourceAnimationTimer(i, j);
