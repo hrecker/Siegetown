@@ -1,9 +1,9 @@
-import { config } from "../model/Config";
-import { getCurrentEra } from "./EraState";
+import { Era } from "./EraState";
 
 export type GameResult = {
     win: boolean,
-    time: number
+    time: number,
+    era: Era
 }
 
 export type GameStats = {
@@ -21,27 +21,26 @@ const gameStatsKey = "SiegeTownGameStats";
 /** Save a player's score on the list of high scores */
 export function saveGameResult(gameResult: GameResult): TotalGameStats {
     let lifetimeStats = getStats();
-    let era = getCurrentEra();
-    if (lifetimeStats && lifetimeStats.stats && lifetimeStats.stats[era]) {
+    if (lifetimeStats && lifetimeStats.stats && lifetimeStats.stats[gameResult.era]) {
         if (gameResult.win) {
-            lifetimeStats.stats[era].wins += 1;
+            lifetimeStats.stats[gameResult.era].wins += 1;
         } else {
-            lifetimeStats.stats[era].losses += 1;
+            lifetimeStats.stats[gameResult.era].losses += 1;
         }
-        if (gameResult.win && gameResult.time != -1 && (lifetimeStats.stats[era].recordTime == -1 || gameResult.time < lifetimeStats.stats[era].recordTime)) {
-            lifetimeStats.stats[era].recordTime = gameResult.time;
+        if (gameResult.win && gameResult.time != -1 && (lifetimeStats.stats[gameResult.era].recordTime == -1 || gameResult.time < lifetimeStats.stats[gameResult.era].recordTime)) {
+            lifetimeStats.stats[gameResult.era].recordTime = gameResult.time;
         }
     } else {
-        lifetimeStats.stats[era] = {
+        lifetimeStats.stats[gameResult.era] = {
             wins: 0,
             losses: 0,
             recordTime: -1
         }
         if (gameResult.win) {
-            lifetimeStats.stats[era].wins = 1;
-            lifetimeStats.stats[era].recordTime = gameResult.time;
+            lifetimeStats.stats[gameResult.era].wins = 1;
+            lifetimeStats.stats[gameResult.era].recordTime = gameResult.time;
         } else {
-            lifetimeStats.stats[era].losses = 1;
+            lifetimeStats.stats[gameResult.era].losses = 1;
         }
     }
     localStorage.setItem(gameStatsKey, JSON.stringify(lifetimeStats));

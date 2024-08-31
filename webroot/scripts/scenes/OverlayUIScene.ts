@@ -1,7 +1,6 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, clearListeners, gameRestartedEvent } from "../events/EventMessenger";
 import { ActiveGame, gameEnded } from "../game/Game";
 import { SoundEffect, playSound } from "../model/Sound";
-import { getCurrentEra } from "../state/EraState";
 import { getStats } from "../state/GameResultState";
 import { timeString } from "../util/Utils";
 import { whiteColor } from "./BaseScene";
@@ -26,6 +25,10 @@ export class OverlayUIScene extends Phaser.Scene {
     activeGame: ActiveGame;
 
     shadowBackground: Phaser.GameObjects.Rectangle;
+
+    // Current era UI
+    currentEraTextBackground: Phaser.GameObjects.Rectangle;
+    currentEraText: Phaser.GameObjects.Text;
 
     // Game result UI
     gameResultBackground: Phaser.GameObjects.Rectangle;
@@ -62,6 +65,8 @@ export class OverlayUIScene extends Phaser.Scene {
     }
 
     hideOverlay() {
+        this.currentEraText.visible = false;
+        this.currentEraTextBackground.visible = false;
         this.shadowBackground.visible = false;
         this.gameResultBackground.visible = false;
         this.pauseBackground.visible = false;
@@ -75,10 +80,10 @@ export class OverlayUIScene extends Phaser.Scene {
 
     setOverlayVisible(overlay: Overlay) {
         this.shadowBackground.visible = true;
-        let topLeft: Phaser.Types.Math.Vector2Like;
-        let height: number;
         switch (overlay) {
             case Overlay.Pause:
+                this.currentEraText.visible = true;
+                this.currentEraTextBackground.visible = true;
                 this.gameResultText.visible = false;
                 this.gameResultTimeText.visible = false;
                 this.gameResultBackground.visible = false;
@@ -89,11 +94,14 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.setButtonVisible(this.mainMenuButton, true);
                 this.pauseBackground.setSize(this.pauseBackground.width,
                     this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y + (2 * textBackgroundPadding));
-                fadeIn(this, [this.pauseText, this.pauseBackground,
+                fadeIn(this, [this.currentEraText, this.currentEraTextBackground,
+                    this.pauseText, this.pauseBackground,
                     this.resumeButton.button, this.resumeButton.outline,
                     this.mainMenuButton.button, this.mainMenuButton.outline], false)
                 break;
             case Overlay.GameEnd:
+                this.currentEraText.visible = true;
+                this.currentEraTextBackground.visible = true;
                 this.gameResultText.visible = true;
                 this.gameResultTimeText.visible = true;
                 this.gameResultBackground.visible = true;
@@ -104,7 +112,8 @@ export class OverlayUIScene extends Phaser.Scene {
                 this.setButtonVisible(this.mainMenuButton, true);
                 this.gameResultBackground.setSize(this.gameResultBackground.width,
                     this.mainMenuButton.outline.getBottomCenter().y - this.gameResultText.getTopCenter().y + (2 * textBackgroundPadding));
-                fadeIn(this, [this.gameResultText, this.gameResultTimeText, this.gameResultBackground,
+                fadeIn(this, [this.currentEraText, this.currentEraTextBackground,
+                    this.gameResultText, this.gameResultTimeText, this.gameResultBackground,
                     this.restartButton.button, this.restartButton.outline,
                     this.mainMenuButton.button, this.mainMenuButton.outline], false)
                 break;
@@ -161,6 +170,12 @@ export class OverlayUIScene extends Phaser.Scene {
 
         // Background
         this.shadowBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
+
+        // Current era UI
+        this.currentEraText = this.add.text(this.game.renderer.width / 2, 5, "Era: " + this.activeGame.era, textFormat).setFontSize(32).setOrigin(0.5, 0).setDepth(2);
+        this.currentEraTextBackground = this.add.rectangle(this.currentEraText.getTopLeft().x - textBackgroundPadding, 0,
+            this.currentEraText.displayWidth + (textBackgroundPadding * 2), this.currentEraText.displayHeight + textBackgroundPadding).
+            setFillStyle(0x43436A).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5).setDepth(1);
 
         // Game result ui
         this.gameResultText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - 125, "Victory!",
@@ -227,8 +242,8 @@ export class OverlayUIScene extends Phaser.Scene {
             let time = scene.activeGame.time;
             let stats = getStats();
             let bestTime = time;
-            if (stats && stats.stats && stats.stats[getCurrentEra()] && stats.stats[getCurrentEra()].recordTime > 0 && stats.stats[getCurrentEra()].recordTime < time) {
-                bestTime = stats.stats[getCurrentEra()].recordTime;
+            if (stats && stats.stats && stats.stats[scene.activeGame.era] && stats.stats[scene.activeGame.era].recordTime > 0 && stats.stats[scene.activeGame.era].recordTime < time) {
+                bestTime = stats.stats[scene.activeGame.era].recordTime;
             }
             let timeText = timeString(time);
             let bestTimeText = timeString(bestTime);

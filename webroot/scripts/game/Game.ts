@@ -617,6 +617,7 @@ export function updateGame(game: ActiveGame, delta: number, laneWidth: number, s
         saveGameResult({
             win: isWin,
             time: game.time,
+            era: game.era
         });
     }
 }
