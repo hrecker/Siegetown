@@ -115,7 +115,14 @@ export function unitAttackSound(type: UnitType): SoundEffect {
             return SoundEffect.Slingshot;
         case UnitType.Clubman:
             return SoundEffect.Club;
-        //TODO sound effect for others
+        case UnitType.Infantry:
+            return SoundEffect.Stab;
+        case UnitType.Archer:
+            return SoundEffect.ArrowShot;
+        case UnitType.Knight:
+            return SoundEffect.SwordSwing;
+        case UnitType.Catapult:
+            return SoundEffect.Catapult;
         default:
             return SoundEffect.None;
     }

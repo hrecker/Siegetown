@@ -10,6 +10,10 @@ export enum SoundEffect {
     Punch = "Punch",
     Slingshot = "Slingshot",
     Club = "Club",
+    Stab = "Stab",
+    ArrowShot = "ArrowShot",
+    SwordSwing = "SwordSwing",
+    Catapult = "Catapult",
     Death = "Death",
     BaseDamaged = "BaseDamaged",
     Victory = "Victory",
@@ -30,6 +34,10 @@ export function loadSounds(scene: Phaser.Scene) {
     sounds[SoundEffect.Punch] = scene.sound.add("Punch");
     sounds[SoundEffect.Slingshot] = scene.sound.add("Slingshot");
     sounds[SoundEffect.Club] = scene.sound.add("Club");
+    sounds[SoundEffect.Stab] = scene.sound.add("Stab");
+    sounds[SoundEffect.ArrowShot] = scene.sound.add("ArrowShot");
+    sounds[SoundEffect.SwordSwing] = scene.sound.add("SwordSwing");
+    sounds[SoundEffect.Catapult] = scene.sound.add("Catapult");
     sounds[SoundEffect.Death] = scene.sound.add("Death");
     sounds[SoundEffect.BaseDamaged] = scene.sound.add("BaseDamaged");
     sounds[SoundEffect.Victory] = scene.sound.add("Victory");

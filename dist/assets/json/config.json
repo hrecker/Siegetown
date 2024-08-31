@@ -17,7 +17,7 @@
     "removeBuildingTooltip": "💣Remove existing building",
 
     "startingResources": {
-        "food": 150,
+        "food": 150000,
         "gold": 200
     },
 
@@ -426,6 +426,10 @@
         "Punch": 0.6,
         "Slingshot": 0.9,
         "Club": 0.9,
+        "Stab": 0.7,
+        "ArrowShot": 1,
+        "SwordSwing": 0.8,
+        "Catapult": 0.8,
         "Death": 0.8,
         "BaseDamaged": 0.9,
         "Victory": 1,

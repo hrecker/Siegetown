@@ -150,6 +150,10 @@ export class LoadingScene extends Phaser.Scene {
         this.load.audio("Punch", "assets/sfx/Punch.mp3");
         this.load.audio("Slingshot", "assets/sfx/Slingshot.mp3");
         this.load.audio("Club", "assets/sfx/Club.mp3");
+        this.load.audio("Stab", "assets/sfx/Stab.mp3");
+        this.load.audio("ArrowShot", "assets/sfx/ArrowShot.mp3");
+        this.load.audio("SwordSwing", "assets/sfx/SwordSwing.mp3");
+        this.load.audio("Catapult", "assets/sfx/Catapult.mp3");
         this.load.audio("Death", "assets/sfx/Death.mp3");
         this.load.audio("BaseDamaged", "assets/sfx/BaseDamaged.mp3");
         this.load.audio("Victory", "assets/sfx/Victory.mp3");
