@@ -33,6 +33,8 @@ const numberKeyCodes = [
 ]
 const unitScaleFactor = 0.15;
 const unitDefaultRangePixels = 70;
+const freezeColor = 0xA2DCC7;
+const clearColor = 0xB45252;
 
 export function laneSceneTopY(game: Phaser.Game): number {
     return (1 - laneSceneFraction) * game.renderer.height;
@@ -66,6 +68,9 @@ export class LaneScene extends Phaser.Scene {
     laneHeight: number;
 
     laneButtons: Phaser.Input.Keyboard.Key[];
+
+    laneOverlays: Phaser.GameObjects.Rectangle[];
+    laneOverlayTweens: Phaser.Tweens.Tween[];
 
     playerLaneQueueIndicators: Tooltip[];
     enemyLaneQueueIndicators: Tooltip[];
@@ -116,6 +121,8 @@ export class LaneScene extends Phaser.Scene {
         this.laneHeight = (this.game.renderer.height - laneSceneTopY(this.game)) / config()["numLanes"];
         this.playerLaneQueueIndicators = [];
         this.enemyLaneQueueIndicators = [];
+        this.laneOverlays = [];
+        this.laneOverlayTweens = [];
         for (let i = 0; i < config()["numLanes"]; i++) {
             let y = laneMargin + (i * this.laneHeight);
             graphics.strokeLineShape(new Phaser.Geom.Line(0, y, this.game.renderer.width, y));
@@ -126,6 +133,9 @@ export class LaneScene extends Phaser.Scene {
             this.enemyLaneQueueIndicators.push(createTooltip(this, "+0", this.game.renderer.width - uiBarWidth - 8, y + 8, 1, 0));
             this.enemyLaneQueueIndicators[i].background.alpha = 0.75;
             this.enemyLaneQueueIndicators[i].text.alpha = 0.75;
+            // Lane overlays for freeze and bomb abilities
+            this.laneOverlays.push(this.add.rectangle(0, y, this.game.renderer.width, this.laneHeight - laneMargin, 0, 1).setOrigin(0, 0).setAlpha(0));
+            this.laneOverlayTweens.push(null);
         }
 
         this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth - 6, 10, 100, 10).
@@ -205,9 +215,34 @@ export class LaneScene extends Phaser.Scene {
             return false;
         }
 
+        // Display overlay based on action
+        switch (this.uiState.selectedAction) {
+            case ActionType.Clear:
+                this.flashLaneOverlay(lane, clearColor, 1000);
+                break;
+            case ActionType.Freeze:
+                this.flashLaneOverlay(lane, freezeColor, config()["freezeDuration"] + 2500);
+                break;
+        }
+
         runAction(this.activeGame, this.uiState.selectedAction, lane, this);
         chargeCosts(this.activeGame, costs);
         return true;
+    }
+
+    flashLaneOverlay(lane: number, color: number, duration: number) {
+        if (this.laneOverlayTweens[lane]) {
+            this.laneOverlayTweens[lane].destroy();
+        }
+        this.laneOverlays[lane].fillColor = color;
+        this.laneOverlays[lane].alpha = 0.5;
+        this.laneOverlayTweens[lane] = this.tweens.add({
+            targets: this.laneOverlays[lane],
+            alpha: 0,
+            duration: duration,
+            ease: 'Sine.easeInOut'
+        })
+        
     }
 
     handleUnitPlacement(lane: number) {
