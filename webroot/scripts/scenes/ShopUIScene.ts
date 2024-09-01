@@ -133,14 +133,6 @@ export class ShopUIScene extends Phaser.Scene {
         this.uiState = data.uiState;
     }
 
-    /** Adjust any UI elements that need to change position based on the canvas size */
-    resize(force?: boolean) {
-        if (! this.scene.isActive() && ! force) {
-            return;
-        }
-        //TODO
-    }
-
     updateScrollIndicatorPosition(scrollConfig: ScrollConfig) {
         if (! scrollConfig.canScroll) {
             return;
@@ -197,8 +189,6 @@ export class ShopUIScene extends Phaser.Scene {
             // Move the labels
             this.buildingLabel.y += yDiff;
         }
-
-        //TODO move tooltips
 
         // Move the indicator
         this.updateScrollIndicatorPosition(scrollConfig);
@@ -451,7 +441,6 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     create() {
-        this.resize(true);
         this.fontSize = defaultFontSize;
         if (isMinimal(this.game)) {
             this.fontSize = minimalFontSize;
@@ -525,8 +514,6 @@ export class ShopUIScene extends Phaser.Scene {
         addActionRunListener(this.actionRunListener, this);
         addBuildListener(this.buildingBuildListener, this);
         addResourceUpdateListener(this.resourceUpdateListener, this);
-
-        this.scale.on("resize", this.resize, this);
     }
 
     isButtonSelected(key: string): boolean {

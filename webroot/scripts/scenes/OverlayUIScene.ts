@@ -56,14 +56,6 @@ export class OverlayUIScene extends Phaser.Scene {
         this.activeGame = data.activeGame;
     }
 
-    /** Adjust any UI elements that need to change position based on the canvas size */
-    resize(force?: boolean) {
-        if (! this.scene.isActive() && ! force) {
-            return;
-        }
-        //TODO
-    }
-
     hideOverlay() {
         this.currentEraText.visible = false;
         this.currentEraTextBackground.visible = false;
@@ -154,8 +146,6 @@ export class OverlayUIScene extends Phaser.Scene {
     }
 
     create() {
-        this.resize(true);
-
         // Corner pause button
         this.pauseButton = this.add.text(this.game.renderer.width + 5, 8, "⏸️").setOrigin(1, 0).setPadding(8).setFontSize(48);
         this.pauseButton.setInteractive();
@@ -221,8 +211,6 @@ export class OverlayUIScene extends Phaser.Scene {
 
         addBaseDamagedListener(this.baseDamagedListener, this);
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
-
-        this.scale.on("resize", this.resize, this);
     }
 
     baseDamagedListener(scene: OverlayUIScene, health: number) {

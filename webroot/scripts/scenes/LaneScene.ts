@@ -96,10 +96,6 @@ export class LaneScene extends Phaser.Scene {
         }
 
         this.activeGame.laneSceneWidth = this.game.renderer.width - uiBarWidth;
-
-        //TODO adjust positioning of preview
-
-        //TODO scale units(?) and unit health bars
     }
 
     create() {

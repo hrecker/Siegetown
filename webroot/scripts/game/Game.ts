@@ -364,7 +364,6 @@ export function updateGame(game: ActiveGame, delta: number, laneWidth: number, s
     // Start wave of enemies if necessary
     if (game.secondsUntilWave == 0) {
         // Get the appropriate defined wave if it exists. If not, just add clubmen to the final defined wave to reach the desired enemy count.
-        //TODO
         let definedWaves = config()["eras"][game.era]["enemyWaves"];
         let wave: { [name: string] : number } 
         if (game.currentWave < definedWaves.length) {

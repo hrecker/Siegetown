@@ -57,14 +57,6 @@ export class BaseScene extends Phaser.Scene {
         this.uiState = data.uiState;
     }
 
-    /** Adjust any UI elements that need to change position based on the canvas size */
-    resize(force?: boolean) {
-        if (! this.scene.isActive() && force !== true) {
-            return;
-        }
-        //TODO
-    }
-
     create() {
         if (! this.sceneCreated) {
             // Add event listeners here
@@ -190,9 +182,6 @@ export class BaseScene extends Phaser.Scene {
         this.previewBackground = this.add.rectangle(this.game.renderer.width - uiBarWidth, laneSceneTopY(this.game), 100, 10).
             setFillStyle(0x43436A).setOrigin(1, 1).setStrokeStyle(1, 0xF2F0E5).setVisible(false).setAlpha(0.8);
         this.previewText = this.add.text(this.game.renderer.width - uiBarWidth - 1, laneSceneTopY(this.game) - 1, "asdf").setOrigin(1, 1).setVisible(false).setAlpha(0.8);
-
-        this.resize(true);
-        this.scale.on("resize", this.resize, this);
 
         addGameRestartedListener(this.gameRestartedListener, this);
         addUnitBuiltListener(this.unitBuiltListener, this);

@@ -5,7 +5,6 @@ import { Era } from "../state/EraState";
 import { whiteColor } from "./BaseScene";
 import { defaultGameHeight } from "./LaneScene";
 
-//TODO tighter ui bar when detected that the game is running in a mobile-y resolution
 export const uiBarWidth = 285;
 const defaultStatusBarHeight = 180;
 const minimalStatusBarHeight = 150;
@@ -44,17 +43,7 @@ export class ResourceUIScene extends Phaser.Scene {
         this.activeGame = data.activeGame;
     }
 
-    /** Adjust any UI elements that need to change position based on the canvas size */
-    resize(force?: boolean) {
-        if (! this.scene.isActive() && ! force) {
-            return;
-        }
-        //TODO
-    }
-
     create() {
-        this.resize(true);
-
         let fontSize = defaultFontSize;
         let barHeight = statusBarHeight(this.game);
         let waveFontSize = waveDefaultFontSize;
@@ -96,8 +85,6 @@ export class ResourceUIScene extends Phaser.Scene {
         addEnemyBaseDamagedListener(this.enemyBaseDamagedListener, this);
         addGameRestartedListener(this.gameRestartedListener, this);
         addWaveCountdownUpdatedListener(this.waveCountdownUpdatedListener, this);
-
-        this.scale.on("resize", this.resize, this);
     }
 
     gameRestartedListener(scene: ResourceUIScene) {
