@@ -99,6 +99,8 @@ export class LoadingScene extends Phaser.Scene {
         this.load.image("shop_icon_border_selected", "assets/sprites/ui/shop_icon_selected.png");
         this.load.image("shop_icon_border_selected_unavailable", "assets/sprites/ui/shop_icon_selected_unavailable.png");
         this.load.image("shop_icon_border_locked", "assets/sprites/ui/shop_icon_locked.png");
+        this.load.image("radioButtonSelected", "assets/sprites/ui/radioButtonSelected.png");
+        this.load.image("radioButtonUnselected", "assets/sprites/ui/radioButtonUnselected.png");
         // caveman
         this.load.image("warrior_icon", "assets/sprites/ui/warrior_icon.png");
         this.load.image("warrior_icon_small", "assets/sprites/ui/warrior_icon_small.png");

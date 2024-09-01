@@ -93,14 +93,11 @@ export class MainMenuScene extends Phaser.Scene {
     playSelected: boolean;
 
     mainMenuGroup: Phaser.GameObjects.Group;
-    /*playButton: Phaser.GameObjects.Text;
-    playButtonOutline: Phaser.GameObjects.Rectangle;
-    viewStatsButtonText: Phaser.GameObjects.Text;
-    viewStatsButtonOutline: Phaser.GameObjects.Rectangle;*/
 
     statsGroup: Phaser.GameObjects.Group;
-    /*backButtonText: Phaser.GameObjects.Text;
-    backButtonOutline: Phaser.GameObjects.Rectangle;*/
+
+    selectedEra: Era;
+    selectedEraButton: Phaser.GameObjects.Image;
 
     constructor() {
         super({
@@ -117,7 +114,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     createButton(x: number, y: number, text: string, pointerDownFunction: Function): OverlayButton {
-        let buttonText = this.add.text(x, y, text, { font: "bold 60px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
+        let buttonText = this.add.text(x, y, text, { font: "bold 50px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
         let outline = this.add.rectangle(buttonText.getTopLeft().x - outlinePadding, buttonText.getTopLeft().y - outlinePadding,
             buttonText.width + (outlinePadding * 2), buttonText.height + (outlinePadding * 2)).setOrigin(0, 0).setFillStyle(0x5F556A).setStrokeStyle(1, 0xF2F0E5).setAlpha(0);
         
@@ -135,15 +132,30 @@ export class MainMenuScene extends Phaser.Scene {
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
         
         // Main menu group
-        let title = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - this.game.renderer.height / 4, "SIEGETOWN", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
-        let playButton = this.createButton(this.game.renderer.width / 2, title.getBottomCenter().y + 35, "PLAY", this.startGame);
-        let statsButton = this.createButton(this.game.renderer.width / 2, playButton.outline.getBottomCenter().y + 52, "STATS", this.viewStats);
+        let title = this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 - this.game.renderer.height / 3, "SIEGETOWN", { font: "bold 90px Verdana", color: whiteColor }).setOrigin(0.5, 0.5).setAlpha(0);
+        let playButton = this.createButton(this.game.renderer.width / 2, title.getBottomCenter().y + 30, "PLAY", this.startGame);
+        // Era selection
+        let cavemanRadioButton = this.add.image(this.game.renderer.width / 2 - 70, playButton.outline.getBottomCenter().y + 15, "radioButtonSelected").setName(Era.Caveman);
+        let medievalRadioButton = this.add.image(this.game.renderer.width / 2 + 70, playButton.outline.getBottomCenter().y + 15, "radioButtonUnselected").setName(Era.Medieval);
+        this.selectedEra = Era.Caveman;
+        this.selectedEraButton = cavemanRadioButton;
+        this.configureDifficultyRadioButton(cavemanRadioButton);
+        this.configureDifficultyRadioButton(medievalRadioButton);
+        let cavemanLabel = this.add.text(cavemanRadioButton.x, cavemanRadioButton.getBottomCenter().y + 10, "Caveman",
+            { font: "bold 20px Verdana", color: whiteColor }).setOrigin(0.5);
+        let medievalLabel = this.add.text(medievalRadioButton.x, medievalRadioButton.getBottomCenter().y + 10, "Medieval",
+            { font: "bold 20px Verdana", color: whiteColor }).setOrigin(0.5);
+        let statsButton = this.createButton(this.game.renderer.width / 2, cavemanLabel.getBottomCenter().y + 47, "STATS", this.viewStats);
         this.playSelected = false;
 
         this.mainMenuGroup = this.add.group();
         this.mainMenuGroup.add(title);
         this.mainMenuGroup.add(playButton.button);
         this.mainMenuGroup.add(playButton.outline);
+        this.mainMenuGroup.add(cavemanLabel);
+        this.mainMenuGroup.add(medievalLabel);
+        this.mainMenuGroup.add(cavemanRadioButton);
+        this.mainMenuGroup.add(medievalRadioButton);
         this.mainMenuGroup.add(statsButton.button);
         this.mainMenuGroup.add(statsButton.outline);
 
@@ -219,10 +231,23 @@ export class MainMenuScene extends Phaser.Scene {
         createAnimation(this, "catapult_walk", 2);
     }
 
-    startGame(scene: Phaser.Scene) {
-        //TODO selectable era
-        //let activeGame = createGame(Era.Caveman);
-        let activeGame = createGame(Era.Medieval);
+    configureDifficultyRadioButton(button: Phaser.GameObjects.Image) {
+        button.setInteractive();
+        button.on('pointerdown', () => {
+            if (button.name != this.selectedEra) {
+                this.selectedEra = Era[button.name];
+                button.setTexture("radioButtonSelected");
+                if (this.selectedEraButton) {
+                    this.selectedEraButton.setTexture("radioButtonUnselected");
+                }
+                this.selectedEraButton = button;
+                playSound(this, SoundEffect.ButtonClick);
+            }
+        });
+    }
+
+    startGame(scene: MainMenuScene) {
+        let activeGame = createGame(scene.selectedEra);
         let uiState = createUIState();
         scene.scene.start("BaseScene", { activeGame: activeGame, uiState: uiState })
                   .start("LaneScene", { activeGame: activeGame, uiState: uiState })
