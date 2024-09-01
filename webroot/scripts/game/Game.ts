@@ -203,6 +203,7 @@ function refreshGrowth(game: ActiveGame) {
                         production.gold += buff.gold * adjacentBuildings[adjacentBuilding];
                         production.food += buff.food * adjacentBuildings[adjacentBuilding];
                         production.wood += buff.wood * adjacentBuildings[adjacentBuilding];
+                        production.metal += buff.metal * adjacentBuildings[adjacentBuilding];
                     }
                 }
             }
@@ -210,6 +211,7 @@ function refreshGrowth(game: ActiveGame) {
             growth.gold += production.gold;
             growth.food += production.food;
             growth.wood += production.wood;
+            growth.metal += production.metal;
         }
     }
     game.base.totalGrowth = growth;
@@ -235,7 +237,7 @@ export function gameEnded(game: ActiveGame) {
 }
 
 export function canAfford(game: ActiveGame, costs: Resources) {
-    return game.resources.gold >= costs.gold && game.resources.food >= costs.food && game.resources.wood >= costs.wood;
+    return game.resources.gold >= costs.gold && game.resources.food >= costs.food && game.resources.wood >= costs.wood && game.resources.metal >= costs.metal;
 }
 
 function selectRandomEnemyType(game: ActiveGame): UnitType {

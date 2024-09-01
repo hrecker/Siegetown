@@ -1,6 +1,7 @@
 import { addBaseDamagedListener, addEnemyBaseDamagedListener, addGameRestartedListener, addResourceUpdateListener, addWaveCountdownUpdatedListener } from "../events/EventMessenger";
 import { ActiveGame } from "../game/Game";
 import { config } from "../model/Config";
+import { Era } from "../state/EraState";
 import { whiteColor } from "./BaseScene";
 import { defaultGameHeight } from "./LaneScene";
 
@@ -28,6 +29,7 @@ export class ResourceUIScene extends Phaser.Scene {
     goldText: Phaser.GameObjects.Text;
     woodText: Phaser.GameObjects.Text;
     foodText: Phaser.GameObjects.Text;
+    metalText: Phaser.GameObjects.Text;
     baseHealthText: Phaser.GameObjects.Text;
     enemyBaseHealthText: Phaser.GameObjects.Text;
     waveCountdown: Phaser.GameObjects.Text;
@@ -67,10 +69,17 @@ export class ResourceUIScene extends Phaser.Scene {
         this.goldText = this.add.text(10, 10, "Gold : 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
         this.woodText = this.add.text(10, 30, "Wood: 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
         this.foodText = this.add.text(10, 50, "Food: 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
+        this.metalText = this.add.text(10, 70, "Metal: 0", {color: whiteColor}).setPadding(0, 3).setFontSize(fontSize);
+        // Hide metal resource for caveman era
+        let lowResourceTextY = this.metalText.y;
+        if (this.activeGame.era == Era.Caveman) {
+            this.metalText.setVisible(false);
+            lowResourceTextY = this.foodText.y;
+        }
         this.updateResourceText();
-        this.baseHealthText = this.add.text(10, 70, "", {color: whiteColor}).setFontSize(fontSize);
+        this.baseHealthText = this.add.text(10, lowResourceTextY + 20, "", {color: whiteColor}).setFontSize(fontSize);
         this.baseDamagedListener(this, this.activeGame.baseHealth);
-        this.enemyBaseHealthText = this.add.text(10, 90, "", {color: whiteColor}).setFontSize(fontSize);
+        this.enemyBaseHealthText = this.add.text(10, lowResourceTextY + 40, "", {color: whiteColor}).setFontSize(fontSize);
         this.enemyBaseDamagedListener(this, this.activeGame.enemyBaseHealth);
         
         let statusRectangleHeight = this.enemyBaseHealthText.getBottomRight().y + 10;
@@ -101,6 +110,7 @@ export class ResourceUIScene extends Phaser.Scene {
         this.goldText.text = "🪙 Gold (+" + this.activeGame.base.totalGrowth.gold + "): " + this.activeGame.resources.gold;
         this.foodText.text = "🍞 Food (+" + this.activeGame.base.totalGrowth.food + "): " + this.activeGame.resources.food;
         this.woodText.text = "🪵 Wood (+" + this.activeGame.base.totalGrowth.wood + "): " + this.activeGame.resources.wood;
+        this.metalText.text = "⛏️ Metal (+" + this.activeGame.base.totalGrowth.metal + "): " + this.activeGame.resources.metal;
     }
 
     resourceUpdateListener(scene: ResourceUIScene) {

@@ -7,7 +7,7 @@ export type Resources = {
     gold: number;
     food: number;
     wood: number;
-    ore: number;
+    metal: number;
 }
 
 export function zeroResources(): Resources {
@@ -15,7 +15,7 @@ export function zeroResources(): Resources {
         gold: 0,
         food: 0,
         wood: 0,
-        ore: 0
+        metal: 0
     };
 }
 
@@ -47,7 +47,7 @@ export function configResources(base): Resources {
         gold: ("gold" in base) ? base["gold"] : 0,
         food: ("food" in base) ? base["food"] : 0,
         wood: ("wood" in base) ? base["wood"] : 0,
-        ore: ("ore" in base) ? base["ore"] : 0
+        metal: ("metal" in base) ? base["metal"] : 0
     }
 }
 
@@ -70,7 +70,7 @@ export function subtractResources(start: Resources, diff: Resources): Resources 
         gold: start.gold - diff.gold,
         food: start.food - diff.food,
         wood: start.wood - diff.wood,
-        ore: start.ore - diff.ore
+        metal: start.metal - diff.metal
     }
 }
 
@@ -79,6 +79,6 @@ export function addResources(start: Resources, diff: Resources): Resources {
         gold: start.gold + diff.gold,
         food: start.food + diff.food,
         wood: start.wood + diff.wood,
-        ore: start.ore + diff.ore
+        metal: start.metal + diff.metal
     }
 }

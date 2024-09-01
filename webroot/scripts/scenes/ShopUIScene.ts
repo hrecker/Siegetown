@@ -235,6 +235,13 @@ export class ShopUIScene extends Phaser.Scene {
                 costTexts.push(costs.wood + " Wood");
             }
         }
+        if (costs.metal) {
+            if (useEmoji) {
+                costTexts.push(costs.metal + "⛏️");
+            } else {
+                costTexts.push(costs.metal + " Metal");
+            }
+        }
         let text = "";
         for (let i = 0; i < costTexts.length; i++) {
             if (i != 0) {

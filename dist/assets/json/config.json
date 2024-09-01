@@ -126,7 +126,7 @@
                 "gold": 0,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "tooltipText": "Main town building\n+2 gold"
         },
@@ -142,7 +142,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -159,7 +159,7 @@
                 "gold": 250,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "forest": {
@@ -176,7 +176,7 @@
                 "gold": 750,
                 "food": 0,
                 "wood": 600,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "townhall": {
@@ -193,7 +193,7 @@
                 "gold": 1500,
                 "food": 750,
                 "wood": 2000,
-                "ore": 0
+                "metal": 0
             },
             "tooltipText": "❤️+1 unit health"
         },
@@ -203,7 +203,7 @@
                 "gold": 2000,
                 "food": 1000,
                 "wood": 3000,
-                "ore": 0
+                "metal": 0
             },
             "displayName": "Training Ground",
             "tooltipText": "🔓Unlocks clubman unit"
@@ -216,7 +216,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -233,7 +233,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -250,7 +250,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -267,7 +267,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {
@@ -284,7 +284,7 @@
                 "gold": 200,
                 "food": 0,
                 "wood": 0,
-                "ore": 0
+                "metal": 0
             },
             "adjacentBuff": {
                 "field": {

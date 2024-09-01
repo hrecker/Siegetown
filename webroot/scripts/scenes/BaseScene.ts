@@ -210,6 +210,9 @@ export class BaseScene extends Phaser.Scene {
         if (growth.food > 0) {
             growthText += "🍞"
         }
+        if (growth.metal > 0) {
+            growthText += "⛏️"
+        }
 
         let gridBuilding = this.gridBuildings[i][j];
         if (gridBuilding.resourceAnimationTimer != null) {
@@ -325,6 +328,9 @@ export class BaseScene extends Phaser.Scene {
         }
         if (production.wood != 0) {
             result += "🪵+" + production.wood + " wood";
+        }
+        if (production.metal != 0) {
+            result += "⛏️+" + production.metal + " metal";
         }
         if (buffs.damageBuff != 0) {
             result += "🗡️+" + buffs.damageBuff + " unit damage";
