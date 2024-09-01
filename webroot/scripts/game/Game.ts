@@ -105,7 +105,7 @@ export function createGame(era: Era): ActiveGame {
         },
         baseHealth: config()["baseMaxHealth"],
         enemyBaseHealth: config()["enemyBaseMaxHealth"],
-        resources: startingResources(),
+        resources: startingResources(era),
         lanes: startingLanes(),
         secondsUntilWave: config()["secondsBetweenWaves"],
         currentWave: 0,
@@ -146,7 +146,7 @@ export function resetGame(game: ActiveGame) {
     };
     game.baseHealth = config()["baseMaxHealth"];
     game.enemyBaseHealth = config()["enemyBaseMaxHealth"];
-    game.resources = startingResources();
+    game.resources = startingResources(game.era);
     game.lanes = startingLanes();
     game.secondsUntilWave = config()["secondsBetweenWaves"];
     game.currentWave = 0;
@@ -156,8 +156,8 @@ export function resetGame(game: ActiveGame) {
     game.time = 0;
 }
 
-function startingResources(): Resources {
-    return configResources(config()["startingResources"]);
+function startingResources(era: Era): Resources {
+    return configResources(config()["eras"][era]["startingResources"]);
 }
 
 function unitInteractable(unitX: number, gameWidth: number) {
@@ -301,9 +301,10 @@ export function runAction(game: ActiveGame, action: ActionType, lane: number, sc
             playSound(scene, SoundEffect.BombLane);
             break;
         case ActionType.Reinforcements:
-            // Spawn three clubmen
+            // Spawn three units
+            let reinforcementsUnit = config()["eras"][game.era]["reinforcementsUnit"];
             for (let i = 0; i < config()["numLanes"]; i++) {
-                game.lanes[i].playerQueuedUnits.push(scene.createUnit(UnitType.Clubman, i, false, true));
+                game.lanes[i].playerQueuedUnits.push(scene.createUnit(reinforcementsUnit, i, false, true));
             }
             playSound(scene, SoundEffect.Reinforcements);
             break;

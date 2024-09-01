@@ -16,11 +16,6 @@
     "removeBuildingCost": 500,
     "removeBuildingTooltip": "💣Remove existing building",
 
-    "startingResources": {
-        "food": 150,
-        "gold": 200
-    },
-
     "units": {
         "warrior": {
             "maxHealth": 3,
@@ -64,56 +59,59 @@
             "tooltipText": "Requires Training Ground\n🗡️Attack: 2\n❤️Health: 4\n🏹Range: 1\n🏃Speed: 4\n⏰Attack Delay: 14"
         },
         "infantry": {
-            "maxHealth": 3,
-            "damage": 1,
+            "maxHealth": 5,
+            "damage": 2,
             "range": 1,
-            "speed": 2,
+            "speed": 3,
             "attackRate": 1200,
             "spawnDelay": 3000,
             "cost": {
-                "food": 150
+                "food": 300
             },
             "buildRequirement": "townhall",
-            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+            "tooltipText": "🗡️Attack: 2\n❤️Health: 5\n🏹Range: 1\n🏃Speed: 3\n⏰Attack Delay: 12"
         },
         "archer": {
-            "maxHealth": 3,
+            "maxHealth": 7,
             "damage": 1,
-            "range": 1,
+            "range": 3,
             "speed": 2,
-            "attackRate": 1200,
-            "spawnDelay": 3000,
+            "attackRate": 1500,
+            "spawnDelay": 3500,
             "cost": {
-                "food": 150
+                "food": 450,
+                "wood": 400
             },
             "buildRequirement": "townhall",
-            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+            "tooltipText": "🗡️Attack: 1\n❤️Health: 7\n🏹Range: 3\n🏃Speed: 2\n⏰Attack Delay: 15"
         },
         "knight": {
-            "maxHealth": 3,
-            "damage": 1,
+            "maxHealth": 8,
+            "damage": 3,
             "range": 1,
             "speed": 2,
-            "attackRate": 1200,
-            "spawnDelay": 3000,
+            "attackRate": 1500,
+            "spawnDelay": 4000,
             "cost": {
-                "food": 150
+                "food": 600,
+                "metal": 400
             },
             "buildRequirement": "townhall",
-            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+            "tooltipText": "🗡️Attack: 3\n❤️Health: 8\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 15"
         },
         "catapult": {
-            "maxHealth": 3,
-            "damage": 1,
-            "range": 1,
-            "speed": 2,
-            "attackRate": 1200,
-            "spawnDelay": 3000,
+            "maxHealth": 10,
+            "damage": 3,
+            "range": 3,
+            "speed": 1,
+            "attackRate": 2500,
+            "spawnDelay": 5000,
             "cost": {
-                "food": 150
+                "wood": 1500,
+                "metal": 1500
             },
-            "buildRequirement": "townhall",
-            "tooltipText": "🗡️Attack: 1\n❤️Health: 3\n🏹Range: 1\n🏃Speed: 2\n⏰Attack Delay: 12"
+            "buildRequirement": "workshop",
+            "tooltipText": "🗡️Attack: 3\n❤️Health: 10\n🏹Range: 3\n🏃Speed: 1\n⏰Attack Delay: 25"
         }
     },
 
@@ -210,7 +208,7 @@
         },
         "farm": {
             "produce": {
-                "food": 10
+                "food": 15
             },
             "cost": {
                 "gold": 200,
@@ -219,90 +217,94 @@
                 "metal": 0
             },
             "adjacentBuff": {
-                "field": {
-                    "food": 1
+                "farm": {
+                    "food": 1.5
                 }
             },
-            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+            "tooltipText": "🍞+15 food\n🍞+1.5 food for each adjacent farm"
         },
         "lumberyard": {
             "produce": {
-                "food": 10
+                "wood": 15
             },
             "cost": {
-                "gold": 200,
+                "gold": 250,
                 "food": 0,
                 "wood": 0,
                 "metal": 0
             },
             "adjacentBuff": {
-                "field": {
-                    "food": 1
+                "lumberyard": {
+                    "wood": 1.5
                 }
             },
-            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+            "tooltipText": "🪵+15 wood\n🪵+1.5 wood for each adjacent lumberyard"
         },
         "bazaar": {
             "produce": {
-                "food": 10
+                "gold": 15
             },
             "cost": {
-                "gold": 200,
+                "gold": 750,
                 "food": 0,
-                "wood": 0,
+                "wood": 800,
                 "metal": 0
             },
             "adjacentBuff": {
-                "field": {
-                    "food": 1
+                "townhall": {
+                    "gold": 3
+                },
+                "bazaar": {
+                    "gold": 3
                 }
             },
-            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+            "tooltipText": "🪙+15 gold\n🪙+3 additional gold for each adjacent townhall or bazaar"
         },
         "blacksmith": {
             "produce": {
-                "food": 10
+                "metal": 20
             },
             "cost": {
-                "gold": 200,
+                "gold": 700,
                 "food": 0,
-                "wood": 0,
+                "wood": 700,
                 "metal": 0
             },
             "adjacentBuff": {
-                "field": {
-                    "food": 1
+                "farm": {
+                    "metal": -5
+                },
+                "lumberyard": {
+                    "metal": -5
                 }
             },
-            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+            "tooltipText": "⛏️+20 metal\n⛏️-5 metal for each adjacent farm or lumberyard"
         },
         "workshop": {
-            "produce": {
-                "food": 10
-            },
+            "produce": {},
             "cost": {
-                "gold": 200,
-                "food": 0,
-                "wood": 0,
-                "metal": 0
+                "gold": 2500,
+                "food": 1000,
+                "wood": 3000,
+                "metal": 2000
             },
-            "adjacentBuff": {
-                "field": {
-                    "food": 1
-                }
-            },
-            "tooltipText": "🍞+10 food\n🍞+1 food for each adjacent field"
+            "tooltipText": "🔓Unlocks catapult unit"
         }
     },
 
     "eras": {
         "Caveman": {
             "baseWidth": 4,
+            "startingResources": {
+                "food": 150,
+                "gold": 200
+            },
             "units": [
                 "warrior",
                 "slingshotter",
                 "clubman"
             ],
+            "reinforcementsUnit": "clubman",
             "uiBuildings": [
                 "field",
                 "forest",
@@ -337,12 +339,17 @@
         },
         "Medieval": {
             "baseWidth": 5,
+            "startingResources": {
+                "food": 600,
+                "gold": 600
+            },
             "units": [
                 "infantry",
                 "archer",
                 "knight",
                 "catapult"
             ],
+            "reinforcementsUnit": "knight",
             "uiBuildings": [
                 "farm",
                 "lumberyard",
@@ -435,7 +442,7 @@
         "Victory": 1,
         "Loss": 0.8,
         "Freeze": 0.8,
-        "BombLane": 1,
+        "BombLane": 0.8,
         "Reinforcements": 1
     }
 }
