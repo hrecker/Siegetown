@@ -332,7 +332,7 @@ export class ShopUIScene extends Phaser.Scene {
     }
 
     getY(localY: number): number {
-        return localY + statusBarHeight(this.game);
+        return localY + statusBarHeight(this.game, this.activeGame);
     }
 
     setIcon(iconKey: string, isAvailable: boolean) {

@@ -17,8 +17,8 @@ export function isMinimal(game: Phaser.Game) {
     return game.renderer.height < defaultGameHeight;
 }
 
-export function statusBarHeight(game: Phaser.Game) {
-    return isMinimal(game) ? minimalStatusBarHeight : defaultStatusBarHeight;
+export function statusBarHeight(game: Phaser.Game, activeGame: ActiveGame) {
+    return isMinimal(game) && activeGame.era == Era.Caveman ? minimalStatusBarHeight : defaultStatusBarHeight;
 }
 
 export class ResourceUIScene extends Phaser.Scene {
@@ -45,7 +45,7 @@ export class ResourceUIScene extends Phaser.Scene {
 
     create() {
         let fontSize = defaultFontSize;
-        let barHeight = statusBarHeight(this.game);
+        let barHeight = statusBarHeight(this.game, this.activeGame);
         let waveFontSize = waveDefaultFontSize;
         if (isMinimal(this.game)) {
             fontSize = minimalFontSize;

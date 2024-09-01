@@ -18,6 +18,7 @@ enum Overlay {
 
 const outlinePadding = 4;
 const textBackgroundPadding = 15;
+const tightTextBackgroundPadding = 8;
 const textFormat = { font: "bold 40px Verdana", color: whiteColor }
 
 /** UI displayed over MainScene */
@@ -162,9 +163,9 @@ export class OverlayUIScene extends Phaser.Scene {
         this.shadowBackground = this.add.rectangle(0, 0, this.game.renderer.width, this.game.renderer.height, 0, 0.8).setOrigin(0, 0);
 
         // Current era UI
-        this.currentEraText = this.add.text(this.game.renderer.width / 2, 5, "Era: " + this.activeGame.era, textFormat).setFontSize(32).setOrigin(0.5, 0).setDepth(2);
-        this.currentEraTextBackground = this.add.rectangle(this.currentEraText.getTopLeft().x - textBackgroundPadding, 0,
-            this.currentEraText.displayWidth + (textBackgroundPadding * 2), this.currentEraText.displayHeight + textBackgroundPadding).
+        this.currentEraText = this.add.text(this.game.renderer.width / 2, this.game.renderer.height - tightTextBackgroundPadding - 1, "Era: " + this.activeGame.era, textFormat).setFontSize(24).setOrigin(0.5, 1).setDepth(2);
+        this.currentEraTextBackground = this.add.rectangle(this.currentEraText.getTopLeft().x - tightTextBackgroundPadding, this.currentEraText.getTopLeft().y - tightTextBackgroundPadding,
+            this.currentEraText.displayWidth + (tightTextBackgroundPadding * 2), this.currentEraText.displayHeight + (tightTextBackgroundPadding * 2)).
             setFillStyle(0x43436A).setOrigin(0, 0).setStrokeStyle(1, 0xF2F0E5).setDepth(1);
 
         // Game result ui
