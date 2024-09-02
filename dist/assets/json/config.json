@@ -414,7 +414,7 @@
             "cost": {
                 "gold": 400
             },
-            "tooltipText": "🪖Spawn one clubman in each lane"
+            "tooltipText": "🪖Spawn one powerful unit in each lane"
         },
         "clear": {
             "cost": {
