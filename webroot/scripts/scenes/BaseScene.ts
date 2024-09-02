@@ -68,8 +68,10 @@ export class BaseScene extends Phaser.Scene {
         switch (this.activeGame.era) {
             case Era.Caveman:
                 backgroundTexture = "background_caveman";
+                break;
             case Era.Medieval:
                 backgroundTexture = "background_medieval";
+                break;
         }
         let background = this.add.image(-100, 0, backgroundTexture).setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
