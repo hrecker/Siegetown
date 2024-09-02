@@ -128,6 +128,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     create() {
+        this.game.hasFocus = true;
         let background = this.add.image(0, 0, "background_caveman").setOrigin(0, 0);
         background.setScale(this.game.renderer.width / background.displayWidth, this.game.renderer.height / background.displayHeight);
         

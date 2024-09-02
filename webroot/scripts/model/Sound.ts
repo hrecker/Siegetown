@@ -58,6 +58,7 @@ export function playSound(scene: Phaser.Scene, sound: SoundEffect) {
         return;
     }
 
+    // Avoid noises piling up when tabbed out.
     if (!scene.game.hasFocus) {
         return;
     }
