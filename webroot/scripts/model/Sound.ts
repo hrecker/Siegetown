@@ -58,6 +58,10 @@ export function playSound(scene: Phaser.Scene, sound: SoundEffect) {
         return;
     }
 
+    if (!scene.game.hasFocus) {
+        return;
+    }
+
     scene.sound.play(sound, {
         volume: config()["defaultSfxVolume"][sound]
     });
