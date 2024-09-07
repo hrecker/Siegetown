@@ -655,13 +655,7 @@ export class ShopUIScene extends Phaser.Scene {
         }
 
         playSound(this, SoundEffect.ButtonClick);
-        if (this.uiState.selectedBuilding == selection) {
-            this.uiState.selectedBuilding = UIBuilding.Empty;
-            this.selectedIndex = -1;
-            this.lastSelectedType = ShopButtonType.None;
-        } else {
-            this.uiState.selectedBuilding = selection;
-        }
+        this.uiState.selectedBuilding = selection;
         for (let i = 0; i < this.allBuildings().length; i++) {
             let currentBuilding = this.allBuildings()[i];
             if (this.uiState.selectedBuilding == currentBuilding) {
@@ -680,13 +674,7 @@ export class ShopUIScene extends Phaser.Scene {
         if (unit == UnitType.None && this.uiState.selectedUnit == UnitType.None) {
             return;
         }
-        if (this.uiState.selectedUnit == unit) {
-            this.uiState.selectedUnit = UnitType.None;
-            this.selectedIndex = -1;
-            this.lastSelectedType = ShopButtonType.None;
-        } else {
-            this.uiState.selectedUnit = unit;
-        }
+        this.uiState.selectedUnit = unit;
         for (let i = 0; i < allUnits(this.activeGame.era).length; i++) {
             let currentUnit = allUnits(this.activeGame.era)[i];
             this.setSelectedBorder(this.buildButtonBorders[currentUnit], this.uiState.selectedUnit == currentUnit);
@@ -710,13 +698,7 @@ export class ShopUIScene extends Phaser.Scene {
         if (action == ActionType.None && this.uiState.selectedAction == ActionType.None) {
             return;
         }
-        if (this.uiState.selectedAction == action) {
-            this.uiState.selectedAction = ActionType.None;
-            this.selectedIndex = -1;
-            this.lastSelectedType = ShopButtonType.None;
-        } else {
-            this.uiState.selectedAction = action;
-        }
+        this.uiState.selectedAction = action;
         for (let i = 0; i < allActions().length; i++) {
             let currentAction = allActions()[i];
             this.setSelectedBorder(this.buildButtonBorders[currentAction], this.uiState.selectedAction == currentAction);
