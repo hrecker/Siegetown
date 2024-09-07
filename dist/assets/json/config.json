@@ -297,7 +297,8 @@
             "baseWidth": 4,
             "startingResources": {
                 "food": 150,
-                "gold": 200
+                "gold": 200,
+                "metal": 10000
             },
             "units": [
                 "warrior",
